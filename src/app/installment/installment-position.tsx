@@ -62,7 +62,7 @@ const STATUS_LABELS: Record<string, string> = {
   CLAIMING: "Claiming",
   AUTO_LIQUIDATED: "Liquidated",
   CANCELLED: "Cancelled",
-  CLOSED: "Closed",
+  CLOSED: "Claimed",
 };
 
 const DANGER_STATUSES = new Set(["PAST_DUE", "AUTO_LIQUIDATED"]);
