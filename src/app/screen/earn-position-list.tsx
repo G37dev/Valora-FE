@@ -3,9 +3,10 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   FlatList,
   Image,
   RefreshControl,
@@ -121,6 +122,54 @@ const positionTimestamp = (
   }
 
   return 0;
+};
+
+const SkeletonBox = ({
+  width,
+  height,
+  style,
+}: {
+  width: number;
+  height: number;
+  style?: any;
+}) => {
+  const opacity = useRef(new Animated.Value(0.35)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.85,
+          duration: 650,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.35,
+          duration: 650,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
+    loop.start();
+
+    return () => loop.stop();
+  }, [opacity]);
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width,
+          height,
+          borderRadius: 6,
+          backgroundColor: "#3a3a3a",
+          opacity,
+        },
+        style,
+      ]}
+    />
+  );
 };
 
 const isClaimingPosition = (position: EarnPosition): boolean => {
@@ -901,9 +950,13 @@ export default function EarnPositionListScreen() {
                 >
                   <View style={styles.summaryCard1}>
                     <View style={styles.summaryValueRow}>
-                      <Text style={styles.earningsNumber1}>
-                        {formatAmount(totalEarned)} g
-                      </Text>
+                      {loading ? (
+                        <SkeletonBox width={72} height={18} />
+                      ) : (
+                        <Text style={styles.earningsNumber1}>
+                          {formatAmount(totalEarned)} g
+                        </Text>
+                      )}
 
                       <Image
                         source={require("../../../assets/images/c11.png")}
@@ -930,9 +983,13 @@ export default function EarnPositionListScreen() {
                 >
                   <View style={styles.summaryCard1}>
                     <View style={styles.summaryValueRow}>
-                      <Text style={styles.earningsNumber1}>
-                        {formatAmount(estimatedEarnings)} g
-                      </Text>
+                      {loading ? (
+                        <SkeletonBox width={72} height={18} />
+                      ) : (
+                        <Text style={styles.earningsNumber1}>
+                          {formatAmount(estimatedEarnings)} g
+                        </Text>
+                      )}
 
                       <Image
                         source={require("../../../assets/images/c12.png")}
@@ -962,9 +1019,13 @@ export default function EarnPositionListScreen() {
                   <View style={styles.summaryTitleRow}>
                     <Text style={styles.summaryTitle}>Avg. Earn APR</Text>
 
-                    <Text style={styles.earningsNumber}>
-                      {averageApr.toFixed(2)}%
-                    </Text>
+                    {loading ? (
+                      <SkeletonBox width={44} height={18} />
+                    ) : (
+                      <Text style={styles.earningsNumber}>
+                        {averageApr.toFixed(2)}%
+                      </Text>
+                    )}
                   </View>
 
                   <View style={styles.gaugeContainer}>
