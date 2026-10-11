@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { showAlert } from "../../components/AppAlert";
 import BackHeader from "../../components/BackHeader";
 import { apiClient } from "../../services/apiClient";
 import {
@@ -482,25 +483,12 @@ export default function EarnPositionListScreen() {
     return total / activePositions.length;
   }, [activePositions]);
 
-  const handleClaim = async (position: EarnPosition) => {
+  const executeClaim = async (position: EarnPosition, coreId: string) => {
     try {
-      const coreId = await AsyncStorage.getItem("coreId");
-
-      if (!coreId) {
-        console.error("[Earn Claim] coreId tidak ditemukan.");
-        return;
-      }
-
-      if (!position.id) {
-        console.error("[Earn Claim] Position ID tidak ditemukan.");
-        return;
-      }
-
-      if (!isReadyToClaim(position)) {
-        console.log("[Earn Claim] Position belum bisa di-claim.");
-        return;
-      }
-
+      /*
+       * Optimistic: tandai claiming supaya tombol
+       * langsung inactive begitu user confirm.
+       */
       setClaimingId(position.id);
 
       const response = await claimEarnPositionApi(position.id, coreId);
@@ -535,7 +523,49 @@ export default function EarnPositionListScreen() {
       console.error("[Earn Claim] Message:", message);
 
       setClaimingId(null);
+
+      showAlert(
+        "Claim Failed",
+        message || "Something went wrong while processing the claim.",
+      );
     }
+  };
+
+  const handleClaim = async (position: EarnPosition) => {
+    const coreId = await AsyncStorage.getItem("coreId");
+
+    if (!coreId) {
+      console.error("[Earn Claim] coreId tidak ditemukan.");
+      return;
+    }
+
+    if (!position.id) {
+      console.error("[Earn Claim] Position ID tidak ditemukan.");
+      return;
+    }
+
+    if (!isReadyToClaim(position)) {
+      console.log("[Earn Claim] Position belum bisa di-claim.");
+      return;
+    }
+
+    const asset = position.asset || "ASSET";
+    const principal = formatPrincipal(position);
+    const reward = formatAmount(getEstimatedReward(position));
+
+    showAlert(
+      "Confirm Claim",
+      `Claim ${principal} ${asset} + ${reward} ${asset} reward? The assets will be sent on-chain to your wallet.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Claim",
+          onPress: () => {
+            void executeClaim(position, coreId);
+          },
+        },
+      ],
+    );
   };
 
   const renderPosition = (position: EarnPosition) => {
