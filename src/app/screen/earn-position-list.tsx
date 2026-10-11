@@ -768,8 +768,9 @@ export default function EarnPositionListScreen() {
       (claimingId !== null && String(claimingId) === String(position.id));
 
     return (
-      <View
-        key={String(position.id ?? position.positionId ?? position.position_id)}
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => setSelectedPosition(position)}
         style={styles.positionCard}
       >
         <View style={styles.cardMainRow}>
@@ -825,13 +826,9 @@ export default function EarnPositionListScreen() {
             </Text>
           </View>
 
-          <TouchableOpacity
-            style={styles.cardChevron}
-            activeOpacity={0.7}
-            onPress={() => setSelectedPosition(position)}
-          >
+          <View style={styles.cardChevron}>
             <Ionicons name="chevron-forward" size={24} color="#777777" />
-          </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.progressInfoRow}>
@@ -900,7 +897,7 @@ export default function EarnPositionListScreen() {
             </View>
           )}
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -1020,7 +1017,11 @@ export default function EarnPositionListScreen() {
                     <Text style={styles.summaryTitle}>Avg. Earn APR</Text>
 
                     {loading ? (
-                      <SkeletonBox width={46} height={26} style={{ marginTop: 8 }} />
+                      <SkeletonBox
+                        width={46}
+                        height={26}
+                        style={{ marginTop: 8 }}
+                      />
                     ) : (
                       <Text style={styles.earningsNumber}>
                         {averageApr.toFixed(2)}%
