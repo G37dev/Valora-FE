@@ -92,6 +92,12 @@ export const TransactionProvider = ({
   const [totalIdrBalance, setTotalIdrBalance] = useState<number>(0);
 
   // ==========================================
+  // TRUE SETELAH FETCH BALANCE PERTAMA SELESAI
+  // (dipakai untuk skeleton loading di header)
+  // ==========================================
+  const [balancesLoaded, setBalancesLoaded] = useState(false);
+
+  // ==========================================
   // TOTAL NILAI ASET MILIK USER DALAM IDR
   // ==========================================
   const [assetIdrValues, setAssetIdrValues] = useState({
@@ -182,6 +188,12 @@ export const TransactionProvider = ({
         },
       },
     });
+
+    /*
+     * Reset = state balance sudah diketahui (nol) —
+     * skeleton tidak perlu tampil lagi.
+     */
+    setBalancesLoaded(true);
   };
 
   const fetchGlobalData = async () => {
@@ -410,6 +422,8 @@ export const TransactionProvider = ({
           goldPricePerGramIdr > 0 ? grandTotalIdr / goldPricePerGramIdr : 0;
 
         setTotalGoldBalance(grandTotalGoldGrams);
+
+        setBalancesLoaded(true);
       }
     } catch (err: any) {
       if (err.response?.status === 404) {
@@ -482,6 +496,8 @@ export const TransactionProvider = ({
         idrBalance: totalIdrBalance,
 
         walletBalances,
+
+        balancesLoaded,
 
         // Total nilai aset user
         assetIdrValues,

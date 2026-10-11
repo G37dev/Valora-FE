@@ -22,6 +22,7 @@ import ComingSoonSheet from "../components/ComingSoonSheet";
 import Text from "../components/CustomText";
 import { TransactionContext } from "../context/TransactionContext";
 import DepositOverlay from "./app/deposit";
+import SkeletonBox from "./SkeletonBox";
 
 // ======================================================
 // PROPS
@@ -101,7 +102,7 @@ export default function AssetHeader({
 }: AssetHeaderProps) {
   const router = useRouter();
 
-  const { pendingTxs, goldBalance, idrBalance } =
+  const { pendingTxs, goldBalance, idrBalance, balancesLoaded } =
     useContext(TransactionContext);
 
   // ======================================================
@@ -302,15 +303,27 @@ export default function AssetHeader({
           </View>
 
           {/* GOLD BALANCE */}
-          <Text style={styles.balanceText}>
-            {showBalance ? formatBalance(goldBalance) : "****"}{" "}
-            <Text style={styles.balanceSub}>grams</Text>
-          </Text>
+          {isLoggedIn && !balancesLoaded ? (
+            <SkeletonBox
+              width={140}
+              height={38}
+              style={{ marginVertical: 5 }}
+            />
+          ) : (
+            <Text style={styles.balanceText}>
+              {showBalance ? formatBalance(goldBalance) : "****"}{" "}
+              <Text style={styles.balanceSub}>grams</Text>
+            </Text>
+          )}
 
           {/* IDR VALUE */}
-          <Text style={styles.profitText}>
-            ≈ {showBalance ? formatBalance(idrBalance) : "****"} IDR
-          </Text>
+          {isLoggedIn && !balancesLoaded ? (
+            <SkeletonBox width={110} height={14} />
+          ) : (
+            <Text style={styles.profitText}>
+              ≈ {showBalance ? formatBalance(idrBalance) : "****"} IDR
+            </Text>
+          )}
         </View>
 
         {/* DEPOSIT BUTTON */}

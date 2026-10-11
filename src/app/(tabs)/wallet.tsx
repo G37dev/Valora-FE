@@ -16,6 +16,7 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { showAlert } from "../../components/AppAlert";
+import SkeletonBox from "../../components/SkeletonBox";
 import { TransactionContext } from "../../context/TransactionContext";
 import { apiClient } from "../../services/apiClient";
 import { notifyApp } from "../../services/notificationService";
@@ -38,6 +39,7 @@ export default function WalletScreen() {
   });
   const [refreshing, setRefreshing] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
+  const [balancesLoading, setBalancesLoading] = useState(true);
 
   const transactionContext = useContext(TransactionContext);
 
@@ -77,7 +79,11 @@ export default function WalletScreen() {
             if (balErr.response?.status !== 404) {
               console.error("Gagal mengambil data balance:", balErr);
             }
+          } finally {
+            setBalancesLoading(false);
           }
+        } else {
+          setBalancesLoading(false);
         }
       } else {
         setIsLoggedIn(false); // Set login false jika coreId tidak ada
@@ -231,13 +237,26 @@ export default function WalletScreen() {
                 </View>
               </View>
               <View style={styles.assetRight}>
-                <Text style={styles.coinBalance}>
-                  {formatBalance(balances.internal?.idr?.balance)} IDR
-                </Text>
+                {balancesLoading ? (
+                  <>
+                    <SkeletonBox width={90} height={17} />
+                    <SkeletonBox
+                      width={70}
+                      height={13}
+                      style={{ marginTop: 4 }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.coinBalance}>
+                      {formatBalance(balances.internal?.idr?.balance)} IDR
+                    </Text>
 
-                <Text style={styles.coinSubBalance}>
-                  {formatBalance(balances.internal?.idr?.idrValue)} IDR
-                </Text>
+                    <Text style={styles.coinSubBalance}>
+                      {formatBalance(balances.internal?.idr?.idrValue)} IDR
+                    </Text>
+                  </>
+                )}
               </View>
             </View>
 
@@ -259,13 +278,26 @@ export default function WalletScreen() {
                 </View>
               </View>
               <View style={styles.assetRight}>
-                <Text style={styles.coinBalance}>
-                  {formatBalance(balances.onChain?.gold?.balance || "0")} gr
-                </Text>
-                <Text style={styles.coinSubBalance}>
-                  {" "}
-                  ≈ {formatBalance(assetIdrValues.gold)} IDR
-                </Text>
+                {balancesLoading ? (
+                  <>
+                    <SkeletonBox width={90} height={17} />
+                    <SkeletonBox
+                      width={70}
+                      height={13}
+                      style={{ marginTop: 4 }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.coinBalance}>
+                      {formatBalance(balances.onChain?.gold?.balance || "0")} gr
+                    </Text>
+                    <Text style={styles.coinSubBalance}>
+                      {" "}
+                      ≈ {formatBalance(assetIdrValues.gold)} IDR
+                    </Text>
+                  </>
+                )}
               </View>
             </View>
 
@@ -287,13 +319,26 @@ export default function WalletScreen() {
                 </View>
               </View>
               <View style={styles.assetRight}>
-                <Text style={styles.coinBalance}>
-                  {formatBalance(balances.onChain?.xaut?.balance)} XAUT
-                </Text>
-                <Text style={styles.coinSubBalance}>
-                  {" "}
-                  ≈ {formatBalance(assetIdrValues.xaut)} IDR
-                </Text>
+                {balancesLoading ? (
+                  <>
+                    <SkeletonBox width={90} height={17} />
+                    <SkeletonBox
+                      width={70}
+                      height={13}
+                      style={{ marginTop: 4 }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.coinBalance}>
+                      {formatBalance(balances.onChain?.xaut?.balance)} XAUT
+                    </Text>
+                    <Text style={styles.coinSubBalance}>
+                      {" "}
+                      ≈ {formatBalance(assetIdrValues.xaut)} IDR
+                    </Text>
+                  </>
+                )}
               </View>
             </View>
 
@@ -315,12 +360,25 @@ export default function WalletScreen() {
                 </View>
               </View>
               <View style={styles.assetRight}>
-                <Text style={styles.coinBalance}>
-                  {formatBalance(balances.onChain?.usdt?.balance)} USDT
-                </Text>
-                <Text style={styles.coinSubBalance}>
-                  ≈ {formatBalance(assetIdrValues.usdt)} IDR
-                </Text>
+                {balancesLoading ? (
+                  <>
+                    <SkeletonBox width={90} height={17} />
+                    <SkeletonBox
+                      width={70}
+                      height={13}
+                      style={{ marginTop: 4 }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.coinBalance}>
+                      {formatBalance(balances.onChain?.usdt?.balance)} USDT
+                    </Text>
+                    <Text style={styles.coinSubBalance}>
+                      ≈ {formatBalance(assetIdrValues.usdt)} IDR
+                    </Text>
+                  </>
+                )}
               </View>
             </View>
 
@@ -342,12 +400,25 @@ export default function WalletScreen() {
                 </View>
               </View>
               <View style={styles.assetRight}>
-                <Text style={styles.coinBalance}>
-                  {formatBalance(balances.onChain?.usdc?.balance)} USDC
-                </Text>
-                <Text style={styles.coinSubBalance}>
-                  ≈ {formatBalance(assetIdrValues.usdc)} IDR
-                </Text>
+                {balancesLoading ? (
+                  <>
+                    <SkeletonBox width={90} height={17} />
+                    <SkeletonBox
+                      width={70}
+                      height={13}
+                      style={{ marginTop: 4 }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.coinBalance}>
+                      {formatBalance(balances.onChain?.usdc?.balance)} USDC
+                    </Text>
+                    <Text style={styles.coinSubBalance}>
+                      ≈ {formatBalance(assetIdrValues.usdc)} IDR
+                    </Text>
+                  </>
+                )}
               </View>
             </View>
           </View>
