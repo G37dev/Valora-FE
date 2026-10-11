@@ -341,7 +341,9 @@ export default function EarnPositionDetailModal({
 
   const status = getStatusText(position);
 
-  const isClaiming = claimingId === position.id;
+  const isClaiming =
+    claimingId === position.id ||
+    normalizeStatus(position.status) === "claiming";
 
   const txHash = getTxHash(position);
 
@@ -409,7 +411,7 @@ export default function EarnPositionDetailModal({
                       {getAssetDescription(asset)}
                     </Text>
                   </View>
-                  {readyToClaim && (
+                  {(readyToClaim || isClaiming) && (
                     <TouchableOpacity
                       activeOpacity={0.8}
                       disabled={isClaiming}

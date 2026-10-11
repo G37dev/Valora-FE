@@ -102,6 +102,10 @@ const normalizeStatus = (status?: string | null): string => {
     .toLowerCase();
 };
 
+const isClaimingPosition = (position: EarnPosition): boolean => {
+  return normalizeStatus(position.status) === "claiming";
+};
+
 const isActivePosition = (position: EarnPosition): boolean => {
   const status = normalizeStatus(position.status);
 
@@ -110,6 +114,7 @@ const isActivePosition = (position: EarnPosition): boolean => {
     status === "pending" ||
     status === "processing" ||
     status === "running" ||
+    status === "claiming" ||
     status === "ready_to_claim" ||
     status === "ready to claim"
   );
@@ -136,6 +141,10 @@ const formatStatus = (position: EarnPosition): string => {
   }
 
   const status = normalizeStatus(position.status);
+
+  if (status === "claiming") {
+    return "Claiming";
+  }
 
   if (
     status === "active" ||
@@ -374,11 +383,38 @@ export default function EarnPositionListScreen() {
 
       const response = await getUserEarnPositionsApi(coreId);
 
-      if (response?.success && Array.isArray(response.data)) {
-        setPositions(response.data);
-      } else {
-        setPositions([]);
-      }
+      const nextPositions =
+        response?.success && Array.isArray(response.data) ? response.data : [];
+
+      setPositions(nextPositions);
+
+      /*
+       * Clear optimistic claiming flag kalau posisi
+       * udah resolve di server (claimed/failed).
+       */
+      setClaimingId((prev) => {
+        if (prev === null) {
+          return prev;
+        }
+
+        const target = nextPositions.find(
+          (item: EarnPosition) => String(item.id) === String(prev),
+        );
+
+        const status = normalizeStatus(target?.status);
+
+        if (
+          !target ||
+          (status !== "claiming" &&
+            status !== "active" &&
+            status !== "ready_to_claim" &&
+            status !== "ready to claim")
+        ) {
+          return null;
+        }
+
+        return prev;
+      });
     } catch (error) {
       console.error("[Earn Position List] Failed:", error);
 
@@ -483,6 +519,13 @@ export default function EarnPositionListScreen() {
        * sedang dibuka dari detail.
        */
       setSelectedPosition(null);
+
+      /*
+       * Claim diproses async oleh worker — poll lagi
+       * sampai status server CLAIMED/CLAIMING.
+       */
+      setTimeout(() => loadPositions(), 8000);
+      setTimeout(() => loadPositions(), 25000);
     } catch (error: any) {
       console.error("[Earn Claim] Failed:", error);
 
@@ -490,7 +533,7 @@ export default function EarnPositionListScreen() {
         error?.response?.data?.message || error?.message || "Claim gagal.";
 
       console.error("[Earn Claim] Message:", message);
-    } finally {
+
       setClaimingId(null);
     }
   };
@@ -515,7 +558,8 @@ export default function EarnPositionListScreen() {
     const assetImage = ASSET_IMAGES[asset];
 
     const isClaiming =
-      claimingId !== null && String(claimingId) === String(position.id);
+      isClaimingPosition(position) ||
+      (claimingId !== null && String(claimingId) === String(position.id));
 
     return (
       <View
@@ -618,7 +662,21 @@ export default function EarnPositionListScreen() {
           ]}
         >
           {isClaiming ? (
-            <ActivityIndicator size="small" color="#050505" />
+            <View style={styles.claimDisabledContent}>
+              <ActivityIndicator size="small" color="#050505" />
+
+              <Text style={styles.claimButtonText}>Processing…</Text>
+            </View>
+          ) : normalizeStatus(position.status) === "claimed" ? (
+            <View style={styles.claimDisabledContent}>
+              <Ionicons
+                name="checkmark-circle-outline"
+                size={17}
+                color="#050505"
+              />
+
+              <Text style={styles.claimButtonText}>Claimed</Text>
+            </View>
           ) : readyToClaim ? (
             <LinearGradient
               colors={["#FBE87C", "#F0C32D"]}
