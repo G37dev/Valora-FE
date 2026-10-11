@@ -483,6 +483,74 @@ export default function EarnPositionListScreen() {
     return total / activePositions.length;
   }, [activePositions]);
 
+  const pollClaimResult = async (position: EarnPosition, attempt = 0) => {
+    const MAX_ATTEMPTS = 12;
+
+    try {
+      const coreId = await AsyncStorage.getItem("coreId");
+
+      if (!coreId) {
+        return;
+      }
+
+      const response = await getUserEarnPositionsApi(coreId);
+
+      const fresh = response?.data?.find(
+        (item: EarnPosition) => String(item.id) === String(position.id),
+      );
+
+      const status = normalizeStatus(fresh?.status);
+
+      if (status === "claimed") {
+        setClaimingId(null);
+
+        await loadPositions();
+
+        const asset = position.asset || "ASSET";
+
+        showAlert(
+          "Asset Claimed",
+          `${formatPrincipal(position)} ${asset} + ${formatAmount(getEstimatedReward(position))} ${asset} reward has been sent to your wallet.`,
+          [{ text: "OK" }],
+          "success",
+        );
+
+        return;
+      }
+
+      if (status === "failed") {
+        setClaimingId(null);
+
+        await loadPositions();
+
+        showAlert(
+          "Claim Failed",
+          fresh?.error_message ||
+            fresh?.errorMessage ||
+            "Claim failed. Please try again.",
+        );
+
+        return;
+      }
+
+      if (attempt >= MAX_ATTEMPTS) {
+        setClaimingId(null);
+
+        await loadPositions();
+
+        return;
+      }
+
+      setTimeout(() => pollClaimResult(position, attempt + 1), 5000);
+    } catch (error) {
+      console.error("[Earn Claim] Poll error:", error);
+
+      if (attempt < MAX_ATTEMPTS) {
+        setTimeout(() => pollClaimResult(position, attempt + 1), 5000);
+      }
+    }
+  };
+
   const executeClaim = async (position: EarnPosition, coreId: string) => {
     try {
       /*
@@ -509,11 +577,11 @@ export default function EarnPositionListScreen() {
       setSelectedPosition(null);
 
       /*
-       * Claim diproses async oleh worker — poll lagi
-       * sampai status server CLAIMED/CLAIMING.
+       * Claim diproses async oleh worker (~15-30s).
+       * Poll status sampai CLAIMED lalu tampilkan
+       * success alert.
        */
-      setTimeout(() => loadPositions(), 8000);
-      setTimeout(() => loadPositions(), 25000);
+      setTimeout(() => pollClaimResult(position), 4000);
     } catch (error: any) {
       console.error("[Earn Claim] Failed:", error);
 
