@@ -951,7 +951,7 @@ export default function EarnPositionListScreen() {
                   <View style={styles.summaryCard1}>
                     <View style={styles.summaryValueRow}>
                       {loading ? (
-                        <SkeletonBox width={72} height={18} />
+                        <SkeletonBox width={72} height={21} />
                       ) : (
                         <Text style={styles.earningsNumber1}>
                           {formatAmount(totalEarned)} g
@@ -984,7 +984,7 @@ export default function EarnPositionListScreen() {
                   <View style={styles.summaryCard1}>
                     <View style={styles.summaryValueRow}>
                       {loading ? (
-                        <SkeletonBox width={72} height={18} />
+                        <SkeletonBox width={72} height={21} />
                       ) : (
                         <Text style={styles.earningsNumber1}>
                           {formatAmount(estimatedEarnings)} g
@@ -1020,7 +1020,7 @@ export default function EarnPositionListScreen() {
                     <Text style={styles.summaryTitle}>Avg. Earn APR</Text>
 
                     {loading ? (
-                      <SkeletonBox width={44} height={18} />
+                      <SkeletonBox width={46} height={26} style={{ marginTop: 8 }} />
                     ) : (
                       <Text style={styles.earningsNumber}>
                         {averageApr.toFixed(2)}%
