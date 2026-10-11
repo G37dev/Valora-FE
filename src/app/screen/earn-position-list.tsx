@@ -6,9 +6,9 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Image,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -367,7 +367,10 @@ export default function EarnPositionListScreen() {
     try {
       const coreId = await AsyncStorage.getItem("coreId");
 
-      const priceRes = await apiClient.get("/prices");
+      const [priceRes, response] = await Promise.all([
+        apiClient.get("/prices"),
+        coreId ? getUserEarnPositionsApi(coreId) : Promise.resolve(null),
+      ]);
 
       if (priceRes.data?.success && Array.isArray(priceRes.data.data)) {
         let usdtRate = 17700;
@@ -401,8 +404,6 @@ export default function EarnPositionListScreen() {
         setPositions([]);
         return;
       }
-
-      const response = await getUserEarnPositionsApi(coreId);
 
       const nextPositions =
         response?.success && Array.isArray(response.data) ? response.data : [];
@@ -858,9 +859,18 @@ export default function EarnPositionListScreen() {
     <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
       <BackHeader title="Earning Position & Summary" />
 
-      <ScrollView
+      <FlatList
+        data={displayedPositions}
+        keyExtractor={(item) =>
+          String(item.id ?? item.positionId ?? item.position_id)
+        }
+        renderItem={({ item }) => renderPosition(item)}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={7}
+        removeClippedSubviews
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -868,184 +878,185 @@ export default function EarnPositionListScreen() {
             tintColor="#FBE87C"
           />
         }
-      >
-        <View style={styles.summaryRow}>
-          <View
-            style={{
-              flex: 1,
-              gap: 10,
-            }}
-          >
-            <LinearGradient
-              colors={["#afab912a", "#fff2a9", "#afab912a"]}
-              start={{
-                x: 1,
-                y: 1,
-              }}
-              end={{
-                x: 0,
-                y: 1,
-              }}
-              style={styles.summaryCardGradient}
-            >
-              <View style={styles.summaryCard1}>
-                <View style={styles.summaryValueRow}>
-                  <Text style={styles.earningsNumber1}>
-                    {formatAmount(totalEarned)} g
-                  </Text>
-
-                  <Image
-                    source={require("../../../assets/images/c11.png")}
-                    style={styles.c1}
-                    resizeMode="contain"
-                  />
-                </View>
-
-                <Text style={styles.summaryTitle}>Total Earned</Text>
-              </View>
-            </LinearGradient>
-
-            <LinearGradient
-              colors={["#afab912a", "#fff2a9", "#afab912a"]}
-              start={{
-                x: 1,
-                y: 1,
-              }}
-              end={{
-                x: 0,
-                y: 1,
-              }}
-              style={styles.summaryCardGradient}
-            >
-              <View style={styles.summaryCard1}>
-                <View style={styles.summaryValueRow}>
-                  <Text style={styles.earningsNumber1}>
-                    {formatAmount(estimatedEarnings)} g
-                  </Text>
-
-                  <Image
-                    source={require("../../../assets/images/c12.png")}
-                    style={styles.c1}
-                    resizeMode="contain"
-                  />
-                </View>
-
-                <Text style={styles.summaryTitle}>Est. Earnings</Text>
-              </View>
-            </LinearGradient>
-          </View>
-
-          <LinearGradient
-            colors={["#afab912a", "#fff2a9", "#afab912a"]}
-            start={{
-              x: 1,
-              y: 1,
-            }}
-            end={{
-              x: 0,
-              y: 1,
-            }}
-            style={styles.summaryCardGradient}
-          >
-            <View style={styles.summaryCard}>
-              <View style={styles.summaryTitleRow}>
-                <Text style={styles.summaryTitle}>Avg. Earn APR</Text>
-
-                <Text style={styles.earningsNumber}>
-                  {averageApr.toFixed(2)}%
-                </Text>
-              </View>
-
-              <View style={styles.gaugeContainer}>
-                <Image
-                  source={require("../../../assets/images/gauge.png")}
-                  style={styles.gaugeImage}
-                  resizeMode="contain"
-                />
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-
-        <View style={styles.positionsHeader}>
-          <Text style={styles.positionsTitle}>Earning Positions</Text>
-          <View style={styles.tabsContainer}>
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => setSelectedTab("active")}
-              style={styles.tab}
-            >
-              {selectedTab === "active" ? (
+        ListHeaderComponent={
+          <>
+            <View style={styles.summaryRow}>
+              <View
+                style={{
+                  flex: 1,
+                  gap: 10,
+                }}
+              >
                 <LinearGradient
-                  colors={["#FBE87C", "#FBE87C"]}
-                  style={styles.tabGradient}
+                  colors={["#afab912a", "#fff2a9", "#afab912a"]}
+                  start={{
+                    x: 1,
+                    y: 1,
+                  }}
+                  end={{
+                    x: 0,
+                    y: 1,
+                  }}
+                  style={styles.summaryCardGradient}
                 >
-                  <Text style={styles.tabTextActive}>
-                    Active ({activePositions.length})
-                  </Text>
-                </LinearGradient>
-              ) : (
-                <Text style={styles.tabText}>
-                  Active ({activePositions.length})
-                </Text>
-              )}
-            </TouchableOpacity>
+                  <View style={styles.summaryCard1}>
+                    <View style={styles.summaryValueRow}>
+                      <Text style={styles.earningsNumber1}>
+                        {formatAmount(totalEarned)} g
+                      </Text>
 
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => setSelectedTab("finished")}
-              style={styles.tab}
-            >
-              {selectedTab === "finished" ? (
+                      <Image
+                        source={require("../../../assets/images/c11.png")}
+                        style={styles.c1}
+                        resizeMode="contain"
+                      />
+                    </View>
+
+                    <Text style={styles.summaryTitle}>Total Earned</Text>
+                  </View>
+                </LinearGradient>
+
                 <LinearGradient
-                  colors={["#FBE87C", "#FBE87C"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.tabGradient}
+                  colors={["#afab912a", "#fff2a9", "#afab912a"]}
+                  start={{
+                    x: 1,
+                    y: 1,
+                  }}
+                  end={{
+                    x: 0,
+                    y: 1,
+                  }}
+                  style={styles.summaryCardGradient}
                 >
-                  <Text style={styles.tabTextActive}>
-                    Finished ({finishedPositions.length})
-                  </Text>
+                  <View style={styles.summaryCard1}>
+                    <View style={styles.summaryValueRow}>
+                      <Text style={styles.earningsNumber1}>
+                        {formatAmount(estimatedEarnings)} g
+                      </Text>
+
+                      <Image
+                        source={require("../../../assets/images/c12.png")}
+                        style={styles.c1}
+                        resizeMode="contain"
+                      />
+                    </View>
+
+                    <Text style={styles.summaryTitle}>Est. Earnings</Text>
+                  </View>
                 </LinearGradient>
-              ) : (
-                <Text style={styles.tabText}>
-                  Finished ({finishedPositions.length})
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
+              </View>
 
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FBE87C" />
+              <LinearGradient
+                colors={["#afab912a", "#fff2a9", "#afab912a"]}
+                start={{
+                  x: 1,
+                  y: 1,
+                }}
+                end={{
+                  x: 0,
+                  y: 1,
+                }}
+                style={styles.summaryCardGradient}
+              >
+                <View style={styles.summaryCard}>
+                  <View style={styles.summaryTitleRow}>
+                    <Text style={styles.summaryTitle}>Avg. Earn APR</Text>
 
-            <Text style={styles.loadingText}>Loading positions...</Text>
-          </View>
-        ) : displayedPositions.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIcon}>
-              <Ionicons name="wallet-outline" size={30} color="#555555" />
+                    <Text style={styles.earningsNumber}>
+                      {averageApr.toFixed(2)}%
+                    </Text>
+                  </View>
+
+                  <View style={styles.gaugeContainer}>
+                    <Image
+                      source={require("../../../assets/images/gauge.png")}
+                      style={styles.gaugeImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                </View>
+              </LinearGradient>
             </View>
 
-            <Text style={styles.emptyTitle}>
-              {selectedTab === "active"
-                ? "No Active Position"
-                : "No Finished Position"}
-            </Text>
+            <View style={styles.positionsHeader}>
+              <Text style={styles.positionsTitle}>Earning Positions</Text>
+              <View style={styles.tabsContainer}>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setSelectedTab("active")}
+                  style={styles.tab}
+                >
+                  {selectedTab === "active" ? (
+                    <LinearGradient
+                      colors={["#FBE87C", "#FBE87C"]}
+                      style={styles.tabGradient}
+                    >
+                      <Text style={styles.tabTextActive}>
+                        Active ({activePositions.length})
+                      </Text>
+                    </LinearGradient>
+                  ) : (
+                    <Text style={styles.tabText}>
+                      Active ({activePositions.length})
+                    </Text>
+                  )}
+                </TouchableOpacity>
 
-            <Text style={styles.emptyDescription}>
-              {selectedTab === "active"
-                ? "You don't have any active earning positions yet."
-                : "You don't have any finished earning positions yet."}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.positionList}>
-            {displayedPositions.map(renderPosition)}
-          </View>
-        )}
-      </ScrollView>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setSelectedTab("finished")}
+                  style={styles.tab}
+                >
+                  {selectedTab === "finished" ? (
+                    <LinearGradient
+                      colors={["#FBE87C", "#FBE87C"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.tabGradient}
+                    >
+                      <Text style={styles.tabTextActive}>
+                        Finished ({finishedPositions.length})
+                      </Text>
+                    </LinearGradient>
+                  ) : (
+                    <Text style={styles.tabText}>
+                      Finished ({finishedPositions.length})
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </>
+        }
+        ItemSeparatorComponent={() => <View style={styles.positionSeparator} />}
+        ListEmptyComponent={
+          loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#FBE87C" />
+
+              <Text style={styles.loadingText}>Loading positions...</Text>
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="wallet-outline" size={30} color="#555555" />
+              </View>
+
+              <Text style={styles.emptyTitle}>
+                {selectedTab === "active"
+                  ? "No Active Position"
+                  : "No Finished Position"}
+              </Text>
+
+              <Text style={styles.emptyDescription}>
+                {selectedTab === "active"
+                  ? "You don't have any active earning positions yet."
+                  : "You don't have any finished earning positions yet."}
+              </Text>
+            </View>
+          )
+        }
+      />
 
       <EarnPositionDetailModal
         visible={selectedPosition !== null}
@@ -1286,8 +1297,8 @@ const styles = StyleSheet.create({
     padding: 1,
   },
 
-  positionList: {
-    gap: 9,
+  positionSeparator: {
+    height: 9,
   },
 
   positionCard: {
