@@ -41,3 +41,11 @@ example
 # generated native folders
 /ios
 /android
+
+# env files (secrets)
+.env
+.env.*
+!*.example
+google-services.json
+vivalora-*-firebase-adminsdk-*.json
+*-firebase-adminsdk-*.json
