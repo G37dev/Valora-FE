@@ -46,6 +46,8 @@ interface EarnPosition {
   created_at?: string | null;
   completedAt?: string | null;
   completed_at?: string | null;
+  updatedAt?: string | null;
+  updated_at?: string | null;
 }
 
 const ASSET_IMAGES: Record<string, any> = {
@@ -101,6 +103,24 @@ const normalizeStatus = (status?: string | null): string => {
   return String(status ?? "")
     .trim()
     .toLowerCase();
+};
+
+const positionTimestamp = (
+  ...values: Array<string | number | null | undefined>
+): number => {
+  for (const value of values) {
+    if (value === null || value === undefined) {
+      continue;
+    }
+
+    const time = new Date(value).getTime();
+
+    if (Number.isFinite(time)) {
+      return time;
+    }
+  }
+
+  return 0;
 };
 
 const isClaimingPosition = (position: EarnPosition): boolean => {
@@ -438,12 +458,50 @@ export default function EarnPositionListScreen() {
   };
 
   const activePositions = useMemo(
-    () => positions.filter(isActivePosition),
+    () =>
+      positions.filter(isActivePosition).sort((a, b) => {
+        /*
+         * Ready-to-claim di paling atas,
+         * sisanya terbaru dulu.
+         */
+        const aReady = isReadyToClaim(a) && !isClaimingPosition(a) ? 1 : 0;
+        const bReady = isReadyToClaim(b) && !isClaimingPosition(b) ? 1 : 0;
+
+        if (aReady !== bReady) {
+          return bReady - aReady;
+        }
+
+        return (
+          positionTimestamp(b.createdAt, b.created_at) -
+          positionTimestamp(a.createdAt, a.created_at)
+        );
+      }),
     [positions],
   );
 
   const finishedPositions = useMemo(
-    () => positions.filter((position) => !isActivePosition(position)),
+    () =>
+      positions
+        .filter((position) => !isActivePosition(position))
+        .sort(
+          (a, b) =>
+            positionTimestamp(
+              b.completedAt,
+              b.completed_at,
+              b.updatedAt,
+              b.updated_at,
+              b.createdAt,
+              b.created_at,
+            ) -
+            positionTimestamp(
+              a.completedAt,
+              a.completed_at,
+              a.updatedAt,
+              a.updated_at,
+              a.createdAt,
+              a.created_at,
+            ),
+        ),
     [positions],
   );
 
