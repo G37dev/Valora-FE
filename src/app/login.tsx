@@ -69,8 +69,6 @@ export default function LoginScreen() {
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
       }
 
-      console.log("ini hasil login = ", JSON.stringify(userData));
-
       setShowTwoFactorSetup(false);
       setShowTwoFactorVerif(false);
 
@@ -111,8 +109,6 @@ export default function LoginScreen() {
   const handleGoogleLoginSupabase = async () => {
     try {
       setGoogleLoading(true);
-
-      console.log("1. Memulai proses Google Login...");
 
       const redirectTo = AuthSession.makeRedirectUri({
         scheme: "valoramobile",
@@ -490,8 +486,6 @@ export default function LoginScreen() {
 
           <OTPVerificationScreen
             onVerifyOTP={(code) => {
-              console.log("OTP:", code);
-
               setVerificationStatus("verifying");
 
               setTimeout(() => {
