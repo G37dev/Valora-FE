@@ -252,7 +252,7 @@ export default function AssetHeader({
       />
 
       {isLoggedIn && !isKycApproved && (
-        <KycUnlockBanner onPress={() => router.push("/wallet")} />
+        <KycUnlockBanner onPress={() => router.push("/kyc-screen")} />
       )}
 
       {/* ==================================================
