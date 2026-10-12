@@ -45,6 +45,7 @@
       ],
       "expo-font",
       "expo-web-browser",
+      "@veriff/react-native-sdk",
       "@react-native-google-signin/google-signin",
       "expo-secure-store",
       [

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import VeriffSdk from "@veriff/react-native-sdk";
 import { useFocusEffect, useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -85,11 +85,30 @@ export default function KycScreen() {
       });
 
       if (res.success && res.data?.url) {
-        // Hosted verification page — capture dokumen + selfie + liveness
-        await WebBrowser.openBrowserAsync(res.data.url);
-        await new Promise((r) => setTimeout(r, 2000));
-        await loadStatus();
-        setStep("review");
+        if (!VeriffSdk?.launchVeriff) {
+          showAlert(
+            "Update Required",
+            "Fitur verifikasi membutuhkan versi aplikasi terbaru.",
+          );
+          return;
+        }
+
+        // Native Veriff UI — capture dokumen + selfie + liveness di dalam app
+        const result = await VeriffSdk.launchVeriff({
+          sessionUrl: res.data.url,
+        });
+
+        if (result.status === VeriffSdk.statusError) {
+          showAlert("Gagal", "Verifikasi tidak dapat diselesaikan.");
+          return;
+        }
+
+        // done → submitted, canceled → user batal; dua-duanya refresh status
+        if (result.status === VeriffSdk.statusDone) {
+          await new Promise((r) => setTimeout(r, 1500));
+          await loadStatus();
+          setStep("review");
+        }
       } else {
         showAlert("Gagal", res.message || "Gagal membuat sesi verifikasi.");
       }
