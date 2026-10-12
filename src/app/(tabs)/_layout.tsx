@@ -75,9 +75,18 @@ export default function TabLayout() {
       <Tabs.Screen
         name="services"
         options={{
-          title: "Services",
+          // Disembunyikan dari tab bar — screen tetap
+          // bisa diakses via route kalau dibutuhkan.
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: "History",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="rocket" size={20} color={color} />
+            <Ionicons name="receipt-outline" size={20} color={color} />
           ),
         }}
       />

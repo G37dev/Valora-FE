@@ -23,7 +23,7 @@ const TX_FAILED_STATUSES = new Set([
   "CANCELED",
 ]);
 
-const TX_TYPE_LABELS: Record<string, string> = {
+export const TX_TYPE_LABELS: Record<string, string> = {
   DEPOSIT: "Deposit",
   TOPUP: "Deposit",
   TOP_UP: "Deposit",
