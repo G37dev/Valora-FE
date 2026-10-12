@@ -45,7 +45,16 @@
       ],
       "expo-font",
       "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
       "@veriff/react-native-sdk",
+      "./plugins/withMlkitManifestFix",
       "@react-native-google-signin/google-signin",
       "expo-secure-store",
       [
