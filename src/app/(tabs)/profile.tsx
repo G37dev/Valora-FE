@@ -1,3 +1,9 @@
+import TwoFactorSetup from "@/components/app/otp/TwoFactorSetup";
+import { showAlert } from "@/components/AppAlert";
+import {
+  setupAuthenticatorApi,
+  verifyAuthenticatorApi,
+} from "@/services/authService";
 import { supabase } from "@/services/supabase";
 import { getUserProfileApi, UserProfile } from "@/services/userService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,6 +16,13 @@ export default function ProfileScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const router = useRouter();
+
+  // 2FA setup state
+  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
+  const [showAuthenticatorInput, setShowAuthenticatorInput] = useState(false);
+  const [secretKey, setSecretKey] = useState("");
+  const [otpauth, setOtpauth] = useState("");
+  const [setupLoading, setSetupLoading] = useState(false);
 
   const loadData = async () => {
     try {
@@ -46,6 +59,67 @@ export default function ProfileScreen() {
       router.replace("/login");
     } catch (error) {
       console.error("Gagal membersihkan storage:", error);
+    }
+  };
+
+  const handleTriggerSetupAuthenticator = async () => {
+    try {
+      setSetupLoading(true);
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
+        return;
+      }
+
+      const res = await setupAuthenticatorApi(token);
+
+      setSecretKey(res.secret);
+      setOtpauth(res.otpauth);
+      setShowAuthenticatorInput(true);
+    } catch (error: any) {
+      showAlert(
+        "Setup Failed",
+        error?.message || "Failed to setup authenticator.",
+      );
+    } finally {
+      setSetupLoading(false);
+    }
+  };
+
+  const handleVerifyTotpCode = async (totpCode: string): Promise<boolean> => {
+    if (!totpCode || totpCode.length !== 6) {
+      showAlert("Peringatan", "Masukkan 6 digit kode OTP dengan benar.");
+      return false;
+    }
+
+    try {
+      setSetupLoading(true);
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
+        return false;
+      }
+
+      const res = await verifyAuthenticatorApi(token, totpCode);
+
+      if (res.token) {
+        await AsyncStorage.setItem("token", res.token);
+      }
+
+      if (res.user) {
+        await AsyncStorage.setItem("userData", JSON.stringify(res.user));
+      }
+
+      return true;
+    } catch (error: any) {
+      console.log("TOTP VERIFY ERROR:", error);
+      return false;
+    } finally {
+      setSetupLoading(false);
     }
   };
 
@@ -86,10 +160,45 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {isLoggedIn && (
-        <TouchableOpacity onPress={handleClearStorage} style={styles.debugBtn}>
-          <Text style={styles.debugBtnText}>logout (debug)</Text>
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity
+            onPress={() => {
+              setShowAuthenticatorInput(false);
+              setShowTwoFactorSetup(true);
+            }}
+            style={styles.setupBtn}
+          >
+            <Text style={styles.setupBtnText}>Setup Authenticator</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleClearStorage}
+            style={styles.debugBtn}
+          >
+            <Text style={styles.debugBtnText}>logout (debug)</Text>
+          </TouchableOpacity>
+        </>
       )}
+
+      <TwoFactorSetup
+        visible={showTwoFactorSetup}
+        loading={setupLoading}
+        showAuthenticatorInput={showAuthenticatorInput}
+        secretKey={secretKey}
+        otpauth={otpauth}
+        onClose={() => setShowTwoFactorSetup(false)}
+        onSelectAuthenticator={handleTriggerSetupAuthenticator}
+        onVerifyTotp={handleVerifyTotpCode}
+        onSuccess={() => {
+          setShowTwoFactorSetup(false);
+          showAlert(
+            "Authenticator Aktif",
+            "Two-factor authentication berhasil diaktifkan untuk akun kamu.",
+            [{ text: "OK" }],
+            "success",
+          );
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -111,6 +220,22 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "700",
+  },
+  setupBtn: {
+    backgroundColor: "#1a1a12",
+    borderColor: "#FBE678",
+    borderWidth: 1,
+    padding: 14,
+    borderRadius: 15,
+    alignItems: "center",
+    marginTop: 14,
+    marginBottom: 14,
+  },
+
+  setupBtnText: {
+    color: "#FBE678",
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 14,
   },
   debugBtn: {
     backgroundColor: "#331111",
