@@ -1,71 +1,64 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { showAlert } from "../components/AppAlert";
 import { getKycApi, startDiditSessionApi } from "../services/kycService";
+import { notifyApp } from "../services/notificationService";
 
-type Step = "country" | "document" | "review" | "done";
-
-const COUNTRIES = [
-  { code: "ID", flag: "🇮🇩", name: "Indonesia" },
-  { code: "LA", flag: "🇱🇦", name: "Laos" },
-  { code: "MY", flag: "🇲🇾", name: "Malaysia" },
-  { code: "MX", flag: "🇲🇽", name: "Mexico" },
-  { code: "PH", flag: "🇵🇭", name: "Philippines" },
-  { code: "SG", flag: "🇸🇬", name: "Singapore" },
-  { code: "TH", flag: "🇹🇭", name: "Thailand" },
-  { code: "VN", flag: "🇻🇳", name: "Vietnam" },
-];
+type Step = "start" | "review" | "done";
 
 const GOLD = "#DEC236";
 
-function ProgressBar({ step }: { step: number }) {
-  return (
-    <View style={styles.progressRow}>
-      {[0, 1, 2, 3].map((i) => (
-        <View
-          key={i}
-          style={[
-            styles.progressSegment,
-            i < step && styles.progressSegmentActive,
-          ]}
-        />
-      ))}
-    </View>
-  );
-}
-
 export default function KycScreen() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("country");
+  const [step, setStep] = useState<Step>("start");
   const [status, setStatus] = useState<string>("UNVERIFIED");
-  const [country, setCountry] = useState(COUNTRIES[0]);
-  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const prevStatus = useRef<string | null>(null);
 
-  const loadStatus = useCallback(async () => {
+  const loadStatus = useCallback(async (): Promise<string> => {
     try {
       const coreId = await AsyncStorage.getItem("coreId");
-      if (!coreId) return;
+      if (!coreId) return "UNVERIFIED";
       const res = await getKycApi(coreId);
       const s = res?.data?.status || "UNVERIFIED";
       setStatus(s);
-      if (s === "VERIFIED") setStep("done");
-      else if (s === "PENDING") setStep("review");
-      else setStep("country");
+      // Local notif pas status transisi jadi VERIFIED (bukan pas
+      // user buka screen dalam keadaan sudah verified).
+      if (
+        s === "VERIFIED" &&
+        prevStatus.current !== null &&
+        prevStatus.current !== "VERIFIED"
+      ) {
+        notifyApp({
+          title: "KYC Successful",
+          body: "Your identity has been verified. All VIVALORA features are now unlocked.",
+          data: { screen: "kyc-screen" },
+        });
+      }
+      prevStatus.current = s;
+      setStep((prev) =>
+        s === "VERIFIED"
+          ? "done"
+          : s === "PENDING" && prev === "review"
+            ? "review"
+            : "start",
+      );
+      return s;
     } catch (e) {
       console.error("Gagal memuat status KYC:", e);
+      return "UNVERIFIED";
     }
   }, []);
 
@@ -74,6 +67,14 @@ export default function KycScreen() {
       loadStatus();
     }, [loadStatus]),
   );
+
+  // Poll status tiap 5 detik selama di review — webhook/auto-sync
+  // backend bisa update status kapan saja.
+  useEffect(() => {
+    if (step !== "review") return;
+    const t = setInterval(loadStatus, 5000);
+    return () => clearInterval(t);
+  }, [step, loadStatus]);
 
   const handleStartDidit = async () => {
     try {
@@ -84,9 +85,12 @@ export default function KycScreen() {
         let completed = false;
         let nativeWorked = false;
 
-        try {
-          // Lazy require — kalau native module tidak ada, getEnforcing
-          // melempar error saat modul dievaluasi (bukan saat dipanggil).
+        // Cek ketersediaan dulu — get() tidak throw (beda dengan getEnforcing
+        // yang dieksekusi saat modul JS-nya di-require).
+        const { TurboModuleRegistry } = require("react-native");
+        const hasNative = !!TurboModuleRegistry.get("SdkReactNative");
+
+        if (hasNative) {
           const didit = require("@didit-protocol/sdk-react-native");
           // Native Didit UI — capture dokumen + liveness di dalam app
           const result = await didit.startVerification(res.data.sessionToken, {
@@ -99,14 +103,19 @@ export default function KycScreen() {
               "Gagal",
               result.error?.message || "Verifikasi tidak dapat diselesaikan.",
             );
+            router.back();
             return;
           }
           completed = result.type === "completed";
-        } catch (nativeErr: any) {
-          console.warn(
-            "[Didit] Native SDK tidak tersedia, fallback ke hosted:",
-            nativeErr?.message,
-          );
+          // User cancel di Didit → langsung keluar dari KYC screen
+          if (!completed) {
+            router.back();
+            return;
+          }
+        }
+
+        if (!hasNative) {
+          console.warn("[Didit] Native SDK tidak tersedia, fallback ke hosted");
         }
 
         // Fallback: hosted verification page di browser
@@ -135,19 +144,6 @@ export default function KycScreen() {
     }
   };
 
-  const filtered = COUNTRIES.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const stepIndex =
-    step === "country"
-      ? 1
-      : step === "document"
-        ? 2
-        : step === "review"
-          ? 3
-          : 4;
-
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.header}>
@@ -155,108 +151,56 @@ export default function KycScreen() {
           <Ionicons name="chevron-back" size={26} color="#FFF" />
         </TouchableOpacity>
       </View>
-      <ProgressBar step={stepIndex} />
 
-      {step === "country" && (
+      {step === "start" && (
         <View style={styles.body}>
-          <Text style={styles.title}>Select Your Country or Region</Text>
-          <Text style={styles.subtitle}>
-            This helps us provide the right verification process.
-          </Text>
-
-          <View style={styles.searchBox}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search your country or region..."
-              placeholderTextColor="#666"
-              value={search}
-              onChangeText={setSearch}
+          <View style={styles.heroWrap}>
+            <Image
+              source={require("@/assets/images/kycbg.png")}
+              style={styles.heroImage}
+              resizeMode="contain"
             />
-            <Ionicons name="search" size={18} color="#666" />
           </View>
 
-          <ScrollView
-            style={styles.countryList}
-            showsVerticalScrollIndicator={false}
-          >
-            {filtered.map((c) => {
-              const active = c.code === country.code;
-              return (
-                <TouchableOpacity
-                  key={c.code}
-                  style={[styles.countryRow, active && styles.countryRowActive]}
-                  onPress={() => setCountry(c)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.flag}>{c.flag}</Text>
-                  <Text style={styles.countryName}>{c.name}</Text>
-                  {active ? (
-                    <Ionicons name="checkmark-circle" size={22} color={GOLD} />
-                  ) : (
-                    <View style={styles.radioOff} />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          <TouchableOpacity
-            style={styles.goldButton}
-            onPress={() => setStep("document")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.goldButtonText}>Continue</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {step === "document" && (
-        <View style={styles.body}>
-          <Text style={styles.title}>Upload Your Identity Card</Text>
+          <Text style={styles.title}>Verify Your Identity</Text>
           <Text style={styles.subtitle}>
-            Take a clear photo of your Identity Card. Make sure all details are
-            visible and readable.
+            Complete KYC to unlock the full VIVALORA experience.
           </Text>
 
-          <View style={styles.cardPreview}>
-            <View style={[styles.corner, styles.cornerTL]} />
-            <View style={[styles.corner, styles.cornerTR]} />
-            <View style={[styles.corner, styles.cornerBL]} />
-            <View style={[styles.corner, styles.cornerBR]} />
-            <View style={styles.idCard}>
-              <View style={styles.idAvatar}>
-                <Ionicons name="person" size={20} color={GOLD} />
-              </View>
-              <View style={{ flex: 1, gap: 6 }}>
-                <View style={styles.idLine} />
-                <View style={[styles.idLine, { width: "80%" }]} />
-                <View style={[styles.idLine, { width: "55%" }]} />
-              </View>
-            </View>
+          <View style={styles.benefitsCard}>
+            <BenefitRow
+              icon="lock-open-outline"
+              title="Unlock all features"
+              desc="Earn, loan, installment, and more"
+            />
+            <BenefitRow
+              icon="bar-chart-outline"
+              title="Higher transaction limits"
+              desc="Access higher limits and better rates"
+            />
+            <BenefitRow
+              icon="shield-checkmark-outline"
+              title="A safer and more secure account"
+              desc="Protect your assets and identity"
+            />
           </View>
 
-          <View style={styles.tipsBox}>
-            <View style={styles.tipsHeader}>
-              <Ionicons name="information-circle" size={16} color={GOLD} />
-              <Text style={styles.tipsTitle}>Tips for a good photo:</Text>
-            </View>
-            <Text style={styles.tipsItem}>• Use a good lighting</Text>
-            <Text style={styles.tipsItem}>
-              • Place your Identity Card on a flat surface
-            </Text>
-            <Text style={styles.tipsItem}>• Avoid glare or blur</Text>
-          </View>
+          <View style={{ flex: 1 }} />
 
           <TouchableOpacity
             style={[styles.goldButton, loading && { opacity: 0.6 }]}
-            onPress={handleStartDidit}
+            onPress={
+              status === "PENDING" ? () => setStep("review") : handleStartDidit
+            }
             disabled={loading}
             activeOpacity={0.85}
           >
             {loading ? (
               <ActivityIndicator color="#000" />
             ) : (
-              <Text style={styles.goldButtonText}>Continue</Text>
+              <Text style={styles.goldButtonText}>
+                {status === "PENDING" ? "Continue" : "Start Verification"}
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -267,11 +211,12 @@ export default function KycScreen() {
           style={styles.body}
           contentContainerStyle={{ paddingBottom: 30 }}
         >
-          <View style={styles.reviewIconWrap}>
-            <Ionicons name="document-text" size={72} color={GOLD} />
-            <View style={styles.reviewIconBadge}>
-              <Ionicons name="search" size={20} color="#000" />
-            </View>
+          <View style={styles.heroWrap}>
+            <Image
+              source={require("@/assets/images/kycbg2.png")}
+              style={styles.heroImage}
+              resizeMode="contain"
+            />
           </View>
 
           <Text style={[styles.title, { textAlign: "center" }]}>
@@ -298,7 +243,10 @@ export default function KycScreen() {
 
           {step === "review" && (
             <View style={styles.waitingBox}>
-              <Text style={styles.waitingTitle}>⏳ Waiting for Review</Text>
+              <View style={styles.tipsHeader}>
+                <Ionicons name="hourglass-outline" size={16} color={GOLD} />
+                <Text style={styles.waitingTitle}>Waiting for Review</Text>
+              </View>
               <Text style={styles.waitingDesc}>
                 We'll update this page automatically once your document review
                 is successfully reviewed by our partner.
@@ -340,6 +288,28 @@ export default function KycScreen() {
   );
 }
 
+function BenefitRow({
+  icon,
+  title,
+  desc,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <View style={styles.benefitRow}>
+      <View style={styles.benefitIcon}>
+        <Ionicons name={icon} size={20} color={GOLD} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.benefitTitle}>{title}</Text>
+        <Text style={styles.benefitDesc}>{desc}</Text>
+      </View>
+    </View>
+  );
+}
+
 function CheckRow({
   label,
   state,
@@ -350,7 +320,9 @@ function CheckRow({
   return (
     <View style={styles.checkRow}>
       {state === "done" && (
-        <Ionicons name="checkmark-circle" size={20} color={GOLD} />
+        <View style={styles.checkIconDone}>
+          <Ionicons name="checkmark" size={12} color="#000" />
+        </View>
       )}
       {state === "progress" && <ActivityIndicator size="small" color={GOLD} />}
       {state === "idle" && (
@@ -373,21 +345,30 @@ function CheckRow({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   header: { paddingHorizontal: 16, paddingVertical: 8 },
-  progressRow: {
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  progressSegment: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#262626",
-  },
-  progressSegmentActive: { backgroundColor: GOLD },
   body: { flex: 1, paddingHorizontal: 24 },
+  heroWrap: { alignItems: "center", marginTop: 8, marginBottom: 20 },
+  heroImage: { width: 240, height: 240 },
+  benefitsCard: {
+    backgroundColor: "#141414",
+    borderWidth: 1,
+    borderColor: "#262626",
+    borderRadius: 16,
+    padding: 16,
+    gap: 18,
+  },
+  benefitRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  benefitIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#2A2A1A",
+    borderWidth: 1,
+    borderColor: "#3A3520",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  benefitTitle: { color: "#FFF", fontSize: 14, fontWeight: "600" },
+  benefitDesc: { color: "#8A8A8A", fontSize: 12, marginTop: 2 },
   title: {
     color: "#FFF",
     fontSize: 22,
@@ -402,125 +383,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginBottom: 24,
   },
-  searchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#141414",
-    borderWidth: 1,
-    borderColor: "#262626",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    marginBottom: 16,
-  },
-  searchInput: { flex: 1, color: "#FFF", fontSize: 14, paddingVertical: 13 },
-  countryList: { flex: 1 },
-  countryRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "transparent",
-    marginBottom: 4,
-    gap: 14,
-  },
-  countryRowActive: { borderColor: GOLD, backgroundColor: "#141410" },
-  flag: { fontSize: 26 },
-  countryName: { flex: 1, color: "#FFF", fontSize: 16, fontWeight: "500" },
-  radioOff: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: "#333",
-  },
-  cardPreview: {
-    height: 210,
-    borderRadius: 16,
-    backgroundColor: "#141410",
-    borderWidth: 1,
-    borderColor: "#2A2A1A",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  corner: {
-    position: "absolute",
-    width: 26,
-    height: 26,
-    borderColor: GOLD,
-  },
-  cornerTL: {
-    top: 18,
-    left: 18,
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderTopLeftRadius: 6,
-  },
-  cornerTR: {
-    top: 18,
-    right: 18,
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderTopRightRadius: 6,
-  },
-  cornerBL: {
-    bottom: 18,
-    left: 18,
-    borderBottomWidth: 3,
-    borderLeftWidth: 3,
-    borderBottomLeftRadius: 6,
-  },
-  cornerBR: {
-    bottom: 18,
-    right: 18,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderBottomRightRadius: 6,
-  },
-  idCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    backgroundColor: "#1E1E14",
-    borderWidth: 1,
-    borderColor: GOLD,
-    borderRadius: 12,
-    padding: 18,
-    width: "72%",
-  },
-  idAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#2A2A1A",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  idLine: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#4A4526",
-    width: "100%",
-  },
-  tipsBox: {
-    backgroundColor: "#141414",
-    borderWidth: 1,
-    borderColor: "#262626",
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 24,
-    gap: 6,
-  },
-  tipsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
-  },
-  tipsTitle: { color: "#FFF", fontSize: 13, fontWeight: "600" },
-  tipsItem: { color: "#8A8A8A", fontSize: 12, lineHeight: 18 },
   goldButton: {
     backgroundColor: GOLD,
     borderRadius: 12,
@@ -540,22 +402,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   darkButtonText: { color: "#FFF", fontSize: 15, fontWeight: "600" },
-  reviewIconWrap: {
-    alignSelf: "center",
-    marginTop: 16,
-    marginBottom: 20,
-  },
-  reviewIconBadge: {
-    position: "absolute",
-    bottom: -4,
-    right: -8,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: GOLD,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   checklist: {
     backgroundColor: "#141414",
     borderWidth: 1,
@@ -566,8 +412,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   checkRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  checkIconDone: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: GOLD,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   checkLabel: { color: "#FFF", fontSize: 14, fontWeight: "600" },
   checkState: { color: "#8A8A8A", fontSize: 11, marginTop: 2 },
+  tipsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   waitingBox: {
     backgroundColor: "#141410",
     borderWidth: 1,
