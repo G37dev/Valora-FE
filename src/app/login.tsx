@@ -29,6 +29,10 @@ import {
 } from "../services/authService";
 import { setAuthToken } from "../services/authStorage";
 import { notifyApp, registerPushToken } from "../services/notificationService";
+import {
+  authenticateWithPasskey,
+  isPasskeySupported,
+} from "../services/passkeyService";
 import { supabase } from "../services/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -45,6 +49,7 @@ export default function LoginScreen() {
   const [preAuthToken, setPreAuthToken] = useState("");
   const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
   const [showTwoFactorVerif, setShowTwoFactorVerif] = useState(false);
+  const [availableMethods, setAvailableMethods] = useState<any>({});
   const [showAuthenticatorInput, setShowAuthenticatorInput] = useState(false);
   const [secretKey, setSecretKey] = useState("");
   const [otpauth, setOtpauth] = useState("");
@@ -89,6 +94,7 @@ export default function LoginScreen() {
 
   const processLoginResponse = (data: any) => {
     setPreAuthToken(data.preAuthToken);
+    setAvailableMethods(data.availableMethods || {});
 
     if (data.requireSetup) {
       setShowAuthenticatorInput(false);
@@ -250,6 +256,26 @@ export default function LoginScreen() {
         "Setup Failed",
         error?.message || "Failed to setup authenticator.",
       );
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleVerifyPasskey = async (): Promise<boolean> => {
+    try {
+      setPasswordLoading(true);
+      const res = await authenticateWithPasskey(preAuthToken);
+      await setAuthToken(res.token);
+      if (res.user?.coreId) {
+        await AsyncStorage.setItem("coreId", res.user.coreId);
+      }
+      if (res.user) {
+        await AsyncStorage.setItem("userData", JSON.stringify(res.user));
+      }
+      return true;
+    } catch (error: any) {
+      console.log("PASSKEY VERIFY ERROR:", error);
+      return false;
     } finally {
       setPasswordLoading(false);
     }
@@ -547,6 +573,10 @@ export default function LoginScreen() {
         loading={passwordLoading}
         onClose={() => setShowTwoFactorVerif(false)}
         onVerifyTotp={handleVerifyTotpCode}
+        onVerifyPasskey={handleVerifyPasskey}
+        passkeyAvailable={
+          Boolean(availableMethods?.passkey) && isPasskeySupported()
+        }
         onSuccess={() => {
           setShowTwoFactorVerif(false);
 

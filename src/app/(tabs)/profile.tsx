@@ -12,12 +12,25 @@ import {
   getAuthToken,
   setAuthToken,
 } from "@/services/authStorage";
+import {
+  deletePasskey,
+  isPasskeySupported,
+  listPasskeys,
+  PasskeyInfo,
+  registerPasskey,
+} from "@/services/passkeyService";
 import { supabase } from "@/services/supabase";
 import { getUserProfileApi, UserProfile } from "@/services/userService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
@@ -37,6 +50,68 @@ export default function ProfileScreen() {
   const [showTwoFactorDisable, setShowTwoFactorDisable] = useState(false);
   const [disableLoading, setDisableLoading] = useState(false);
 
+  // Passkey state
+  const [passkeys, setPasskeys] = useState<PasskeyInfo[]>([]);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
+
+  const loadPasskeys = async (token: string) => {
+    try {
+      setPasskeys(await listPasskeys(token));
+    } catch (error) {
+      console.error("Gagal memuat passkey:", error);
+    }
+  };
+
+  const handleAddPasskey = async () => {
+    try {
+      setPasskeyLoading(true);
+      const token = await getAuthToken();
+      if (!token) return;
+      await registerPasskey(token);
+      await loadPasskeys(token);
+      showAlert(
+        "Passkey Terdaftar",
+        "Passkey berhasil ditambahkan ke akun kamu.",
+        [{ text: "OK" }],
+        "success",
+      );
+    } catch (error: any) {
+      if (error?.name === "UserCancelled" || error?.code === "USER_CANCELED")
+        return;
+      showAlert(
+        "Setup Gagal",
+        error?.message || "Gagal mendaftarkan passkey. Coba lagi.",
+      );
+    } finally {
+      setPasskeyLoading(false);
+    }
+  };
+
+  const handleDeletePasskey = (pk: PasskeyInfo) => {
+    showAlert(
+      "Hapus Passkey",
+      `Yakin mau hapus passkey "${pk.friendlyName}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Hapus",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await getAuthToken();
+              if (!token) return;
+              await deletePasskey(token, pk.id);
+              await loadPasskeys(token);
+            } catch (error: any) {
+              showAlert("Gagal", error?.message || "Gagal menghapus passkey.");
+            }
+          },
+        },
+      ],
+      "warning",
+    );
+  };
+
   const load2FAStatus = async () => {
     try {
       const token = await getAuthToken();
@@ -49,6 +124,7 @@ export default function ProfileScreen() {
       const res = await get2FAStatusApi(token);
 
       setTwoFAEnabled(Boolean(res?.enabled));
+      await loadPasskeys(token);
     } catch (error) {
       console.error("Gagal cek status 2FA:", error);
       setTwoFAEnabled(null);
@@ -241,6 +317,31 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           )}
 
+          {isPasskeySupported() && (
+            <>
+              <TouchableOpacity
+                onPress={handleAddPasskey}
+                style={styles.setupBtn}
+                disabled={passkeyLoading}
+              >
+                {passkeyLoading ? (
+                  <ActivityIndicator color="#000" />
+                ) : (
+                  <Text style={styles.setupBtnText}>Setup Passkey</Text>
+                )}
+              </TouchableOpacity>
+
+              {passkeys.map((pk) => (
+                <View key={pk.id} style={styles.passkeyRow}>
+                  <Text style={styles.passkeyName}>🔑 {pk.friendlyName}</Text>
+                  <TouchableOpacity onPress={() => handleDeletePasskey(pk)}>
+                    <Text style={styles.passkeyDelete}>Hapus</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </>
+          )}
+
           <TouchableOpacity
             onPress={handleClearStorage}
             style={styles.debugBtn}
@@ -340,5 +441,29 @@ const styles = StyleSheet.create({
     color: "#FF4D4D",
     fontFamily: "Poppins_600SemiBold",
     fontSize: 14,
+  },
+
+  passkeyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1A1A1A",
+    borderColor: "#2D2D2D",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 10,
+  },
+
+  passkeyName: {
+    color: "#FFFFFF",
+    fontFamily: "Poppins_500Medium",
+    fontSize: 13,
+  },
+
+  passkeyDelete: {
+    color: "#FF4D4D",
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
   },
 });

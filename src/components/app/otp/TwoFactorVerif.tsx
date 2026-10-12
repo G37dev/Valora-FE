@@ -21,6 +21,8 @@ interface TwoFactorVerifProps {
   loading: boolean;
   onClose: () => void;
   onVerifyTotp: (code: string) => Promise<boolean>;
+  onVerifyPasskey?: () => Promise<boolean>;
+  passkeyAvailable?: boolean;
   onSuccess: () => void;
 }
 
@@ -29,6 +31,8 @@ export default function TwoFactorVerif({
   loading,
   onClose,
   onVerifyTotp,
+  onVerifyPasskey,
+  passkeyAvailable = false,
   onSuccess,
 }: TwoFactorVerifProps) {
   const [totpCode, setTotpCode] = useState("");
@@ -98,6 +102,36 @@ export default function TwoFactorVerif({
         setVerificationStatus("idle");
         setTotpCode("");
       }, 700);
+    }
+  };
+
+  const handlePasskey = async () => {
+    if (
+      !onVerifyPasskey ||
+      loading ||
+      verificationStatus === "verifying" ||
+      verificationStatus === "success"
+    ) {
+      return;
+    }
+
+    setVerificationStatus("verifying");
+
+    try {
+      const success = await onVerifyPasskey();
+
+      if (!success) {
+        setVerificationStatus("error");
+        setTimeout(() => setVerificationStatus("idle"), 700);
+        return;
+      }
+
+      setVerificationStatus("success");
+      setTimeout(() => onSuccess(), 1200);
+    } catch (error) {
+      console.log("PASSKEY VERIFY ERROR:", error);
+      setVerificationStatus("error");
+      setTimeout(() => setVerificationStatus("idle"), 700);
     }
   };
 
@@ -205,6 +239,34 @@ export default function TwoFactorVerif({
                       )}
                     </TouchableOpacity>
                   </View>
+
+                  {passkeyAvailable && onVerifyPasskey && (
+                    <TouchableOpacity
+                      style={[
+                        styles.passkeyButton,
+                        (loading ||
+                          verificationStatus === "verifying" ||
+                          verificationStatus === "success") &&
+                          styles.disabledButton,
+                      ]}
+                      onPress={handlePasskey}
+                      disabled={
+                        loading ||
+                        verificationStatus === "verifying" ||
+                        verificationStatus === "success"
+                      }
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons
+                        name="finger-print-outline"
+                        size={18}
+                        color="#FBE87C"
+                      />
+                      <Text style={styles.passkeyButtonText}>
+                        Verify with Passkey
+                      </Text>
+                    </TouchableOpacity>
+                  )}
 
                   <TouchableOpacity
                     style={styles.cancelButton}
@@ -339,6 +401,26 @@ const styles = StyleSheet.create({
 
   disabledButton: {
     opacity: 0.6,
+  },
+
+  passkeyButton: {
+    width: "100%",
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#FBE87C",
+    backgroundColor: "rgba(251,232,124,0.08)",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 12,
+  },
+
+  passkeyButtonText: {
+    color: "#FBE87C",
+    fontSize: 13,
+    fontFamily: "Poppins_600SemiBold",
   },
 
   cancelButton: {
