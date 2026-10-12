@@ -38,10 +38,15 @@ export const getKycApi = async (coreId: string) => {
   }
 };
 
+export interface VeriffSessionPayload {
+  documentCountry?: string;
+  documentType?: string;
+}
+
 // Buat sesi verifikasi Veriff → return { url } hosted page
-export const startVeriffSessionApi = async () => {
+export const startVeriffSessionApi = async (payload?: VeriffSessionPayload) => {
   try {
-    const response = await apiClient.post("/kyc/veriff/session");
+    const response = await apiClient.post("/kyc/veriff/session", payload);
     return response.data;
   } catch (error: any) {
     console.error("Gagal membuat sesi Veriff:", error);
