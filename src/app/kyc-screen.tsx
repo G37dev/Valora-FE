@@ -19,14 +19,14 @@ import { getKycApi, startVeriffSessionApi } from "../services/kycService";
 type Step = "country" | "document" | "review" | "done";
 
 const COUNTRIES = [
-  { code: "IDN", flag: "🇮🇩", name: "Indonesia" },
-  { code: "LAO", flag: "🇱🇦", name: "Laos" },
-  { code: "MYS", flag: "🇲🇾", name: "Malaysia" },
-  { code: "MEX", flag: "🇲🇽", name: "Mexico" },
-  { code: "PHL", flag: "🇵🇭", name: "Philippines" },
-  { code: "SGP", flag: "🇸🇬", name: "Singapore" },
-  { code: "THA", flag: "🇹🇭", name: "Thailand" },
-  { code: "VNM", flag: "🇻🇳", name: "Vietnam" },
+  { code: "ID", flag: "🇮🇩", name: "Indonesia" },
+  { code: "LA", flag: "🇱🇦", name: "Laos" },
+  { code: "MY", flag: "🇲🇾", name: "Malaysia" },
+  { code: "MX", flag: "🇲🇽", name: "Mexico" },
+  { code: "PH", flag: "🇵🇭", name: "Philippines" },
+  { code: "SG", flag: "🇸🇬", name: "Singapore" },
+  { code: "TH", flag: "🇹🇭", name: "Thailand" },
+  { code: "VN", flag: "🇻🇳", name: "Vietnam" },
 ];
 
 const GOLD = "#DEC236";
