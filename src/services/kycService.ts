@@ -53,3 +53,15 @@ export const startVeriffSessionApi = async (payload?: VeriffSessionPayload) => {
     throw error.response?.data || { message: "Gagal membuat sesi verifikasi" };
   }
 };
+
+// Buat sesi verifikasi Didit → return { url, sessionId, sessionToken }
+// sessionToken dipakai untuk launch Didit native SDK di device
+export const startDiditSessionApi = async () => {
+  try {
+    const response = await apiClient.post("/kyc/didit/session");
+    return response.data;
+  } catch (error: any) {
+    console.error("Gagal membuat sesi Didit:", error);
+    throw error.response?.data || { message: "Gagal membuat sesi verifikasi" };
+  }
+};

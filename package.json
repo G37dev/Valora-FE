@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@didit-protocol/sdk-react-native": "^4.9.1",
     "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/ngrok": "^4.1.3",
     "@expo/ui": "~57.0.21",
@@ -15,7 +16,6 @@
     "@react-navigation/native": "^7.4.1",
     "@shopify/react-native-skia": "2.6.2",
     "@supabase/supabase-js": "^2.116.0",
-    "@veriff/react-native-sdk": "^13.2.0",
     "axios": "^1.20.0",
     "expo": "~57.0.26",
     "expo-asset": "~57.0.18",

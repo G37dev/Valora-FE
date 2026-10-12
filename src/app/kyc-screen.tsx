@@ -1,6 +1,6 @@
+import { startVerification } from "@didit-protocol/sdk-react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import VeriffSdk from "@veriff/react-native-sdk";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { showAlert } from "../components/AppAlert";
-import { getKycApi, startVeriffSessionApi } from "../services/kycService";
+import { getKycApi, startDiditSessionApi } from "../services/kycService";
 
 type Step = "country" | "document" | "review" | "done";
 
@@ -76,35 +76,27 @@ export default function KycScreen() {
     }, [loadStatus]),
   );
 
-  const handleStartVeriff = async () => {
+  const handleStartDidit = async () => {
     try {
       setLoading(true);
-      const res = await startVeriffSessionApi({
-        documentCountry: country.code,
-        documentType: "ID_CARD",
-      });
+      const res = await startDiditSessionApi();
 
-      if (res.success && res.data?.url) {
-        if (!VeriffSdk?.launchVeriff) {
+      if (res.success && res.data?.sessionToken) {
+        // Native Didit UI — capture dokumen + selfie + liveness di dalam app
+        const result = await startVerification(res.data.sessionToken, {
+          languageCode: "en",
+        });
+
+        if (result.type === "failed") {
           showAlert(
-            "Update Required",
-            "Fitur verifikasi membutuhkan versi aplikasi terbaru.",
+            "Gagal",
+            result.error?.message || "Verifikasi tidak dapat diselesaikan.",
           );
           return;
         }
 
-        // Native Veriff UI — capture dokumen + selfie + liveness di dalam app
-        const result = await VeriffSdk.launchVeriff({
-          sessionUrl: res.data.url,
-        });
-
-        if (result.status === VeriffSdk.statusError) {
-          showAlert("Gagal", "Verifikasi tidak dapat diselesaikan.");
-          return;
-        }
-
-        // done → submitted, canceled → user batal; dua-duanya refresh status
-        if (result.status === VeriffSdk.statusDone) {
+        // completed → submitted; cancelled → user batal (tetap di screen)
+        if (result.type === "completed") {
           await new Promise((r) => setTimeout(r, 1500));
           await loadStatus();
           setStep("review");
@@ -113,7 +105,7 @@ export default function KycScreen() {
         showAlert("Gagal", res.message || "Gagal membuat sesi verifikasi.");
       }
     } catch (error: any) {
-      console.error("Error start Veriff:", error);
+      console.error("Error start Didit:", error);
       showAlert(
         "Error",
         error.message || "Terjadi kesalahan koneksi ke server.",
@@ -237,7 +229,7 @@ export default function KycScreen() {
 
           <TouchableOpacity
             style={[styles.goldButton, loading && { opacity: 0.6 }]}
-            onPress={handleStartVeriff}
+            onPress={handleStartDidit}
             disabled={loading}
             activeOpacity={0.85}
           >
