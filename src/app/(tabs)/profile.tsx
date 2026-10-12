@@ -1,6 +1,9 @@
 import TwoFactorSetup from "@/components/app/otp/TwoFactorSetup";
+import TwoFactorVerif from "@/components/app/otp/TwoFactorVerif";
 import { showAlert } from "@/components/AppAlert";
 import {
+  disableAuthenticatorApi,
+  get2FAStatusApi,
   setupAuthenticatorApi,
   verifyAuthenticatorApi,
 } from "@/services/authService";
@@ -23,6 +26,29 @@ export default function ProfileScreen() {
   const [secretKey, setSecretKey] = useState("");
   const [otpauth, setOtpauth] = useState("");
   const [setupLoading, setSetupLoading] = useState(false);
+
+  // 2FA status & disable state
+  const [twoFAEnabled, setTwoFAEnabled] = useState<boolean | null>(null);
+  const [showTwoFactorDisable, setShowTwoFactorDisable] = useState(false);
+  const [disableLoading, setDisableLoading] = useState(false);
+
+  const load2FAStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setTwoFAEnabled(null);
+        return;
+      }
+
+      const res = await get2FAStatusApi(token);
+
+      setTwoFAEnabled(Boolean(res?.enabled));
+    } catch (error) {
+      console.error("Gagal cek status 2FA:", error);
+      setTwoFAEnabled(null);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -123,6 +149,33 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleDisableTotpCode = async (totpCode: string): Promise<boolean> => {
+    if (!totpCode || totpCode.length !== 6) {
+      showAlert("Peringatan", "Masukkan 6 digit kode OTP dengan benar.");
+      return false;
+    }
+
+    try {
+      setDisableLoading(true);
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
+        return false;
+      }
+
+      const res = await disableAuthenticatorApi(token, totpCode);
+
+      return Boolean(res?.success);
+    } catch (error: any) {
+      console.log("TOTP DISABLE ERROR:", error);
+      return false;
+    } finally {
+      setDisableLoading(false);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       const getLatestDataFromStorage = async () => {
@@ -144,9 +197,11 @@ export default function ProfileScreen() {
             }
 
             await loadData();
+            load2FAStatus();
           } else {
             setIsLoggedIn(false);
             setUserData(null);
+            setTwoFAEnabled(null);
           }
         } catch (error) {
           console.error("Gagal membaca lokal data:", error);
@@ -161,15 +216,24 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       {isLoggedIn && (
         <>
-          <TouchableOpacity
-            onPress={() => {
-              setShowAuthenticatorInput(false);
-              setShowTwoFactorSetup(true);
-            }}
-            style={styles.setupBtn}
-          >
-            <Text style={styles.setupBtnText}>Setup Authenticator</Text>
-          </TouchableOpacity>
+          {twoFAEnabled === true ? (
+            <TouchableOpacity
+              onPress={() => setShowTwoFactorDisable(true)}
+              style={styles.debugBtn}
+            >
+              <Text style={styles.debugBtnText}>Disable Authenticator</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => {
+                setShowAuthenticatorInput(false);
+                setShowTwoFactorSetup(true);
+              }}
+              style={styles.setupBtn}
+            >
+              <Text style={styles.setupBtnText}>Setup Authenticator</Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             onPress={handleClearStorage}
@@ -191,9 +255,27 @@ export default function ProfileScreen() {
         onVerifyTotp={handleVerifyTotpCode}
         onSuccess={() => {
           setShowTwoFactorSetup(false);
+          setTwoFAEnabled(true);
           showAlert(
             "Authenticator Aktif",
             "Two-factor authentication berhasil diaktifkan untuk akun kamu.",
+            [{ text: "OK" }],
+            "success",
+          );
+        }}
+      />
+
+      <TwoFactorVerif
+        visible={showTwoFactorDisable}
+        loading={disableLoading}
+        onClose={() => setShowTwoFactorDisable(false)}
+        onVerifyTotp={handleDisableTotpCode}
+        onSuccess={() => {
+          setShowTwoFactorDisable(false);
+          setTwoFAEnabled(false);
+          showAlert(
+            "Authenticator Dinonaktifkan",
+            "Two-factor authentication berhasil dimatikan. Kamu bisa mengaktifkannya lagi kapan saja.",
             [{ text: "OK" }],
             "success",
           );

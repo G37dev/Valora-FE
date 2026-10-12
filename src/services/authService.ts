@@ -210,3 +210,44 @@ export const verifyTransaction2faApi = async (
     );
   }
 };
+
+export const get2FAStatusApi = async (
+  userToken: string,
+): Promise<{ enabled: boolean }> => {
+  try {
+    const response = await apiClient.get("/auth/2fa/status", {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "❌ ERROR get2FAStatusApi:",
+      error.response?.data || error.message || error,
+    );
+    throw (
+      error.response?.data?.error || error.message || "Gagal cek status 2FA"
+    );
+  }
+};
+
+export const disableAuthenticatorApi = async (
+  userToken: string,
+  totpCode: string,
+): Promise<any> => {
+  try {
+    const response = await apiClient.post(
+      "/auth/2fa/disable",
+      { token: totpCode },
+      { headers: { Authorization: `Bearer ${userToken}` } },
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "❌ ERROR disableAuthenticatorApi:",
+      error.response?.data || error.message || error,
+    );
+    throw (
+      error.response?.data?.error || error.message || "Kode Authenticator salah"
+    );
+  }
+};
