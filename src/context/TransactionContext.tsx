@@ -36,6 +36,8 @@ export const TX_TYPE_LABELS: Record<string, string> = {
   CONVERT: "Convert",
   REDEMPTION: "Redemption",
   INSTALLMENT: "Installment",
+  REFUND: "Refund",
+  TRANSFER: "Transfer",
 };
 
 const getTxKey = (tx: any): string =>

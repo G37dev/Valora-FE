@@ -1,12 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useContext, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  View,
-} from "react-native";
+import { useContext, useMemo, useState } from "react";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Text from "../../components/CustomText";
 import {
@@ -22,6 +16,7 @@ const INBOUND_TYPES = new Set([
   "TOP_UP",
   "EARN_CLAIM",
   "REDEMPTION",
+  "REFUND",
 ]);
 
 const TYPE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -37,6 +32,8 @@ const TYPE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   CONVERT: "swap-horizontal-outline",
   REDEMPTION: "repeat-outline",
   INSTALLMENT: "calendar-outline",
+  REFUND: "refresh-outline",
+  TRANSFER: "swap-horizontal-outline",
 };
 
 const STATUS_STYLE: Record<string, { label: string; color: string }> = {
@@ -55,8 +52,18 @@ const formatDate = (iso?: string) => {
   const d = new Date(iso);
   const dd = String(d.getDate()).padStart(2, "0");
   const months = [
-    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-    "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
   ];
   const hh = String(d.getHours()).padStart(2, "0");
   const min = String(d.getMinutes()).padStart(2, "0");
@@ -93,12 +100,14 @@ export default function HistoryScreen() {
   const renderItem = ({ item }: { item: any }) => {
     const type = String(item.type || "").toUpperCase();
     const status = String(item.status || "").toUpperCase();
-    const label = TX_TYPE_LABELS[type] || "Transaction";
+    const label = item.description || TX_TYPE_LABELS[type] || "Transaction";
     const statusInfo = STATUS_STYLE[status] || {
       label: status || "-",
       color: "#858585",
     };
-    const inbound = INBOUND_TYPES.has(type);
+    const inbound = item.direction
+      ? String(item.direction).toUpperCase() === "CREDIT"
+      : INBOUND_TYPES.has(type);
     const icon = TYPE_ICONS[type] || "ellipse-outline";
 
     return (
@@ -114,7 +123,10 @@ export default function HistoryScreen() {
 
         <View style={styles.txRight}>
           <Text
-            style={[styles.txAmount, { color: inbound ? "#10B981" : "#FFFFFF" }]}
+            style={[
+              styles.txAmount,
+              { color: inbound ? "#10B981" : "#FFFFFF" },
+            ]}
           >
             {inbound ? "+" : "-"}
             {formatAmount(item.amount)} {item.asset}
