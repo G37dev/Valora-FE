@@ -24,3 +24,27 @@ export const submitKycApi = async (
     throw error.response?.data || { message: "Terjadi kesalahan pada server" };
   }
 };
+
+// Ambil status KYC user
+export const getKycApi = async (coreId: string) => {
+  try {
+    const response = await apiClient.get(`/kyc/${coreId}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return { success: true, data: null };
+    }
+    throw error.response?.data || { message: "Terjadi kesalahan pada server" };
+  }
+};
+
+// Buat sesi verifikasi Veriff → return { url } hosted page
+export const startVeriffSessionApi = async () => {
+  try {
+    const response = await apiClient.post("/kyc/veriff/session");
+    return response.data;
+  } catch (error: any) {
+    console.error("Gagal membuat sesi Veriff:", error);
+    throw error.response?.data || { message: "Gagal membuat sesi verifikasi" };
+  }
+};
