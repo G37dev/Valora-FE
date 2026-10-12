@@ -1,5 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { getAuthToken } from "./authStorage";
 
 // const API_BASE_URL = "http://192.168.1.80:5000/api";
 const API_BASE_URL = "https://valora-be.vercel.app/api";
@@ -15,7 +15,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await getAuthToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

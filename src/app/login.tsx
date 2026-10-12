@@ -27,6 +27,7 @@ import {
   syncGoogleWithBackend,
   verifyAuthenticatorApi,
 } from "../services/authService";
+import { setAuthToken } from "../services/authStorage";
 import { notifyApp, registerPushToken } from "../services/notificationService";
 import { supabase } from "../services/supabase";
 
@@ -58,7 +59,7 @@ export default function LoginScreen() {
     userData?: any,
   ) => {
     try {
-      await AsyncStorage.setItem("token", token);
+      await setAuthToken(token);
 
       if (coreId) {
         await AsyncStorage.setItem("coreId", coreId);
@@ -266,7 +267,7 @@ export default function LoginScreen() {
     try {
       setPasswordLoading(true);
       const res = await verifyAuthenticatorApi(preAuthToken, totpCode);
-      await AsyncStorage.setItem("token", res.token);
+      await setAuthToken(res.token);
       if (res.user?.coreId) {
         await AsyncStorage.setItem("coreId", res.user.coreId);
       }

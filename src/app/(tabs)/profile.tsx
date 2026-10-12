@@ -7,6 +7,11 @@ import {
   setupAuthenticatorApi,
   verifyAuthenticatorApi,
 } from "@/services/authService";
+import {
+  clearAuthToken,
+  getAuthToken,
+  setAuthToken,
+} from "@/services/authStorage";
 import { supabase } from "@/services/supabase";
 import { getUserProfileApi, UserProfile } from "@/services/userService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -34,7 +39,7 @@ export default function ProfileScreen() {
 
   const load2FAStatus = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await getAuthToken();
 
       if (!token) {
         setTwoFAEnabled(null);
@@ -77,6 +82,7 @@ export default function ProfileScreen() {
     try {
       await supabase.auth.signOut();
 
+      await clearAuthToken();
       await AsyncStorage.clear();
 
       setIsLoggedIn(false);
@@ -92,7 +98,7 @@ export default function ProfileScreen() {
     try {
       setSetupLoading(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = await getAuthToken();
 
       if (!token) {
         showAlert("Sesi tidak ditemukan. Silakan login ulang.");
@@ -123,7 +129,7 @@ export default function ProfileScreen() {
     try {
       setSetupLoading(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = await getAuthToken();
 
       if (!token) {
         showAlert("Sesi tidak ditemukan. Silakan login ulang.");
@@ -133,7 +139,7 @@ export default function ProfileScreen() {
       const res = await verifyAuthenticatorApi(token, totpCode);
 
       if (res.token) {
-        await AsyncStorage.setItem("token", res.token);
+        await setAuthToken(res.token);
       }
 
       if (res.user) {
@@ -158,7 +164,7 @@ export default function ProfileScreen() {
     try {
       setDisableLoading(true);
 
-      const token = await AsyncStorage.getItem("token");
+      const token = await getAuthToken();
 
       if (!token) {
         showAlert("Sesi tidak ditemukan. Silakan login ulang.");

@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants, { AppOwnership } from "expo-constants";
 import { Platform } from "react-native";
 import { apiClient } from "./apiClient";
+import { getAuthToken } from "./authStorage";
 
 export const isExpoGo = Constants.appOwnership === AppOwnership.Expo;
 
@@ -118,7 +119,7 @@ export async function registerPushToken(): Promise<string | null> {
 
     await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
 
-    const authToken = await AsyncStorage.getItem("token");
+    const authToken = await getAuthToken();
     if (!authToken) {
       return token;
     }

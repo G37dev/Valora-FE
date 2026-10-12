@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,6 +20,7 @@ import Text from "../components/CustomText";
 import GoldButton from "../components/GoldButton";
 import { TransactionContext } from "../context/TransactionContext";
 import { verifyTransaction2faApi } from "../services/authService";
+import { getAuthToken } from "../services/authStorage";
 import { notifyApp } from "../services/notificationService";
 
 const ASSETS_INITIAL = {
@@ -221,7 +221,7 @@ export default function WithdrawScreen() {
     try {
       setIsVerifying2FA(true);
 
-      const userToken = await AsyncStorage.getItem("token");
+      const userToken = await getAuthToken();
 
       if (!userToken) {
         throw new Error("Sesi login berakhir. Silakan login ulang.");

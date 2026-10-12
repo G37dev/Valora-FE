@@ -5,7 +5,6 @@ import {
   Poppins_700Bold,
   useFonts,
 } from "@expo-google-fonts/poppins";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -15,6 +14,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppAlertHost } from "../components/AppAlert";
 import TransactionProvider from "../context/TransactionContext";
+import { getAuthToken } from "../services/authStorage";
 import {
   initializeNotifications,
   registerPushToken,
@@ -41,7 +41,7 @@ export default function RootLayout() {
   useEffect(() => {
     const checkUserSession = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await getAuthToken();
 
         if (token) {
           registerPushToken();
