@@ -175,7 +175,12 @@ export default function WithdrawScreen() {
   };
 
   const handleWithdrawSubmit = () => {
-    if (pendingTxs && pendingTxs.length > 0) {
+    // Block hanya kalau ada tx on-chain pending — topup/swap internal
+    // tidak relevan untuk withdraw.
+    const pendingOnChain = (pendingTxs || []).filter(
+      (tx: any) => tx.type === "DEPOSIT" || tx.type === "WITHDRAW",
+    );
+    if (pendingOnChain.length > 0) {
       setErrorMessage(
         "Masih ada transaksi yang berstatus PENDING. Harap tunggu hingga selesai.",
       );

@@ -105,6 +105,11 @@ export default function AssetHeader({
   const { pendingTxs, goldBalance, idrBalance, balancesLoaded } =
     useContext(TransactionContext);
 
+  // Pending alert khusus deposit on-chain — bukan swap/topup/installment.
+  const pendingDeposits = (pendingTxs || []).filter(
+    (tx: any) => tx.type === "DEPOSIT",
+  );
+
   // ======================================================
   // BALANCE VISIBILITY
   // ======================================================
@@ -259,7 +264,7 @@ export default function AssetHeader({
       PENDING TRANSACTION
   ================================================== */}
 
-      {pendingTxs && pendingTxs.length > 0 && (
+      {pendingDeposits.length > 0 && (
         <TouchableOpacity
           style={styles.pendingAlert}
           activeOpacity={0.7}
@@ -273,8 +278,8 @@ export default function AssetHeader({
           }}
         >
           <Text style={styles.pendingAlertText}>
-            {pendingTxs.length} Pending Transaction
-            {pendingTxs.length > 1 ? "s" : ""}
+            {pendingDeposits.length} Pending Deposit Transaction
+            {pendingDeposits.length > 1 ? "s" : ""}
           </Text>
         </TouchableOpacity>
       )}
