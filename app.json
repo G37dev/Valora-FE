@@ -54,7 +54,7 @@
         }
       ],
       "@didit-protocol/sdk-react-native",
-      "./plugins/withMlkitManifestFix",
+      "./plugins/withManifestFixes",
       "@react-native-google-signin/google-signin",
       "expo-secure-store",
       [

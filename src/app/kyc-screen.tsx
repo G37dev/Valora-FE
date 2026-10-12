@@ -1,4 +1,3 @@
-import { startVerification } from "@didit-protocol/sdk-react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -82,21 +81,42 @@ export default function KycScreen() {
       const res = await startDiditSessionApi();
 
       if (res.success && res.data?.sessionToken) {
-        // Native Didit UI — capture dokumen + selfie + liveness di dalam app
-        const result = await startVerification(res.data.sessionToken, {
-          languageCode: "en",
-        });
+        let completed = false;
+        let nativeWorked = false;
 
-        if (result.type === "failed") {
-          showAlert(
-            "Gagal",
-            result.error?.message || "Verifikasi tidak dapat diselesaikan.",
+        try {
+          // Lazy require — kalau native module tidak ada, getEnforcing
+          // melempar error saat modul dievaluasi (bukan saat dipanggil).
+          const didit = require("@didit-protocol/sdk-react-native");
+          // Native Didit UI — capture dokumen + liveness di dalam app
+          const result = await didit.startVerification(res.data.sessionToken, {
+            languageCode: "en",
+          });
+          nativeWorked = true;
+
+          if (result.type === "failed") {
+            showAlert(
+              "Gagal",
+              result.error?.message || "Verifikasi tidak dapat diselesaikan.",
+            );
+            return;
+          }
+          completed = result.type === "completed";
+        } catch (nativeErr: any) {
+          console.warn(
+            "[Didit] Native SDK tidak tersedia, fallback ke hosted:",
+            nativeErr?.message,
           );
-          return;
         }
 
-        // completed → submitted; cancelled → user batal (tetap di screen)
-        if (result.type === "completed") {
+        // Fallback: hosted verification page di browser
+        if (!nativeWorked && res.data?.url) {
+          const WebBrowser = require("expo-web-browser");
+          await WebBrowser.openBrowserAsync(res.data.url);
+          completed = true; // anggap selesai, status final dari webhook/poll
+        }
+
+        if (completed) {
           await new Promise((r) => setTimeout(r, 1500));
           await loadStatus();
           setStep("review");
