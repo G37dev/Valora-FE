@@ -536,6 +536,13 @@ export default function LoginScreen() {
         onVerifyTotp={handleVerifyTotpCode}
         onSuccess={() => {
           setShowTwoFactorSetup(false);
+
+          notifyApp({
+            title: "Welcome Back 👋",
+            body: "You have successfully logged in to ViValora.",
+          });
+
+          registerPushToken();
           router.replace("/(tabs)");
         }}
       />
@@ -547,6 +554,12 @@ export default function LoginScreen() {
         onVerifyTotp={handleVerifyTotpCode}
         onSuccess={() => {
           setShowTwoFactorVerif(false);
+
+          notifyApp({
+            title: "Welcome Back 👋",
+            body: "You have successfully logged in to ViValora.",
+          });
+
           registerPushToken();
           router.replace("/(tabs)");
         }}
