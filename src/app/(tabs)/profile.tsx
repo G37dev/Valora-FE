@@ -165,7 +165,7 @@ export default function ProfileScreen() {
           <Text style={styles.journeyLevel}>{sec.label} Level</Text>
           <View style={styles.progressTrack}>
             <LinearGradient
-              colors={["#FBE678", "#F5D13E"]}
+              colors={["#FFF3A6", "#F5D13E"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={[
@@ -184,7 +184,7 @@ export default function ProfileScreen() {
               activeOpacity={0.85}
             >
               <LinearGradient
-                colors={["#FBE678", "#F5D13E"]}
+                colors={["#FFF3A6", "#F5D13E"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
                 style={styles.benefitsGradient}
