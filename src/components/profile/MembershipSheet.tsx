@@ -464,6 +464,14 @@ function DetailsView({
               ) : (
                 body
               )}
+              {!last && (
+                <LinearGradient
+                  colors={["transparent", "#EFE6C4", "transparent"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={styles.detailGapConnector}
+                />
+              )}
             </View>
           );
         })}
@@ -651,15 +659,14 @@ const styles = StyleSheet.create({
   },
   detailActiveInner: {
     borderRadius: 15,
-    backgroundColor: "#1E1C17",
+    backgroundColor: "#191919",
     overflow: "hidden",
   },
   detailActiveGlow: {
     position: "absolute",
-    right: 0,
+    right: -120,
     top: 0,
     bottom: 0,
-    width: "24%",
   },
   detailBadgeCol: {
     width: 76,
@@ -685,6 +692,13 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   detailBadge: { width: 74, height: 74 },
+  detailGapConnector: {
+    width: 2,
+    height: 22,
+    marginLeft: 8 + 8 + 38 - 1,
+    marginTop: -2,
+    borderRadius: 1,
+  },
   detailConnector: {
     width: 2,
     flex: 1,
