@@ -17,10 +17,10 @@ export default function PaymentErrorScreen() {
           <Ionicons name="close" size={52} color="#FFFFFF" />
         </View>
 
-        <Text style={styles.title}>Pembayaran Gagal</Text>
+        <Text style={styles.title}>Payment Failed</Text>
 
         <Text style={styles.description}>
-          Pembayaran tidak berhasil diproses. Silakan coba kembali.
+          Your payment could not be processed. Please try again.
         </Text>
 
         {refNo ? <Text style={styles.refNo}>Ref No: {refNo}</Text> : null}
@@ -29,7 +29,7 @@ export default function PaymentErrorScreen() {
           style={styles.button}
           onPress={() => router.replace("/(tabs)")}
         >
-          <Text style={styles.buttonText}>Kembali ke Beranda</Text>
+          <Text style={styles.buttonText}>Back to Home</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

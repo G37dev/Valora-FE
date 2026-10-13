@@ -169,13 +169,13 @@ export default function EarnSummaryScreen() {
 
       if (!coreId) {
         setErrorMessage(
-          "Sesi pengguna tidak ditemukan. Silakan login kembali.",
+          "User session not found. Please log in again.",
         );
         return;
       }
 
       if (!asset || !amount || amount <= 0 || !term) {
-        setErrorMessage("Data earning tidak valid.");
+        setErrorMessage("Invalid earning data.");
         return;
       }
 
@@ -207,7 +207,7 @@ export default function EarnSummaryScreen() {
       console.log("[Earn Summary] API response:", response);
 
       if (!response?.success) {
-        throw new Error(response?.message || "Gagal membuat posisi earn.");
+        throw new Error(response?.message || "Failed to create earn position.");
       }
 
       notifyApp({
@@ -229,7 +229,7 @@ export default function EarnSummaryScreen() {
     } catch (error: any) {
       console.error("[Earn Summary] Execute error:", error?.message || error);
 
-      setErrorMessage(error?.message || "Gagal membuat posisi earn.");
+      setErrorMessage(error?.message || "Failed to create earn position.");
     } finally {
       setExecuting(false);
     }

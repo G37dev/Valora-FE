@@ -450,7 +450,7 @@ export const TransactionProvider = ({
       const coreId = await AsyncStorage.getItem("coreId");
 
       if (!coreId) {
-        onError?.("Sesi pengguna tidak ditemukan.");
+        onError?.("User session not found.");
         return;
       }
 
@@ -468,12 +468,12 @@ export const TransactionProvider = ({
 
         fetchGlobalData();
       } else {
-        onError?.(res.message || "Gagal melakukan withdraw.");
+        onError?.(res.message || "Withdraw failed.");
       }
     } catch (err: any) {
       console.error("Error background withdraw:", err);
 
-      onError?.(err.message || "Terjadi kesalahan pada server.");
+      onError?.(err.message || "A server error occurred.");
     }
   };
 

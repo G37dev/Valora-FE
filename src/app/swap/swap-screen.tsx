@@ -387,7 +387,7 @@ export default function SwapScreen() {
 
   const executeSwap = async () => {
     if (!walletAddress) {
-      showAlert("Error", "Wallet belum tersedia.");
+      showAlert("Error", "Wallet is not available yet.");
       return;
     }
     try {
@@ -402,7 +402,7 @@ export default function SwapScreen() {
       });
       const swap = result?.data;
       if (!swap?.id) {
-        throw new Error("Data swap tidak valid.");
+        throw new Error("Invalid swap data.");
       }
       console.log(swap);
       notifyApp({
@@ -424,10 +424,10 @@ export default function SwapScreen() {
     } catch (error: any) {
       console.error("executeSwap error:", error);
       showAlert(
-        "Swap Gagal",
+        "Swap Failed",
         error?.response?.data?.message ||
           error?.message ||
-          "Terjadi kesalahan saat melakukan swap.",
+          "An error occurred while performing the swap.",
       );
     } finally {
       setIsSwapping(false);

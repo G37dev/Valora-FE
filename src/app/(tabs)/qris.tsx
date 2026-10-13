@@ -138,8 +138,8 @@ export default function QRISScreen() {
 
       if (!scanResult.length) {
         showAlert(
-          "QR Code tidak ditemukan",
-          "Pastikan gambar yang dipilih memiliki QR Code yang jelas.",
+          "QR Code Not Found",
+          "Make sure the selected image contains a clear QR code.",
         );
 
         setProcessing(false);
@@ -166,7 +166,7 @@ export default function QRISScreen() {
     } catch (error) {
       console.error("[QRIS Scanner] Gallery error:", error);
 
-      showAlert("Gagal membaca QR", "QR Code pada gambar tidak dapat dibaca.");
+      showAlert("Cannot Read QR", "The QR code in the image could not be read.");
     } finally {
       setProcessing(false);
     }

@@ -398,13 +398,13 @@ export default function EarningScreen() {
       const principalNum = parseFloat(amount) || 0;
 
       if (principalNum <= 0) {
-        showAlert("Masukkan jumlah principal yang valid.");
+        showAlert("Enter a valid principal amount.");
         return;
       }
 
       if (principalNum > maxAmount) {
         showAlert(
-          `Jumlah melebihi saldo maksimum (${maxAmountStr} ${currentAsset.name}) setelah dipotong fee & estimasi gas.`,
+          `Amount exceeds the maximum balance (${maxAmountStr} ${currentAsset.name}) after fee & estimated gas.`,
         );
         return;
       }
@@ -412,14 +412,14 @@ export default function EarningScreen() {
       const coreId = await AsyncStorage.getItem("coreId");
 
       if (!coreId) {
-        showAlert("Sesi pengguna tidak ditemukan. Silakan login kembali.");
+        showAlert("User session not found. Please log in again.");
         return;
       }
 
       const apr = currentAsset.aprs[selectedLockTime];
 
       if (!apr) {
-        showAlert("APR untuk term ini belum tersedia.");
+        showAlert("APR for this term is not available yet.");
         return;
       }
 

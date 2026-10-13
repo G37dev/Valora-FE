@@ -182,7 +182,7 @@ export default function WithdrawScreen() {
     );
     if (pendingOnChain.length > 0) {
       setErrorMessage(
-        "Masih ada transaksi yang berstatus PENDING. Harap tunggu hingga selesai.",
+        "There are still transactions with PENDING status. Please wait until they complete.",
       );
       return;
     }
@@ -219,7 +219,7 @@ export default function WithdrawScreen() {
 
   const handleVerifyTotp = async (totpCode: string) => {
     if (!totpCode || totpCode.length !== 6) {
-      showAlert("Masukkan 6 digit kode Authenticator dengan benar.");
+      showAlert("Enter the 6-digit Authenticator code correctly.");
       return;
     }
 
@@ -229,7 +229,7 @@ export default function WithdrawScreen() {
       const userToken = await getAuthToken();
 
       if (!userToken) {
-        throw new Error("Sesi login berakhir. Silakan login ulang.");
+        throw new Error("Login session expired. Please log in again.");
       }
 
       await verifyTransaction2faApi(userToken, totpCode);
@@ -240,7 +240,7 @@ export default function WithdrawScreen() {
     } catch (err: any) {
       console.error("Error verifikasi 2FA:", err);
 
-      showAlert(err?.message || "Kode Authenticator salah atau kadaluarsa.");
+      showAlert(err?.message || "Authenticator code is incorrect or expired.");
     } finally {
       setIsVerifying2FA(false);
     }
@@ -274,7 +274,7 @@ export default function WithdrawScreen() {
     } catch (err: any) {
       console.error("Error withdraw:", err);
 
-      setErrorMessage(err?.message || "Terjadi kesalahan pada server.");
+      setErrorMessage(err?.message || "A server error occurred.");
     } finally {
       setIsLoading(false);
     }

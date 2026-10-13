@@ -622,7 +622,7 @@ export default function EarnPositionListScreen() {
       const response = await claimEarnPositionApi(position.id, coreId);
 
       if (!response?.success) {
-        throw new Error(response?.message || "Claim gagal.");
+        throw new Error(response?.message || "Claim failed.");
       }
 
       /*
@@ -646,7 +646,7 @@ export default function EarnPositionListScreen() {
       console.error("[Earn Claim] Failed:", error);
 
       const message =
-        error?.response?.data?.message || error?.message || "Claim gagal.";
+        error?.response?.data?.message || error?.message || "Claim failed.";
 
       console.error("[Earn Claim] Message:", message);
 

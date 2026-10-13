@@ -91,22 +91,22 @@ export default function IdrTopUp() {
     const amount = Number(idrAmount);
 
     if (!Number.isSafeInteger(amount) || amount <= 0) {
-      showAlert("Nominal tidak valid", "Masukkan nominal deposit yang valid.");
+      showAlert("Invalid Amount", "Enter a valid deposit amount.");
       return;
     }
 
     if (amount < 10_000) {
       showAlert(
-        "Nominal terlalu kecil",
-        "Minimum deposit IDR adalah 10.000 IDR.",
+        "Amount Too Small",
+        "Minimum IDR deposit is 10,000 IDR.",
       );
       return;
     }
 
     if (amount > MAX_AMOUNT) {
       showAlert(
-        "Nominal terlalu besar",
-        "Maximum deposit IDR adalah 100.000.000 IDR.",
+        "Amount Too Large",
+        "Maximum IDR deposit is 100,000,000 IDR.",
       );
       return;
     }
@@ -175,7 +175,7 @@ export default function IdrTopUp() {
       });
 
       if (!response?.success || !response?.data) {
-        throw new Error(response?.message || "Gagal membuat transaksi top up.");
+        throw new Error(response?.message || "Failed to create top up transaction.");
       }
 
       const {
@@ -193,15 +193,15 @@ export default function IdrTopUp() {
       } = response.data;
 
       if (!token && !redirectUrl) {
-        throw new Error("Data pembayaran Midtrans tidak tersedia.");
+        throw new Error("Midtrans payment data is not available.");
       }
 
       if (!refNo) {
-        throw new Error("Reference transaksi tidak tersedia.");
+        throw new Error("Transaction reference is not available.");
       }
 
       if (!redirectUrl) {
-        throw new Error("URL pembayaran Midtrans tidak tersedia.");
+        throw new Error("Midtrans payment URL is not available.");
       }
 
       await savePendingTopUp({
@@ -240,8 +240,8 @@ export default function IdrTopUp() {
       console.error("[TopUp] Create error:", error);
 
       showAlert(
-        "Top Up Gagal",
-        error?.message || "Terjadi kesalahan pada server. Silakan coba lagi.",
+        "Top Up Failed",
+        error?.message || "A server error occurred. Please try again.",
       );
     } finally {
       setLoading(false);

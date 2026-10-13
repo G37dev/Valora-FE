@@ -160,7 +160,7 @@ export default function HistoryScreen() {
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <Ionicons name="receipt-outline" size={42} color="#3a3a3a" />
-            <Text style={styles.emptyText}>Belum ada transaksi</Text>
+            <Text style={styles.emptyText}>No transactions yet</Text>
           </View>
         }
       />

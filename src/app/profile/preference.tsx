@@ -24,7 +24,7 @@ export default function PreferenceScreen() {
   const handleSignOut = () => {
     showAlert(
       "Sign Out",
-      "Yakin mau keluar dari akun ini?",
+      "Are you sure you want to sign out?",
       [
         { text: "Cancel", style: "cancel" },
         {

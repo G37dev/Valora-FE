@@ -100,8 +100,8 @@ export default function KycScreen() {
 
           if (result.type === "failed") {
             showAlert(
-              "Gagal",
-              result.error?.message || "Verifikasi tidak dapat diselesaikan.",
+              "Failed",
+              result.error?.message || "Verification could not be completed.",
             );
             router.back();
             return;
@@ -131,14 +131,14 @@ export default function KycScreen() {
           setStep("review");
         }
       } else {
-        showAlert("Gagal", res.message || "Gagal membuat sesi verifikasi.");
+        showAlert(
+          "Failed",
+          res.message || "Failed to create verification session.",
+        );
       }
     } catch (error: any) {
       console.error("Error start Didit:", error);
-      showAlert(
-        "Error",
-        error.message || "Terjadi kesalahan koneksi ke server.",
-      );
+      showAlert("Error", error.message || "A connection error occurred.");
     } finally {
       setLoading(false);
     }

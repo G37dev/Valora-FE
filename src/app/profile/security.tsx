@@ -67,7 +67,7 @@ export default function SecurityScreen() {
       setSetupLoading(true);
       const token = await getAuthToken();
       if (!token) {
-        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
+        showAlert("Session not found. Please log in again.");
         return;
       }
       const res = await setupAuthenticatorApi(token);
@@ -86,14 +86,14 @@ export default function SecurityScreen() {
 
   const handleVerifyTotpCode = async (totpCode: string): Promise<boolean> => {
     if (!totpCode || totpCode.length !== 6) {
-      showAlert("Peringatan", "Masukkan 6 digit kode OTP dengan benar.");
+      showAlert("Warning", "Enter the 6-digit OTP code correctly.");
       return false;
     }
     try {
       setSetupLoading(true);
       const token = await getAuthToken();
       if (!token) {
-        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
+        showAlert("Session not found. Please log in again.");
         return false;
       }
       const res = await verifyAuthenticatorApi(token, totpCode);
@@ -113,14 +113,14 @@ export default function SecurityScreen() {
 
   const handleDisableTotpCode = async (totpCode: string): Promise<boolean> => {
     if (!totpCode || totpCode.length !== 6) {
-      showAlert("Peringatan", "Masukkan 6 digit kode OTP dengan benar.");
+      showAlert("Warning", "Enter the 6-digit OTP code correctly.");
       return false;
     }
     try {
       setDisableLoading(true);
       const token = await getAuthToken();
       if (!token) {
-        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
+        showAlert("Session not found. Please log in again.");
         return false;
       }
       const res = await disableAuthenticatorApi(token, totpCode);
@@ -141,8 +141,8 @@ export default function SecurityScreen() {
       await registerPasskey(token);
       await reload(true);
       showAlert(
-        "Passkey Terdaftar",
-        "Passkey berhasil ditambahkan ke akun kamu.",
+        "Passkey Registered",
+        "Passkey added to your account.",
         [{ text: "OK" }],
         "success",
       );
@@ -150,8 +150,8 @@ export default function SecurityScreen() {
       if (error?.name === "UserCancelled" || error?.code === "USER_CANCELED")
         return;
       showAlert(
-        "Setup Gagal",
-        error?.message || "Gagal mendaftarkan passkey. Coba lagi.",
+        "Setup Failed",
+        error?.message || "Failed to register passkey. Try again.",
       );
     } finally {
       setPasskeyLoading(false);
@@ -160,12 +160,12 @@ export default function SecurityScreen() {
 
   const handleDeletePasskey = (pk: PasskeyInfo) => {
     showAlert(
-      "Hapus Passkey",
-      `Yakin mau hapus passkey "${pk.friendlyName}"?`,
+      "Remove Passkey",
+      `Remove passkey "${pk.friendlyName}"?`,
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Hapus",
+          text: "Remove",
           style: "destructive",
           onPress: async () => {
             try {
@@ -174,7 +174,7 @@ export default function SecurityScreen() {
               await deletePasskey(token, pk.id);
               await reload(true);
             } catch (error: any) {
-              showAlert("Gagal", error?.message || "Gagal menghapus passkey.");
+              showAlert("Failed", error?.message || "Failed to remove passkey.");
             }
           },
         },
@@ -186,7 +186,7 @@ export default function SecurityScreen() {
   const handleSignOut = () => {
     showAlert(
       "Sign Out",
-      "Yakin mau keluar dari akun ini?",
+      "Are you sure you want to sign out?",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -298,7 +298,7 @@ export default function SecurityScreen() {
                     <Ionicons name="key" size={14} color={GOLD} />
                     <Text style={styles.passkeyName}>{pk.friendlyName}</Text>
                     <TouchableOpacity onPress={() => handleDeletePasskey(pk)}>
-                      <Text style={styles.passkeyDelete}>Hapus</Text>
+                      <Text style={styles.passkeyDelete}>Remove</Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -379,8 +379,8 @@ export default function SecurityScreen() {
           setShowTwoFactorSetup(false);
           reload(true);
           showAlert(
-            "Authenticator Aktif",
-            "Two-factor authentication berhasil diaktifkan untuk akun kamu.",
+            "Authenticator Enabled",
+            "Two-factor authentication has been enabled for your account.",
             [{ text: "OK" }],
             "success",
           );
@@ -396,8 +396,8 @@ export default function SecurityScreen() {
           setShowTwoFactorDisable(false);
           reload(true);
           showAlert(
-            "Authenticator Dinonaktifkan",
-            "Two-factor authentication berhasil dimatikan. Kamu bisa mengaktifkannya lagi kapan saja.",
+            "Authenticator Disabled",
+            "Two-factor authentication has been disabled. You can enable it again anytime.",
             [{ text: "OK" }],
             "success",
           );

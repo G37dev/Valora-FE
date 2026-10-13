@@ -143,14 +143,14 @@ export default function WalletScreen() {
         const coreId = await AsyncStorage.getItem("coreId");
 
         if (!coreId) {
-          showAlert("Sesi pengguna tidak ditemukan.");
+          showAlert("User session not found.");
           return;
         }
 
         const result = await activateWalletApi(coreId);
 
         if (result.success) {
-          showAlert("Wallet berhasil diaktifkan!");
+          showAlert("Wallet activated successfully!");
 
           notifyApp({
             title: "Wallet Activated 🎉",
@@ -160,13 +160,13 @@ export default function WalletScreen() {
 
           await loadData();
         } else {
-          showAlert(result.message || "Gagal mengaktifkan wallet.");
+          showAlert(result.message || "Failed to activate wallet.");
         }
       } catch (error: any) {
         console.error("Error activating wallet:", error);
         showAlert(
           error.message ||
-            "Terjadi kesalahan koneksi saat mengaktifkan wallet.",
+            "A connection error occurred while activating the wallet.",
         );
       } finally {
         setLoadingAction(false);
@@ -415,13 +415,13 @@ export default function WalletScreen() {
           <View style={styles.activationContainer}>
             <Text style={styles.activationTitle}>
               {isKycApproved
-                ? "Aktifkan Wallet Anda"
-                : "Verifikasi Identitas (KYC)"}
+                ? "Activate Your Wallet"
+                : "Identity Verification (KYC)"}
             </Text>
             <Text style={styles.activationDesc}>
               {isKycApproved
-                ? "KYC Anda sudah disetujui. Klik tombol di bawah untuk langsung mengaktifkan Wallet gasless Anda."
-                : "Untuk dapat membuat dan menggunakan Wallet, Anda wajib menyelesaikan verifikasi identitas terlebih dahulu."}
+                ? "Your KYC has been approved. Tap the button below to instantly activate your gasless Wallet."
+                : "To create and use a Wallet, you must complete identity verification first."}
             </Text>
 
             <TouchableOpacity
@@ -434,8 +434,8 @@ export default function WalletScreen() {
               ) : (
                 <Text style={styles.activateButtonText}>
                   {isKycApproved
-                    ? "Aktifasi Wallet Sekarang"
-                    : "Selesaikan KYC Dulu"}
+                    ? "Activate Wallet Now"
+                    : "Complete KYC First"}
                 </Text>
               )}
             </TouchableOpacity>

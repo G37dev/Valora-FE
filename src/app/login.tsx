@@ -173,16 +173,14 @@ export default function LoginScreen() {
           throw sessionError;
         }
       } else {
-        throw new Error(
-          "Token atau Auth Code tidak ditemukan di URL callback.",
-        );
+        throw new Error("Token or Auth Code not found in the callback URL.");
       }
 
       const backendData = await syncGoogleWithBackend();
 
       processLoginResponse(backendData);
     } catch (error: any) {
-      showAlert("Gagal Google Login", error?.message || JSON.stringify(error));
+      showAlert("Google Login Failed", error?.message || JSON.stringify(error));
     } finally {
       setGoogleLoading(false);
     }
@@ -190,7 +188,7 @@ export default function LoginScreen() {
 
   const handlePasswordLogin = async () => {
     if (!email || !password) {
-      showAlert("Peringatan", "Email dan password wajib diisi");
+      showAlert("Warning", "Email and password are required");
       return;
     }
 
@@ -201,7 +199,7 @@ export default function LoginScreen() {
 
       processLoginResponse(data);
     } catch (err: any) {
-      let errorMessage = "Terjadi kesalahan yang tidak diketahui.";
+      let errorMessage = "An unknown error occurred.";
 
       if (typeof err === "string") {
         errorMessage = err;
@@ -216,7 +214,7 @@ export default function LoginScreen() {
       if (errorLower.includes("password") || errorLower.includes("sandi")) {
         showAlert(
           "Password Salah",
-          "Password yang Anda masukkan tidak sesuai. Silakan coba lagi.",
+          "The password you entered is incorrect. Please try again.",
         );
       } else if (
         errorLower.includes("email") ||
@@ -224,8 +222,8 @@ export default function LoginScreen() {
         errorLower.includes("tidak ditemukan")
       ) {
         showAlert(
-          "Akun Tidak Ditemukan",
-          "Email ini belum terdaftar di sistem kami.",
+          "Account Not Found",
+          "This email is not registered in our system.",
         );
       } else if (
         errorLower.includes("network") ||
@@ -234,10 +232,10 @@ export default function LoginScreen() {
       ) {
         showAlert(
           "Masalah Jaringan",
-          "Gagal terhubung ke server. Pastikan koneksi internet Anda stabil.",
+          "Failed to connect to the server. Make sure your internet connection is stable.",
         );
       } else {
-        showAlert("Gagal Login", errorMessage);
+        showAlert("Login Failed", errorMessage);
       }
     } finally {
       setPasswordLoading(false);
@@ -286,7 +284,7 @@ export default function LoginScreen() {
 
   const handleVerifyTotpCode = async (totpCode: string): Promise<boolean> => {
     if (!totpCode || totpCode.length !== 6) {
-      showAlert("Peringatan", "Masukkan 6 digit kode OTP dengan benar.");
+      showAlert("Warning", "Enter the 6-digit OTP code correctly.");
       return false;
     }
     try {

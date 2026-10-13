@@ -366,7 +366,7 @@ export default function ValoraChart() {
           }
 
           if (!response.success || !response.data) {
-            throw new Error(response.message || "Data chart tidak tersedia.");
+            throw new Error(response.message || "Chart data is not available.");
           }
 
           points = response.data.points || [];
@@ -384,7 +384,7 @@ export default function ValoraChart() {
 
         console.error("Gagal load chart:", err);
 
-        setError(err?.message || "Gagal mengambil data chart.");
+        setError(err?.message || "Failed to fetch chart data.");
       } finally {
         if (mounted) {
           setLoading(false);

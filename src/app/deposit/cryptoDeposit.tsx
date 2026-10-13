@@ -88,7 +88,7 @@ export default function CryptoDeposit() {
       const coreId = await AsyncStorage.getItem("coreId");
 
       if (!coreId) {
-        throw new Error("CoreId tidak ditemukan. Silakan login kembali.");
+        throw new Error("CoreId not found. Please log in again.");
       }
 
       console.log("[CryptoDeposit] Core ID:", coreId);
@@ -141,7 +141,7 @@ export default function CryptoDeposit() {
       // ----------------------------------------------
 
       if (!profile.walletAddress) {
-        throw new Error("Alamat wallet belum tersedia. Silakan coba lagi.");
+        throw new Error("Wallet address is not available yet. Please try again.");
       }
 
       // ----------------------------------------------
@@ -157,7 +157,7 @@ export default function CryptoDeposit() {
     } catch (error: any) {
       console.error("[CryptoDeposit] Wallet error:", error);
 
-      let message = "Gagal mengambil alamat wallet.";
+      let message = "Failed to fetch wallet address.";
 
       if (typeof error === "string") {
         message = error;
@@ -189,7 +189,7 @@ export default function CryptoDeposit() {
 
       setCopied(true);
 
-      showAlert("Berhasil", "Alamat wallet berhasil disalin.");
+      showAlert("Success", "Wallet address copied.");
 
       setTimeout(() => {
         setCopied(false);
@@ -332,10 +332,10 @@ export default function CryptoDeposit() {
         <View style={styles.errorContainer}>
           <Ionicons name="wallet-outline" size={42} color="#FBE678" />
 
-          <Text style={styles.errorTitle}>Wallet belum tersedia</Text>
+          <Text style={styles.errorTitle}>Wallet Not Available</Text>
 
           <Text style={styles.errorText}>
-            {walletError || "Alamat wallet belum tersedia."}
+            {walletError || "Wallet address not available."}
           </Text>
 
           <TouchableOpacity

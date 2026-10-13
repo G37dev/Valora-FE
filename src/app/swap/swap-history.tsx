@@ -90,7 +90,7 @@ export default function SwapHistoryScreen() {
     } catch (err: any) {
       console.error("[SWAP HISTORY] Load error:", err);
 
-      setError(err?.message || err?.error || "Gagal mengambil riwayat swap.");
+      setError(err?.message || err?.error || "Failed to fetch swap history.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -391,7 +391,7 @@ export default function SwapHistoryScreen() {
                     <View style={styles.processingDot} />
 
                     <Text style={styles.processingText}>
-                      Swap sedang diproses
+                      Swap is being processed
                     </Text>
                   </View>
                 )}
@@ -422,7 +422,7 @@ export default function SwapHistoryScreen() {
                         },
                       ]}
                     >
-                      Dana telah dikembalikan
+                      Funds have been returned
                     </Text>
                   </View>
                 )}
