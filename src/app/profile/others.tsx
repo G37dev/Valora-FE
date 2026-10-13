@@ -1,5 +1,5 @@
-import ComingSoonSheet from "@/components/ComingSoonSheet";
 import { showAlert } from "@/components/AppAlert";
+import ComingSoonSheet from "@/components/ComingSoonSheet";
 import {
   SectionCard,
   SettingRow,
@@ -75,7 +75,7 @@ export default function OthersScreen() {
       >
         <ScrollView showsVerticalScrollIndicator={false}>
           <SectionCard
-            icon="settings-outline"
+            icon={require("../../../assets/images/profile/myIdentity.png")}
             title="General"
             subtitle="Manage your app and support preferences."
           >
@@ -127,9 +127,7 @@ export default function OthersScreen() {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Device</Text>
-              <Text style={styles.infoValue}>
-                {Device.modelName || "-"}
-              </Text>
+              <Text style={styles.infoValue}>{Device.modelName || "-"}</Text>
             </View>
           </View>
 

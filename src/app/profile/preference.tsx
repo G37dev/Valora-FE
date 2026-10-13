@@ -1,5 +1,5 @@
-import ComingSoonSheet from "@/components/ComingSoonSheet";
 import { showAlert } from "@/components/AppAlert";
+import ComingSoonSheet from "@/components/ComingSoonSheet";
 import {
   SectionCard,
   SettingRow,
@@ -12,7 +12,14 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PreferenceScreen() {
@@ -58,7 +65,7 @@ export default function PreferenceScreen() {
       >
         <ScrollView showsVerticalScrollIndicator={false}>
           <SectionCard
-            icon="options-outline"
+            icon={require("../../../assets/images/profile/myIdentity.png")}
             title="Preferences"
             subtitle="Set your app and account preferences."
           >
