@@ -32,6 +32,11 @@ export default function ComingSoonSheet({
     overshootClamping: false,
   });
 
+  const closeSheet = () => {
+    sheetRef.current?.close();
+    setTimeout(onClose, 500);
+  };
+
   return (
     <Modal
       visible={visible}
@@ -40,16 +45,16 @@ export default function ComingSoonSheet({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <Pressable
-        style={StyleSheet.absoluteFill}
-        onPress={() => sheetRef.current?.close()}
-      />
+      <Pressable style={StyleSheet.absoluteFill} onPress={() => closeSheet()} />
       <BottomSheet
         ref={sheetRef}
         index={0}
         snapPoints={["52%"]}
         animationConfigs={springConfig}
         enablePanDownToClose
+        onChange={(i) => {
+          if (i === -1) onClose();
+        }}
         onClose={onClose}
         handleComponent={null}
         backgroundStyle={styles.sheetBg}
@@ -60,7 +65,7 @@ export default function ComingSoonSheet({
             disappearsOnIndex={-1}
             opacity={0.65}
             pressBehavior="close"
-            onPress={() => sheetRef.current?.close()}
+            onPress={() => closeSheet()}
           />
         )}
       >
@@ -75,7 +80,7 @@ export default function ComingSoonSheet({
 
           <TouchableOpacity
             style={styles.closeBtn}
-            onPress={() => sheetRef.current?.close()}
+            onPress={() => closeSheet()}
             hitSlop={12}
             activeOpacity={0.7}
           >

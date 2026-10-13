@@ -78,6 +78,11 @@ export default function MembershipSheet({
     if (visible) setDetails(false);
   }, [visible]);
 
+  const closeSheet = () => {
+    sheetRef.current?.close();
+    setTimeout(onClose, 500);
+  };
+
   return (
     <Modal
       visible={visible}
@@ -86,16 +91,16 @@ export default function MembershipSheet({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <Pressable
-        style={StyleSheet.absoluteFill}
-        onPress={() => sheetRef.current?.close()}
-      />
+      <Pressable style={StyleSheet.absoluteFill} onPress={() => closeSheet()} />
       <BottomSheet
         ref={sheetRef}
         index={0}
         snapPoints={["75%", "92%"]}
         animationConfigs={springConfig}
         enablePanDownToClose
+        onChange={(i) => {
+          if (i === -1) onClose();
+        }}
         onClose={onClose}
         handleComponent={null}
         backgroundStyle={styles.sheetBg}
@@ -106,7 +111,7 @@ export default function MembershipSheet({
             disappearsOnIndex={-1}
             opacity={0.65}
             pressBehavior="close"
-            onPress={() => sheetRef.current?.close()}
+            onPress={() => closeSheet()}
           />
         )}
       >
@@ -126,7 +131,7 @@ export default function MembershipSheet({
                 setDetails(false);
                 sheetRef.current?.snapToIndex(0);
               }}
-              onClose={() => sheetRef.current?.close()}
+              onClose={() => closeSheet()}
             />
           </BottomSheetScrollView>
         ) : (
@@ -139,7 +144,7 @@ export default function MembershipSheet({
           >
             <OverviewView
               tier={tier}
-              onClose={() => sheetRef.current?.close()}
+              onClose={() => closeSheet()}
               onDetails={() => {
                 setDetails(true);
                 sheetRef.current?.snapToIndex(1);
