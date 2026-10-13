@@ -1,31 +1,13 @@
-import TwoFactorSetup from "@/components/app/otp/TwoFactorSetup";
-import TwoFactorVerif from "@/components/app/otp/TwoFactorVerif";
-import { showAlert } from "@/components/AppAlert";
+import ComingSoonSheet from "@/components/ComingSoonSheet";
+import { GOLD, GREEN, securityLevel } from "@/components/profile/ProfileChrome";
+import { useProfileData } from "@/hooks/useProfileData";
+import { Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
-  disableAuthenticatorApi,
-  get2FAStatusApi,
-  setupAuthenticatorApi,
-  verifyAuthenticatorApi,
-} from "@/services/authService";
-import {
-  clearAuthToken,
-  getAuthToken,
-  setAuthToken,
-} from "@/services/authStorage";
-import {
-  deletePasskey,
-  isPasskeySupported,
-  listPasskeys,
-  PasskeyInfo,
-  registerPasskey,
-} from "@/services/passkeyService";
-import { supabase } from "@/services/supabase";
-import { getUserProfileApi, UserProfile } from "@/services/userService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
+  Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -33,437 +15,408 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const QUICK = [
+  { icon: "sparkles" as const, title: "Rewards Hub", desc: "Explore rewards" },
+  {
+    icon: "person-add" as const,
+    title: "Invite Friends",
+    desc: "Earn together",
+  },
+  {
+    icon: "headset" as const,
+    title: "Help Center",
+    desc: "Get support",
+  },
+];
+
+const RECENT = [
+  {
+    icon: "wallet-outline" as const,
+    label: "Earn",
+    route: "/screen/earning-screen",
+  },
+  {
+    icon: "flash-outline" as const,
+    label: "Installment",
+    route: "/installment/installment-screen",
+  },
+  {
+    icon: "swap-horizontal" as const,
+    label: "Swap",
+    route: "/swap/swap-screen",
+  },
+  {
+    icon: "download-outline" as const,
+    label: "Deposit",
+    route: "/deposit/IdrTopUp",
+  },
+];
+
 export default function ProfileScreen() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userData, setUserData] = useState<UserProfile | null>(null);
   const router = useRouter();
+  const { user, kycStatus, twoFAEnabled, passkeys } = useProfileData();
+  const [comingSoon, setComingSoon] = useState(false);
 
-  // 2FA setup state
-  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
-  const [showAuthenticatorInput, setShowAuthenticatorInput] = useState(false);
-  const [secretKey, setSecretKey] = useState("");
-  const [otpauth, setOtpauth] = useState("");
-  const [setupLoading, setSetupLoading] = useState(false);
-
-  // 2FA status & disable state
-  const [twoFAEnabled, setTwoFAEnabled] = useState<boolean | null>(null);
-  const [showTwoFactorDisable, setShowTwoFactorDisable] = useState(false);
-  const [disableLoading, setDisableLoading] = useState(false);
-
-  // Passkey state
-  const [passkeys, setPasskeys] = useState<PasskeyInfo[]>([]);
-  const [passkeyLoading, setPasskeyLoading] = useState(false);
-
-  const loadPasskeys = async (token: string) => {
-    try {
-      setPasskeys(await listPasskeys(token));
-    } catch (error) {
-      console.error("Gagal memuat passkey:", error);
-    }
-  };
-
-  const handleAddPasskey = async () => {
-    try {
-      setPasskeyLoading(true);
-      const token = await getAuthToken();
-      if (!token) return;
-      await registerPasskey(token);
-      await loadPasskeys(token);
-      showAlert(
-        "Passkey Terdaftar",
-        "Passkey berhasil ditambahkan ke akun kamu.",
-        [{ text: "OK" }],
-        "success",
-      );
-    } catch (error: any) {
-      if (error?.name === "UserCancelled" || error?.code === "USER_CANCELED")
-        return;
-      showAlert(
-        "Setup Gagal",
-        error?.message || "Gagal mendaftarkan passkey. Coba lagi.",
-      );
-    } finally {
-      setPasskeyLoading(false);
-    }
-  };
-
-  const handleDeletePasskey = (pk: PasskeyInfo) => {
-    showAlert(
-      "Hapus Passkey",
-      `Yakin mau hapus passkey "${pk.friendlyName}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Hapus",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const token = await getAuthToken();
-              if (!token) return;
-              await deletePasskey(token, pk.id);
-              await loadPasskeys(token);
-            } catch (error: any) {
-              showAlert("Gagal", error?.message || "Gagal menghapus passkey.");
-            }
-          },
-        },
-      ],
-      "warning",
-    );
-  };
-
-  const load2FAStatus = async () => {
-    try {
-      const token = await getAuthToken();
-
-      if (!token) {
-        setTwoFAEnabled(null);
-        return;
-      }
-
-      const res = await get2FAStatusApi(token);
-
-      setTwoFAEnabled(Boolean(res?.enabled));
-      await loadPasskeys(token);
-    } catch (error) {
-      console.error("Gagal cek status 2FA:", error);
-      setTwoFAEnabled(null);
-    }
-  };
-
-  const loadData = async () => {
-    try {
-      const coreId = await AsyncStorage.getItem("coreId");
-
-      const savedUser = await AsyncStorage.getItem("userData");
-
-      if (coreId) {
-        setIsLoggedIn(true);
-
-        const profile = await getUserProfileApi(coreId);
-
-        setUserData(profile);
-
-        await AsyncStorage.setItem("userData", JSON.stringify(profile));
-      } else {
-        setIsLoggedIn(false);
-        setUserData(null);
-      }
-    } catch (error) {
-      console.error("Gagal memuat data HomeScreen:", error);
-    }
-  };
-
-  const handleClearStorage = async () => {
-    try {
-      await supabase.auth.signOut();
-
-      await clearAuthToken();
-      await AsyncStorage.clear();
-
-      setIsLoggedIn(false);
-      setUserData(null);
-
-      router.replace("/login");
-    } catch (error) {
-      console.error("Gagal membersihkan storage:", error);
-    }
-  };
-
-  const handleTriggerSetupAuthenticator = async () => {
-    try {
-      setSetupLoading(true);
-
-      const token = await getAuthToken();
-
-      if (!token) {
-        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
-        return;
-      }
-
-      const res = await setupAuthenticatorApi(token);
-
-      setSecretKey(res.secret);
-      setOtpauth(res.otpauth);
-      setShowAuthenticatorInput(true);
-    } catch (error: any) {
-      showAlert(
-        "Setup Failed",
-        error?.message || "Failed to setup authenticator.",
-      );
-    } finally {
-      setSetupLoading(false);
-    }
-  };
-
-  const handleVerifyTotpCode = async (totpCode: string): Promise<boolean> => {
-    if (!totpCode || totpCode.length !== 6) {
-      showAlert("Peringatan", "Masukkan 6 digit kode OTP dengan benar.");
-      return false;
-    }
-
-    try {
-      setSetupLoading(true);
-
-      const token = await getAuthToken();
-
-      if (!token) {
-        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
-        return false;
-      }
-
-      const res = await verifyAuthenticatorApi(token, totpCode);
-
-      if (res.token) {
-        await setAuthToken(res.token);
-      }
-
-      if (res.user) {
-        await AsyncStorage.setItem("userData", JSON.stringify(res.user));
-      }
-
-      return true;
-    } catch (error: any) {
-      console.log("TOTP VERIFY ERROR:", error);
-      return false;
-    } finally {
-      setSetupLoading(false);
-    }
-  };
-
-  const handleDisableTotpCode = async (totpCode: string): Promise<boolean> => {
-    if (!totpCode || totpCode.length !== 6) {
-      showAlert("Peringatan", "Masukkan 6 digit kode OTP dengan benar.");
-      return false;
-    }
-
-    try {
-      setDisableLoading(true);
-
-      const token = await getAuthToken();
-
-      if (!token) {
-        showAlert("Sesi tidak ditemukan. Silakan login ulang.");
-        return false;
-      }
-
-      const res = await disableAuthenticatorApi(token, totpCode);
-
-      return Boolean(res?.success);
-    } catch (error: any) {
-      console.log("TOTP DISABLE ERROR:", error);
-      return false;
-    } finally {
-      setDisableLoading(false);
-    }
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      const getLatestDataFromStorage = async () => {
-        try {
-          const coreId = await AsyncStorage.getItem("coreId");
-
-          const savedUser = await AsyncStorage.getItem("userData");
-
-          if (coreId) {
-            setIsLoggedIn(true);
-
-            // Tampilkan data lokal terlebih dahulu
-            if (savedUser) {
-              try {
-                setUserData(JSON.parse(savedUser));
-              } catch (parseError) {
-                console.error("Gagal parsing userData:", parseError);
-              }
-            }
-
-            await loadData();
-            load2FAStatus();
-          } else {
-            setIsLoggedIn(false);
-            setUserData(null);
-            setTwoFAEnabled(null);
-          }
-        } catch (error) {
-          console.error("Gagal membaca lokal data:", error);
-        }
-      };
-
-      getLatestDataFromStorage();
-    }, []),
-  );
+  const name =
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
+  const sec = securityLevel({
+    kycVerified: kycStatus === "VERIFIED",
+    twoFA: twoFAEnabled,
+    passkeys: passkeys.length,
+  });
+  const verified = kycStatus === "VERIFIED";
 
   return (
-    <SafeAreaView style={styles.container}>
-      {isLoggedIn && (
-        <>
-          {twoFAEnabled === true ? (
-            <TouchableOpacity
-              onPress={() => setShowTwoFactorDisable(true)}
-              style={styles.debugBtn}
-            >
-              <Text style={styles.debugBtnText}>Disable Authenticator</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={() => {
-                setShowAuthenticatorInput(false);
-                setShowTwoFactorSetup(true);
-              }}
-              style={styles.setupBtn}
-            >
-              <Text style={styles.setupBtnText}>Setup Authenticator</Text>
-            </TouchableOpacity>
-          )}
-
-          {isPasskeySupported() && (
-            <>
-              <TouchableOpacity
-                onPress={handleAddPasskey}
-                style={styles.setupBtn}
-                disabled={passkeyLoading}
-              >
-                {passkeyLoading ? (
-                  <ActivityIndicator color="#000" />
-                ) : (
-                  <Text style={styles.setupBtnText}>Setup Passkey</Text>
-                )}
-              </TouchableOpacity>
-
-              {passkeys.map((pk) => (
-                <View key={pk.id} style={styles.passkeyRow}>
-                  <Text style={styles.passkeyName}>🔑 {pk.friendlyName}</Text>
-                  <TouchableOpacity onPress={() => handleDeletePasskey(pk)}>
-                    <Text style={styles.passkeyDelete}>Hapus</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </>
-          )}
-
-          <TouchableOpacity
-            onPress={handleClearStorage}
-            style={styles.debugBtn}
-          >
-            <Text style={styles.debugBtnText}>logout (debug)</Text>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <View style={styles.topBar}>
+        <View style={{ width: 26 }} />
+        <Text style={styles.topTitle}>Profile</Text>
+        <View style={styles.topIcons}>
+          <TouchableOpacity onPress={() => setComingSoon(true)} hitSlop={10}>
+            <Ionicons name="moon-outline" size={21} color="#FFF" />
           </TouchableOpacity>
-        </>
-      )}
+          <TouchableOpacity
+            onPress={() => router.push("/profile/my-info")}
+            hitSlop={10}
+          >
+            <Ionicons name="settings-outline" size={21} color="#FFF" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setComingSoon(true)} hitSlop={10}>
+            <Ionicons name="headset-outline" size={21} color="#FFF" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      <TwoFactorSetup
-        visible={showTwoFactorSetup}
-        loading={setupLoading}
-        showAuthenticatorInput={showAuthenticatorInput}
-        secretKey={secretKey}
-        otpauth={otpauth}
-        onClose={() => setShowTwoFactorSetup(false)}
-        onSelectAuthenticator={handleTriggerSetupAuthenticator}
-        onVerifyTotp={handleVerifyTotpCode}
-        onSuccess={() => {
-          setShowTwoFactorSetup(false);
-          setTwoFAEnabled(true);
-          showAlert(
-            "Authenticator Aktif",
-            "Two-factor authentication berhasil diaktifkan untuk akun kamu.",
-            [{ text: "OK" }],
-            "success",
-          );
-        }}
-      />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <TouchableOpacity
+          style={styles.userRow}
+          onPress={() => router.push("/profile/my-info")}
+          activeOpacity={0.8}
+        >
+          <View style={styles.avatarRing}>
+            {user?.avatarUrl ? (
+              <Image
+                source={{ uri: user.avatarUrl }}
+                style={styles.avatarImg}
+              />
+            ) : (
+              <Ionicons name="person" size={34} color={GOLD} />
+            )}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.userName} numberOfLines={1}>
+              {name}
+            </Text>
+            <View style={styles.vidRow}>
+              <Text style={styles.vidText}>VID : {user?.coreId || "-"}</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  user?.coreId && Clipboard.setStringAsync(user.coreId)
+                }
+                hitSlop={8}
+              >
+                <Ionicons name="copy-outline" size={14} color="#8A8A8A" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.badgeRow}>
+              {verified ? (
+                <View style={[styles.badge, styles.badgeVerified]}>
+                  <Ionicons name="checkmark-circle" size={12} color="#000" />
+                  <Text style={styles.badgeVerifiedText}>Verified</Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={[styles.badge, styles.badgeDim]}
+                  onPress={() => router.push("/kyc-screen")}
+                >
+                  <Ionicons name="alert-circle" size={12} color={GOLD} />
+                  <Text style={styles.badgeDimText}>
+                    {kycStatus === "PENDING" ? "Pending" : "Unverified"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              <View style={[styles.badge, styles.badgeGold]}>
+                <Ionicons name="ribbon" size={12} color={GOLD} />
+                <Text style={styles.badgeGoldText}>Member</Text>
+                <Ionicons name="chevron-forward" size={12} color={GOLD} />
+              </View>
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#555" />
+        </TouchableOpacity>
 
-      <TwoFactorVerif
-        visible={showTwoFactorDisable}
-        loading={disableLoading}
-        onClose={() => setShowTwoFactorDisable(false)}
-        onVerifyTotp={handleDisableTotpCode}
-        onSuccess={() => {
-          setShowTwoFactorDisable(false);
-          setTwoFAEnabled(false);
-          showAlert(
-            "Authenticator Dinonaktifkan",
-            "Two-factor authentication berhasil dimatikan. Kamu bisa mengaktifkannya lagi kapan saja.",
-            [{ text: "OK" }],
-            "success",
-          );
-        }}
+        <View style={styles.journeyCard}>
+          <Text style={styles.journeyEyebrow}>Y O U R J O U R N E Y</Text>
+          <Text style={styles.journeyTitle}>Grow with VIVALORA</Text>
+          <Text style={styles.journeySub}>
+            Growth, save and explore exclusive benefits as you level up.
+          </Text>
+
+          <Text style={styles.journeyLevel}>{sec.label} Level</Text>
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${sec.level === "high" ? 75 : sec.level === "medium" ? 45 : 15}%`,
+                },
+              ]}
+            />
+          </View>
+          <View style={styles.journeyBottom}>
+            <Text style={styles.journeyPoints}>Complete KYC to level up</Text>
+            <TouchableOpacity
+              style={styles.benefitsBtn}
+              onPress={() => setComingSoon(true)}
+            >
+              <Text style={styles.benefitsBtnText}>View Benefits</Text>
+              <Ionicons name="arrow-forward" size={14} color="#000" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.quickRow}>
+          {QUICK.map((q) => (
+            <TouchableOpacity
+              key={q.title}
+              style={styles.quickCard}
+              onPress={() => setComingSoon(true)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.quickHead}>
+                <Ionicons name={q.icon} size={20} color={GOLD} />
+                <Ionicons name="chevron-forward" size={14} color="#555" />
+              </View>
+              <Text style={styles.quickTitle}>{q.title}</Text>
+              <Text style={styles.quickDesc}>{q.desc}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.sectionTitle}>Recently Used</Text>
+        <View style={styles.recentRow}>
+          {RECENT.map((r) => (
+            <TouchableOpacity
+              key={r.label}
+              style={styles.recentCard}
+              onPress={() => router.push(r.route as never)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name={r.icon} size={26} color={GOLD} />
+              <Text style={styles.recentLabel}>{r.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={{ height: 30 }} />
+      </ScrollView>
+
+      <ComingSoonSheet
+        visible={comingSoon}
+        onClose={() => setComingSoon(false)}
       />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#050505",
-    padding: 20,
-  },
-
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  title: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "700",
-  },
-  setupBtn: {
-    backgroundColor: "#1a1a12",
-    borderColor: "#FBE678",
-    borderWidth: 1,
-    padding: 14,
-    borderRadius: 15,
-    alignItems: "center",
-    marginTop: 14,
-    marginBottom: 14,
-  },
-
-  setupBtnText: {
-    color: "#FBE678",
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-  },
-  debugBtn: {
-    backgroundColor: "#331111",
-    borderColor: "#FF4D4D",
-    borderWidth: 1,
-    padding: 14,
-    borderRadius: 15,
-    alignItems: "center",
-    marginTop: 14,
-    marginBottom: 14,
-  },
-
-  debugBtnText: {
-    color: "#FF4D4D",
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 14,
-  },
-
-  passkeyRow: {
+  container: { flex: 1, backgroundColor: "#050505" },
+  topBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#1A1A1A",
-    borderColor: "#2D2D2D",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  topTitle: {
+    color: "#FFF",
+    fontSize: 17,
+    fontFamily: "Poppins_600SemiBold",
+  },
+  topIcons: { flexDirection: "row", alignItems: "center", gap: 18 },
+  userRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingHorizontal: 20,
+    marginTop: 6,
+    marginBottom: 18,
+  },
+  avatarRing: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2,
+    borderColor: GOLD,
+    backgroundColor: "#1A1A10",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  avatarImg: { width: "100%", height: "100%" },
+  userName: {
+    color: "#FFF",
+    fontSize: 18,
+    fontFamily: "Poppins_600SemiBold",
+  },
+  vidRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 3,
+  },
+  vidText: { color: "#8A8A8A", fontSize: 12 },
+  badgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
+  },
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
+  },
+  badgeVerified: { backgroundColor: GREEN, borderColor: GREEN },
+  badgeVerifiedText: {
+    color: "#000",
+    fontSize: 11,
+    fontFamily: "Poppins_600SemiBold",
+  },
+  badgeDim: { backgroundColor: "#1A1A10", borderColor: "#3A3520" },
+  badgeDimText: {
+    color: GOLD,
+    fontSize: 11,
+    fontFamily: "Poppins_500Medium",
+  },
+  badgeGold: { backgroundColor: "#1A1A10", borderColor: "#3A3520" },
+  badgeGoldText: {
+    color: GOLD,
+    fontSize: 11,
+    fontFamily: "Poppins_500Medium",
+  },
+  journeyCard: {
+    marginHorizontal: 20,
+    backgroundColor: "#141410",
+    borderWidth: 1,
+    borderColor: "#3A3520",
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 16,
+  },
+  journeyEyebrow: {
+    color: GOLD,
+    fontSize: 10,
+    letterSpacing: 2,
+    fontFamily: "Poppins_500Medium",
+  },
+  journeyTitle: {
+    color: "#FFF",
+    fontSize: 20,
+    fontFamily: "Poppins_600SemiBold",
+    marginTop: 6,
+  },
+  journeySub: {
+    color: "#8A8A8A",
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 6,
+    maxWidth: "80%",
+  },
+  journeyLevel: {
+    color: "#FFF",
+    fontSize: 13,
+    fontFamily: "Poppins_600SemiBold",
+    marginTop: 18,
+  },
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#262620",
+    marginTop: 8,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 4,
+    backgroundColor: GOLD,
+  },
+  journeyBottom: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginTop: 10,
   },
-
-  passkeyName: {
-    color: "#FFFFFF",
-    fontFamily: "Poppins_500Medium",
-    fontSize: 13,
+  journeyPoints: { color: "#8A8A8A", fontSize: 11 },
+  benefitsBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: GOLD,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
   },
-
-  passkeyDelete: {
-    color: "#FF4D4D",
-    fontFamily: "Poppins_600SemiBold",
+  benefitsBtnText: {
+    color: "#000",
     fontSize: 12,
+    fontFamily: "Poppins_600SemiBold",
+  },
+  quickRow: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  quickCard: {
+    flex: 1,
+    backgroundColor: "#141414",
+    borderWidth: 1,
+    borderColor: "#262626",
+    borderRadius: 16,
+    padding: 14,
+  },
+  quickHead: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  quickTitle: {
+    color: "#FFF",
+    fontSize: 13,
+    fontFamily: "Poppins_600SemiBold",
+  },
+  quickDesc: { color: "#8A8A8A", fontSize: 11, marginTop: 3 },
+  sectionTitle: {
+    color: "#FFF",
+    fontSize: 15,
+    fontFamily: "Poppins_600SemiBold",
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  recentRow: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 20,
+  },
+  recentCard: {
+    flex: 1,
+    backgroundColor: "#141414",
+    borderWidth: 1,
+    borderColor: "#262626",
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: "center",
+    gap: 10,
+  },
+  recentLabel: {
+    color: "#FFF",
+    fontSize: 12,
+    fontFamily: "Poppins_500Medium",
   },
 });
