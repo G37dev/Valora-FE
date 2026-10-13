@@ -43,6 +43,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+function TogglePill({ on }: { on: boolean }) {
+  return (
+    <View style={[styles.pill, on ? styles.pillOn : styles.pillOff]}>
+      {on && <View style={styles.pillKnobLight} />}
+      <Text
+        style={[styles.pillText, on ? styles.pillTextOn : styles.pillTextOff]}
+      >
+        {on ? "Disable" : "Enable"}
+      </Text>
+      {!on && <View style={styles.pillKnobDark} />}
+    </View>
+  );
+}
+
 export default function SecurityScreen() {
   const router = useRouter();
   const data = useProfileData();
@@ -174,7 +188,10 @@ export default function SecurityScreen() {
               await deletePasskey(token, pk.id);
               await reload(true);
             } catch (error: any) {
-              showAlert("Failed", error?.message || "Failed to remove passkey.");
+              showAlert(
+                "Failed",
+                error?.message || "Failed to remove passkey.",
+              );
             }
           },
         },
@@ -221,7 +238,7 @@ export default function SecurityScreen() {
       >
         <ScrollView showsVerticalScrollIndicator={false}>
           <SectionCard
-            icon="shield-checkmark-outline"
+            icon={require("../../../assets/images/profile/basicProtect.png")}
             title="Basic Protection"
             subtitle="Essential protection for everyday account activity."
           >
@@ -244,25 +261,9 @@ export default function SecurityScreen() {
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
-              icon="keypad-outline"
+              icon="shield-checkmark-outline"
               label="Google 2FA Authentication"
-              right={
-                <View
-                  style={[
-                    styles.pill,
-                    twoFAEnabled ? styles.pillOff : styles.pillOn,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.pillText,
-                      twoFAEnabled ? styles.pillTextOff : styles.pillTextOn,
-                    ]}
-                  >
-                    {twoFAEnabled ? "Disable" : "Enable"}
-                  </Text>
-                </View>
-              }
+              right={<TogglePill on={twoFAEnabled} />}
               onPress={() => {
                 if (twoFAEnabled) {
                   setShowTwoFactorDisable(true);
@@ -282,9 +283,7 @@ export default function SecurityScreen() {
               }
               right={
                 <Text style={styles.rowValue}>
-                  {passkeys.length > 0
-                    ? `${passkeys.length} Active`
-                    : "Not set"}
+                  {passkeys.length > 0 ? "Enabled" : "Not set"}
                 </Text>
               }
               onPress={() => setPasskeyOpen((v) => !v)}
@@ -320,12 +319,12 @@ export default function SecurityScreen() {
           </SectionCard>
 
           <SectionCard
-            icon="people-outline"
+            icon={require("../../../assets/images/profile/aam.png")}
             title="Account Access & Management"
             subtitle="Manage your account and device security."
           >
             <SettingRow
-              icon="lock-closed-outline"
+              icon="ellipsis-horizontal"
               label="Change Password"
               onPress={() => setComingSoon(true)}
             />
@@ -340,9 +339,9 @@ export default function SecurityScreen() {
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
-              icon="lock-open-outline"
+              icon="scan-outline"
               label="App Lock"
-              right={<Text style={styles.rowValue}>Off</Text>}
+              right={<TogglePill on={false} />}
               onPress={() => setComingSoon(true)}
               last
             />
@@ -415,19 +414,34 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
   },
   pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  pillOn: { backgroundColor: GOLD },
-  pillOff: {
+  pillOn: {
     backgroundColor: "#2A2A2A",
     borderWidth: 1,
     borderColor: "#3A3A3A",
   },
+  pillOff: { backgroundColor: GOLD },
+  pillKnobLight: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#E8E8E8",
+  },
+  pillKnobDark: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#141414",
+  },
   pillText: { fontSize: 12, fontFamily: "Poppins_600SemiBold" },
-  pillTextOn: { color: "#000" },
-  pillTextOff: { color: "#8A8A8A" },
+  pillTextOn: { color: "#8A8A8A" },
+  pillTextOff: { color: "#141414" },
   recBadge: {
     borderWidth: 1,
     borderColor: GOLD,

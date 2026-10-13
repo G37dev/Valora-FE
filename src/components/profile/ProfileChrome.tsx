@@ -282,9 +282,9 @@ export function SectionCard({
 }) {
   return (
     <LinearGradient
-      colors={["#8D7F5A", "#262015", "#A17C51"]}
+      colors={["#c7ba9672", "#262015", "#262015"]}
       start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      end={{ x: 0.9, y: 1 }}
       style={styles.cardBorder}
     >
       <View style={styles.card}>
@@ -331,9 +331,12 @@ export function SettingRow({
   const content = (
     <View style={[styles.row, !last && styles.rowBorder]}>
       {icon && (
-        <View style={styles.rowIconWrap}>
-          <Ionicons name={icon} size={18} color={MUTED} />
-        </View>
+        <Ionicons
+          name={icon}
+          size={20}
+          color="#B8B8B8"
+          style={styles.rowIcon}
+        />
       )}
       <View style={{ flex: 1 }}>
         <View style={styles.rowLabelRow}>
@@ -567,14 +570,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: "#1E1E1E" },
-  rowIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#1A1A1A",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  rowIcon: { width: 24 },
   rowLabelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   rowLabel: {
     color: "#FFF",
