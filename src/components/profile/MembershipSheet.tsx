@@ -698,14 +698,13 @@ const styles = StyleSheet.create({
   },
   detailStripes: {
     color: "#8A8A8A",
-    fontSize: 9,
+    fontSize: 10,
     marginTop: 2,
   },
   detailDesc: {
     color: "#8A8A8A",
-    fontSize: 13,
-    lineHeight: 20,
-    marginTop: 10,
+    fontSize: 10,
+    marginTop: 4,
     paddingRight: 6,
   },
 });

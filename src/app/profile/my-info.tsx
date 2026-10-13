@@ -15,7 +15,7 @@ import {
 } from "@/components/profile/ProfileChrome";
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import { updateUserProfileApi } from "@/services/userService";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -57,7 +57,7 @@ export default function MyInfoScreen() {
       >
         <ScrollView showsVerticalScrollIndicator={false}>
           <SectionCard
-            icon="card-outline"
+            icon={require("../../../assets/images/profile/vivaloraIdentity.png")}
             title="Vivalora Identity"
             subtitle="Manage your profile and membership"
           >
@@ -86,9 +86,16 @@ export default function MyInfoScreen() {
             <SettingRow
               label="Membership Level"
               right={
-                <Text style={[styles.rowValue, { color: "#DEC236" }]}>
-                  {memberLevelName(tier)}
-                </Text>
+                <View style={styles.memberValueRow}>
+                  <MaterialCommunityIcons
+                    name="crown"
+                    size={16}
+                    color="#DEC236"
+                  />
+                  <Text style={[styles.rowValue, { color: "#DEC236" }]}>
+                    {memberLevelName(tier)}
+                  </Text>
+                </View>
               }
               onPress={() => setMemberSheet(true)}
               last
@@ -96,7 +103,7 @@ export default function MyInfoScreen() {
           </SectionCard>
 
           <SectionCard
-            icon="person-outline"
+            icon={require("../../../assets/images/profile/myIdentity.png")}
             title="My Identity"
             subtitle="Your identity and verification status"
           >
@@ -126,7 +133,7 @@ export default function MyInfoScreen() {
           </SectionCard>
 
           <SectionCard
-            icon="git-network-outline"
+            icon={require("../../../assets/images/profile/connection.png")}
             title="Connection"
             subtitle="View your linked accounts"
           >
@@ -148,7 +155,12 @@ export default function MyInfoScreen() {
             />
             <SettingRow
               label="Linked Accounts"
-              right={<Ionicons name="logo-google" size={20} color="#FFF" />}
+              right={
+                <View style={styles.linkedIcons}>
+                  <Ionicons name="logo-google" size={18} color="#FFF" />
+                  <Ionicons name="logo-apple" size={20} color="#FFF" />
+                </View>
+              }
               onPress={() => setComingSoon(true)}
               last
             />
@@ -191,4 +203,14 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
   },
   avatarThumb: { width: 32, height: 32, borderRadius: 16 },
+  memberValueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  linkedIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
 });

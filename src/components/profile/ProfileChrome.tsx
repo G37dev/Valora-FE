@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -194,6 +195,7 @@ export function ProfileHead({
               ]}
             />
           ))}
+          <Ionicons name="chevron-forward" size={14} color={MUTED} />
         </View>
       </View>
     </View>
@@ -273,24 +275,39 @@ export function SectionCard({
   subtitle,
   children,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap | number;
   title: string;
   subtitle?: string;
   children: React.ReactNode;
 }) {
   return (
-    <View style={styles.card}>
-      <View style={styles.cardHead}>
-        <View style={styles.cardIcon}>
-          <Ionicons name={icon} size={22} color={GOLD} />
+    <LinearGradient
+      colors={["#8D7F5A", "#262015", "#A17C51"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.cardBorder}
+    >
+      <View style={styles.card}>
+        <View style={styles.cardHead}>
+          {typeof icon === "number" ? (
+            <Image
+              source={icon}
+              style={styles.cardIconImg}
+              resizeMode="contain"
+            />
+          ) : (
+            <View style={styles.cardIcon}>
+              <Ionicons name={icon} size={22} color={GOLD} />
+            </View>
+          )}
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>{title}</Text>
+            {subtitle ? <Text style={styles.cardSub}>{subtitle}</Text> : null}
+          </View>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.cardTitle}>{title}</Text>
-          {subtitle ? <Text style={styles.cardSub}>{subtitle}</Text> : null}
-        </View>
+        <View style={styles.cardBody}>{children}</View>
       </View>
-      <View style={styles.cardBody}>{children}</View>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -480,7 +497,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
   },
-  tabItem: { flex: 1, alignItems: "center", paddingVertical: 12 },
+  tabItem: {
+    flex: 1,
+    alignItems: "center",
+    paddingTop: 12,
+    paddingBottom: 14,
+  },
   tabLabel: {
     color: "#777",
     fontSize: 14,
@@ -488,27 +510,32 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: { color: "#FFF", fontFamily: "Poppins_600SemiBold" },
   tabUnderline: {
-    marginTop: 8,
-    width: 28,
+    position: "absolute",
+    bottom: -1.5,
+    width: 30,
     height: 3,
     borderRadius: 2,
     backgroundColor: GOLD,
   },
-  card: {
-    backgroundColor: CARD,
-    borderWidth: 1,
-    borderColor: BORDER,
+  cardBorder: {
     borderRadius: 18,
+    padding: 1,
     marginHorizontal: 20,
     marginBottom: 16,
-    paddingBottom: 4,
+  },
+  card: {
+    backgroundColor: CARD,
+    borderRadius: 17,
+    paddingBottom: 12,
+    overflow: "hidden",
   },
   cardHead: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    padding: 16,
+    padding: 14,
   },
+  cardIconImg: { width: 44, height: 44, borderRadius: 12 },
   cardIcon: {
     width: 44,
     height: 44,
@@ -526,11 +553,11 @@ const styles = StyleSheet.create({
   },
   cardSub: { color: MUTED, fontSize: 11, marginTop: 2 },
   cardBody: {
-    backgroundColor: "#101010",
-    borderTopWidth: 1,
-    borderTopColor: BORDER,
-    borderBottomLeftRadius: 17,
-    borderBottomRightRadius: 17,
+    backgroundColor: "#181818",
+    borderWidth: 1,
+    borderColor: "#2C2C2C",
+    borderRadius: 14,
+    marginHorizontal: 12,
     paddingHorizontal: 16,
   },
   row: {
