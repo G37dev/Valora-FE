@@ -82,6 +82,7 @@ export default function ProfileScreen() {
   const { user, kycStatus, twoFAEnabled, passkeys } = useProfileData();
   const [comingSoon, setComingSoon] = useState(false);
   const [memberSheet, setMemberSheet] = useState(false);
+  const [cardSize, setCardSize] = useState({ w: 0, h: 0 });
 
   const name =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
@@ -96,6 +97,13 @@ export default function ProfileScreen() {
     passkeys: passkeys.length,
   });
   const verified = kycStatus === "VERIFIED";
+  const cardAspect = CARD_ASPECT[tier] || 2;
+  const cardImgDims =
+    cardSize.h > 0
+      ? cardSize.h * cardAspect >= cardSize.w
+        ? { width: cardSize.h * cardAspect, height: cardSize.h }
+        : { width: cardSize.w, height: cardSize.w / cardAspect }
+      : { width: "100%" as const, height: "100%" as const };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -182,13 +190,18 @@ export default function ProfileScreen() {
           end={{ x: 1, y: 1 }}
           style={styles.journeyCardBorder}
         >
-          <View style={styles.journeyCard}>
+          <View
+            style={styles.journeyCard}
+            onLayout={(e) => {
+              const { width, height } = e.nativeEvent.layout;
+              setCardSize((s) =>
+                s.w === width && s.h === height ? s : { w: width, h: height },
+              );
+            }}
+          >
             <Image
               source={LEVEL_CARDS[tier] || LEVEL_CARDS[1]}
-              style={[
-                styles.journeyCardBg,
-                { aspectRatio: CARD_ASPECT[tier] || CARD_ASPECT[1] },
-              ]}
+              style={[styles.journeyCardBg, cardImgDims]}
               resizeMode="cover"
             />
             <Text style={styles.journeyEyebrow}>YOUR JOURNEY</Text>
@@ -396,7 +409,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     top: 0,
-    bottom: 0,
     borderRadius: 17,
   },
   journeyEyebrow: {
