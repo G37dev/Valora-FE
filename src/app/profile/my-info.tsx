@@ -16,7 +16,7 @@ import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import { initialWindowMetrics, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyInfoScreen() {
   const router = useRouter();
@@ -36,11 +36,7 @@ export default function MyInfoScreen() {
         : "#FF5252";
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={["top", "bottom"]}
-      initialMetrics={initialWindowMetrics}
-    >
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <SubPageShell
         title="My Info"
         activeTab="my-info"

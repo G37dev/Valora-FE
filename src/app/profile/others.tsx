@@ -22,7 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { initialWindowMetrics, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OthersScreen() {
   const router = useRouter();
@@ -64,11 +64,7 @@ export default function OthersScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={["top", "bottom"]}
-      initialMetrics={initialWindowMetrics}
-    >
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <SubPageShell
         title="Others"
         activeTab="others"

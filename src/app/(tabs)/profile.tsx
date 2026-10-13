@@ -22,7 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { initialWindowMetrics, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const QUICK = [
   { icon: "sparkles" as const, title: "Rewards Hub", desc: "Explore rewards" },
@@ -81,11 +81,7 @@ export default function ProfileScreen() {
   const verified = kycStatus === "VERIFIED";
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={["top"]}
-      initialMetrics={initialWindowMetrics}
-    >
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.topLeft}

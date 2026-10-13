@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { initialWindowMetrics, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PreferenceScreen() {
   const router = useRouter();
@@ -47,11 +47,7 @@ export default function PreferenceScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={["top", "bottom"]}
-      initialMetrics={initialWindowMetrics}
-    >
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <SubPageShell
         title="Preference"
         activeTab="preference"
