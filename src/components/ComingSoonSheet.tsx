@@ -8,13 +8,12 @@ import { useRef } from "react";
 import {
   Image,
   Modal,
-  Platform,
   Pressable,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSheetBottomPad } from "./ValoraSheet";
 
 interface ComingSoonSheetProps {
   visible: boolean;
@@ -25,10 +24,7 @@ export default function ComingSoonSheet({
   visible,
   onClose,
 }: ComingSoonSheetProps) {
-  const insets = useSafeAreaInsets();
-  const bottomPad =
-    (Platform.OS === "android" ? Math.max(insets.bottom, 28) : insets.bottom) +
-    40;
+  const bottomPad = useSheetBottomPad(40);
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
     damping: 14,

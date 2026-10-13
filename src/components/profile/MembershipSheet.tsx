@@ -10,7 +10,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   Image,
   Modal,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -18,7 +17,6 @@ import {
   View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, {
   Circle,
   Defs,
@@ -26,6 +24,7 @@ import Svg, {
   Rect,
   Stop,
 } from "react-native-svg";
+import { useSheetBottomPad } from "../ValoraSheet";
 import { LEVEL_BADGES } from "./ProfileChrome";
 
 const GLOW = require("../../../assets/images/profile/bgMembershiplvl.png");
@@ -74,10 +73,7 @@ export default function MembershipSheet({
   tier,
   onClose,
 }: MembershipSheetProps) {
-  const insets = useSafeAreaInsets();
-  const bottomPad =
-    (Platform.OS === "android" ? Math.max(insets.bottom, 28) : insets.bottom) +
-    20;
+  const bottomPad = useSheetBottomPad(20);
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
     damping: 14,

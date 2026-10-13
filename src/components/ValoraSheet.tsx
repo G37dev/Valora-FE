@@ -5,9 +5,33 @@ import BottomSheet, {
   useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
-import { Modal, Platform, Pressable, StyleSheet } from "react-native";
+import {
+  Dimensions,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+/**
+ * Bottom inset buat konten di dalam RN Modal. Window utama bisa
+ * tidak edge-to-edge (insets.bottom = 0) sementara window Modal
+ * nembus di bawah nav bar — jadi tinggi nav bar dihitung dari
+ * selisih screen vs window height sebagai fallback.
+ */
+export function useSheetBottomPad(extra = 20) {
+  const insets = useSafeAreaInsets();
+  if (Platform.OS !== "android") return insets.bottom + extra;
+  const navBar = Math.max(
+    0,
+    Dimensions.get("screen").height -
+      Dimensions.get("window").height -
+      insets.top,
+  );
+  return Math.max(insets.bottom, navBar, 16) + extra;
+}
 
 interface ValoraSheetProps {
   visible: boolean;
@@ -32,12 +56,7 @@ export default function ValoraSheet({
   scrollable = false,
   children,
 }: ValoraSheetProps) {
-  const insets = useSafeAreaInsets();
-  // Modal di Android punya window terpisah — insets.bottom bisa 0
-  // padahal nav bar overlay sheet-nya. Fallback 28dp buat 3-button nav.
-  const bottomPad =
-    (Platform.OS === "android" ? Math.max(insets.bottom, 28) : insets.bottom) +
-    20;
+  const bottomPad = useSheetBottomPad(20);
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
     damping: 14,
