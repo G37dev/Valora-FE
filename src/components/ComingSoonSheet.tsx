@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
+  useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
 import { Image, Modal, StyleSheet, TouchableOpacity } from "react-native";
@@ -18,6 +19,12 @@ export default function ComingSoonSheet({
 }: ComingSoonSheetProps) {
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
+  const springConfig = useBottomSheetSpringConfigs({
+    damping: 16,
+    stiffness: 220,
+    mass: 0.7,
+    overshootClamping: false,
+  });
 
   return (
     <Modal
@@ -31,6 +38,7 @@ export default function ComingSoonSheet({
         ref={sheetRef}
         index={0}
         snapPoints={["52%"]}
+        animationConfigs={springConfig}
         enablePanDownToClose
         onClose={onClose}
         handleComponent={null}

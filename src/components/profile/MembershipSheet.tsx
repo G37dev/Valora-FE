@@ -3,6 +3,7 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
   BottomSheetView,
+  useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -64,6 +65,12 @@ export default function MembershipSheet({
 }: MembershipSheetProps) {
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
+  const springConfig = useBottomSheetSpringConfigs({
+    damping: 16,
+    stiffness: 220,
+    mass: 0.7,
+    overshootClamping: false,
+  });
   const [details, setDetails] = useState(false);
 
   useEffect(() => {
@@ -82,6 +89,7 @@ export default function MembershipSheet({
         ref={sheetRef}
         index={0}
         snapPoints={["75%", "92%"]}
+        animationConfigs={springConfig}
         enablePanDownToClose
         onClose={onClose}
         handleComponent={null}
