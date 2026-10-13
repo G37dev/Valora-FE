@@ -12,7 +12,7 @@ export interface ProfileData {
   kycStatus: string;
   twoFAEnabled: boolean;
   passkeys: PasskeyInfo[];
-  reload: () => Promise<void>;
+  reload: (force?: boolean) => Promise<void>;
 }
 
 // Cache di memori — antar screen dapat data sinkron, tanpa flash.
@@ -37,10 +37,16 @@ export function setCachedProfile(profile: UserProfile | null) {
   }
 }
 
+let memTwoFA = false;
+let memPasskeys: PasskeyInfo[] = [];
+let lastFetch = 0;
+const STALE_MS = 20_000;
+let inflight: Promise<void> | null = null;
+
 export function useProfileData(): ProfileData {
   const [user, setUser] = useState<UserProfile | null>(memUser);
-  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
-  const [passkeys, setPasskeys] = useState<PasskeyInfo[]>([]);
+  const [twoFAEnabled, setTwoFAEnabled] = useState(memTwoFA);
+  const [passkeys, setPasskeys] = useState<PasskeyInfo[]>(memPasskeys);
 
   // Kalau module-level hydrate belum selesai saat mount (kasus langka),
   // isi ulang setelah AsyncStorage selesai dibaca.
@@ -54,36 +60,50 @@ export function useProfileData(): ProfileData {
     };
   }, []);
 
-  const reload = useCallback(async () => {
-    try {
-      const coreId = await AsyncStorage.getItem("coreId");
-      if (!coreId) {
-        setUser(null);
-        return;
-      }
+  const reload = useCallback(async (force = false) => {
+    // Skip fetch kalau data masih fresh (<20s) — dedupe call konkuren.
+    if (!force && Date.now() - lastFetch < STALE_MS && memUser) return;
+    if (inflight) return inflight;
 
-      const profile = await getUserProfileApi(coreId);
-      setCachedProfile(profile);
-      setUser(profile);
-
-      const token = await getAuthToken();
-      if (!token) return;
-
+    const run = async () => {
       try {
-        const res = await get2FAStatusApi(token);
-        setTwoFAEnabled(Boolean(res?.enabled));
-      } catch (e) {
-        console.error("Gagal cek status 2FA:", e);
-      }
+        const coreId = await AsyncStorage.getItem("coreId");
+        if (!coreId) {
+          setUser(null);
+          return;
+        }
 
-      try {
-        setPasskeys(await listPasskeys(token));
-      } catch (e) {
-        console.error("Gagal memuat passkey:", e);
+        const profile = await getUserProfileApi(coreId);
+        setCachedProfile(profile);
+        setUser(profile);
+        lastFetch = Date.now();
+
+        const token = await getAuthToken();
+        if (!token) return;
+
+        try {
+          const res = await get2FAStatusApi(token);
+          memTwoFA = Boolean(res?.enabled);
+          setTwoFAEnabled(memTwoFA);
+        } catch (e) {
+          console.error("Gagal cek status 2FA:", e);
+        }
+
+        try {
+          memPasskeys = await listPasskeys(token);
+          setPasskeys(memPasskeys);
+        } catch (e) {
+          console.error("Gagal memuat passkey:", e);
+        }
+      } catch (error) {
+        console.error("Gagal memuat data profil:", error);
       }
-    } catch (error) {
-      console.error("Gagal memuat data profil:", error);
-    }
+    };
+
+    inflight = run().finally(() => {
+      inflight = null;
+    });
+    return inflight;
   }, []);
 
   useFocusEffect(
