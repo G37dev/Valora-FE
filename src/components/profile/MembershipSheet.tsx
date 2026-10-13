@@ -332,8 +332,8 @@ function DetailsView({
                 <View style={styles.detailBadgeWrap}>
                   {active && (
                     <Svg
-                      width={150}
-                      height={150}
+                      width={110}
+                      height={110}
                       style={styles.detailBadgeHalo}
                     >
                       <Defs>
@@ -365,7 +365,7 @@ function DetailsView({
                           />
                         </RadialGradient>
                       </Defs>
-                      <Circle cx={75} cy={75} r={75} fill="url(#badgeHalo)" />
+                      <Circle cx={55} cy={55} r={55} fill="url(#badgeHalo)" />
                     </Svg>
                   )}
                   {active && (
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    width: "55%",
+    width: "38%",
   },
   detailBadgeCol: {
     width: 76,
@@ -674,8 +674,8 @@ const styles = StyleSheet.create({
   },
   detailBadgeHalo: {
     position: "absolute",
-    top: -37,
-    left: -37,
+    top: -17,
+    left: -17,
   },
   detailBadgeGlow: {
     position: "absolute",
