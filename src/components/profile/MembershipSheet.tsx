@@ -424,24 +424,24 @@ function DetailsView({
                       <Defs>
                         <RadialGradient
                           id="cardGlow"
-                          cx="140%"
+                          cx="105%"
                           cy="45%"
-                          r="110%"
+                          r="95%"
                         >
                           <Stop
                             offset="0"
-                            stopColor="#FBE678"
-                            stopOpacity={0.45}
+                            stopColor="#FFF9D6"
+                            stopOpacity={0.6}
                           />
                           <Stop
-                            offset="0.45"
+                            offset="0.4"
                             stopColor="#FBE678"
-                            stopOpacity={0.16}
+                            stopOpacity={0.22}
                           />
                           <Stop
                             offset="0.75"
                             stopColor="#FBE678"
-                            stopOpacity={0.05}
+                            stopOpacity={0.06}
                           />
                           <Stop
                             offset="1"
