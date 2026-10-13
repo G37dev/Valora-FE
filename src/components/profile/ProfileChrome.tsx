@@ -1,16 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Image,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import type { UserProfile } from "../../services/userService";
+import ValoraSheet from "../ValoraSheet";
 
 export const GOLD = "#DEC236";
 export const GREEN = "#22C55E";
@@ -360,36 +353,32 @@ export function AvatarPicker({
 }) {
   const [saving, setSaving] = useState<string | null>(null);
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <Pressable style={styles.pickerBackdrop} onPress={onClose} />
-      <View style={styles.pickerSheet}>
-        <View style={styles.pickerHandle} />
-        <Text style={styles.pickerTitle}>Choose Your Avatar</Text>
-        <View style={styles.pickerGrid}>
-          {Object.keys(AVATARS).map((key) => (
-            <TouchableOpacity
-              key={key}
-              style={[
-                styles.pickerItem,
-                current === key && styles.pickerItemActive,
-              ]}
-              disabled={saving !== null}
-              onPress={async () => {
-                setSaving(key);
-                try {
-                  await onSelect(key);
-                } finally {
-                  setSaving(null);
-                }
-              }}
-              activeOpacity={0.8}
-            >
-              <Image source={AVATARS[key]} style={styles.pickerAvatar} />
-            </TouchableOpacity>
-          ))}
-        </View>
+    <ValoraSheet visible={visible} onClose={onClose} snapPoints={["42%"]}>
+      <Text style={styles.pickerTitle}>Choose Your Avatar</Text>
+      <View style={styles.pickerGrid}>
+        {Object.keys(AVATARS).map((key) => (
+          <TouchableOpacity
+            key={key}
+            style={[
+              styles.pickerItem,
+              current === key && styles.pickerItemActive,
+            ]}
+            disabled={saving !== null}
+            onPress={async () => {
+              setSaving(key);
+              try {
+                await onSelect(key);
+              } finally {
+                setSaving(null);
+              }
+            }}
+            activeOpacity={0.8}
+          >
+            <Image source={AVATARS[key]} style={styles.pickerAvatar} />
+          </TouchableOpacity>
+        ))}
       </View>
-    </Modal>
+    </ValoraSheet>
   );
 }
 

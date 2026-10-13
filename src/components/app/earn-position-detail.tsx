@@ -1,15 +1,12 @@
+import ValoraSheet from "@/components/ValoraSheet";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Image,
-  Modal,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 interface EarnPosition {
   id: number | string;
@@ -354,279 +351,239 @@ export default function EarnPositionDetailModal({
   const protocolFee = 0;
 
   return (
-    <Modal
+    <ValoraSheet
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      onClose={onClose}
+      snapPoints={["85%"]}
+      scrollable
     >
-      <View style={styles.overlay}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.outsideArea} />
-        </TouchableWithoutFeedback>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Earning Position</Text>
 
-        <View style={styles.modalContainer}>
-          <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
-            {/* HANDLE */}
-            <View style={styles.handle} />
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={onClose}
+          style={styles.closeButton}
+        >
+          <Ionicons name="close" size={17} color="#777777" />
+        </TouchableOpacity>
+      </View>
 
-            {/* HEADER */}
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>Earning Position</Text>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={onClose}
-                style={styles.closeButton}
-              >
-                <Ionicons name="close" size={17} color="#777777" />
-              </TouchableOpacity>
+      <View>
+        {/* ASSET */}
+        <View style={styles.assetCard}>
+          <View style={styles.assetLeft}>
+            <View style={styles.assetIcon}>
+              {assetImage ? (
+                <Image
+                  source={assetImage}
+                  style={styles.assetImage}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Text style={styles.assetFallback}>{asset.slice(0, 1)}</Text>
+              )}
             </View>
 
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContent}
-            >
-              {/* ASSET */}
-              <View style={styles.assetCard}>
-                <View style={styles.assetLeft}>
-                  <View style={styles.assetIcon}>
-                    {assetImage ? (
-                      <Image
-                        source={assetImage}
-                        style={styles.assetImage}
-                        resizeMode="contain"
-                      />
-                    ) : (
-                      <Text style={styles.assetFallback}>
-                        {asset.slice(0, 1)}
-                      </Text>
-                    )}
-                  </View>
+            <View style={styles.assetInfo}>
+              <Text style={styles.assetName}>{asset}</Text>
 
-                  <View style={styles.assetInfo}>
-                    <Text style={styles.assetName}>{asset}</Text>
+              <Text style={styles.assetDescription}>
+                {getAssetDescription(asset)}
+              </Text>
+            </View>
+            {(readyToClaim || isClaiming) && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                disabled={isClaiming}
+                onPress={() => onClaim(position)}
+                style={[
+                  styles.claimButton,
+                  isClaiming && styles.claimButtonDisabled,
+                ]}
+              >
+                {isClaiming ? (
+                  <Ionicons name="sync-outline" size={17} color="#050505" />
+                ) : (
+                  <Ionicons name="gift-outline" size={17} color="#050505" />
+                )}
 
-                    <Text style={styles.assetDescription}>
-                      {getAssetDescription(asset)}
-                    </Text>
-                  </View>
-                  {(readyToClaim || isClaiming) && (
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      disabled={isClaiming}
-                      onPress={() => onClaim(position)}
-                      style={[
-                        styles.claimButton,
-                        isClaiming && styles.claimButtonDisabled,
-                      ]}
-                    >
-                      {isClaiming ? (
-                        <Ionicons
-                          name="sync-outline"
-                          size={17}
-                          color="#050505"
-                        />
-                      ) : (
-                        <Ionicons
-                          name="gift-outline"
-                          size={17}
-                          color="#050505"
-                        />
-                      )}
+                <Text style={styles.claimButtonText}>
+                  {isClaiming ? "Claiming..." : "Claim"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
-                      <Text style={styles.claimButtonText}>
-                        {isClaiming ? "Claiming..." : "Claim"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                <View style={styles.transactionCard}>
-                  <View style={styles.transactionColumn}>
-                    <View style={{ flexDirection: "row", gap: 6 }}>
-                      <Text style={styles.transactionLabel}>
-                        Transaction Hash
-                      </Text>
-                      <Ionicons name="open-outline" size={12} color="#777777" />
-                    </View>
-
-                    <View style={styles.transactionValueRow}>
-                      <Text numberOfLines={1} style={styles.transactionValue}>
-                        {truncateHash(txHash)}
-                      </Text>
-
-                      <Ionicons name="copy-outline" size={12} color="#777777" />
-                    </View>
-                  </View>
-
-                  <View style={styles.transactionColumn2}>
-                    <Text style={styles.transactionLabel}>Transaction ID</Text>
-
-                    <View style={styles.transactionValueRow}>
-                      <Text numberOfLines={1} style={styles.transactionValue}>
-                        {truncateHash(getPositionId(position))}
-                      </Text>
-
-                      <Ionicons name="copy-outline" size={12} color="#777777" />
-                    </View>
-                  </View>
-                </View>
+          <View style={styles.transactionCard}>
+            <View style={styles.transactionColumn}>
+              <View style={{ flexDirection: "row", gap: 6 }}>
+                <Text style={styles.transactionLabel}>Transaction Hash</Text>
+                <Ionicons name="open-outline" size={12} color="#777777" />
               </View>
 
-              {/* TRANSACTION */}
+              <View style={styles.transactionValueRow}>
+                <Text numberOfLines={1} style={styles.transactionValue}>
+                  {truncateHash(txHash)}
+                </Text>
 
-              {/* STATUS + PROGRESS */}
-              <View style={styles.statusCard}>
-                <View style={styles.statusTop}>
-                  <View style={styles.statusLeft}>
-                    <View
-                      style={
-                        readyToClaim ? styles.statusIcon2 : styles.statusIcon
-                      }
-                    >
-                      <Ionicons
-                        name={readyToClaim ? "checkmark" : "time-outline"}
-                        size={16}
-                        color={readyToClaim ? "#00E58A" : "#FBE87C"}
-                      />
-                    </View>
-
-                    <View>
-                      <Text
-                        style={
-                          readyToClaim
-                            ? styles.statusTitle2
-                            : styles.statusTitle
-                        }
-                      >
-                        {status}
-                      </Text>
-
-                      <Text style={styles.statusDescription}>
-                        {readyToClaim
-                          ? "Position is ready to claim"
-                          : "Position is running on contract"}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.startDate}>
-                    <Text style={styles.startDateLabel}>Start Date</Text>
-
-                    <Text style={styles.startDateValue}>
-                      {formatDate(createdAt)}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.progressTextRow}>
-                  <Text style={styles.progressDays}>
-                    {elapsed} of {total} days
-                  </Text>
-
-                  <Text style={styles.progressPercent}>
-                    {progressPercent.toFixed(2)}%
-                  </Text>
-                </View>
-
-                <View style={styles.progressTrack}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      {
-                        width: `${Math.max(2, Math.min(100, progress))}%`,
-                      },
-                    ]}
-                  />
-                </View>
+                <Ionicons name="copy-outline" size={12} color="#777777" />
               </View>
+            </View>
 
-              {/* DETAILS */}
-              <View style={styles.detailsCard}>
-                <View style={styles.detailGrid}>
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Asset</Text>
+            <View style={styles.transactionColumn2}>
+              <Text style={styles.transactionLabel}>Transaction ID</Text>
 
-                    <Text style={styles.detailValue}>{asset}</Text>
-                  </View>
+              <View style={styles.transactionValueRow}>
+                <Text numberOfLines={1} style={styles.transactionValue}>
+                  {truncateHash(getPositionId(position))}
+                </Text>
 
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Asset Type</Text>
-
-                    <Text style={styles.detailValue}>
-                      {getAssetType(asset)}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Principal Amount</Text>
-
-                    <Text style={styles.detailValue}>
-                      {formatAmount(principal)} {asset}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Total at Maturity</Text>
-
-                    <Text style={styles.detailValue}>
-                      {formatAmount(totalMaturity)} {asset}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Lock Time</Text>
-
-                    <Text style={styles.detailValue}>{term} Days</Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>APR</Text>
-
-                    <Text style={styles.detailValue}>{apr.toFixed(2)}%</Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Start Date</Text>
-
-                    <Text style={styles.detailValue}>
-                      {formatDate(createdAt)}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Maturity Date</Text>
-
-                    <Text style={styles.detailValue}>
-                      {formatDate(maturityAt)}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Est. Earnings</Text>
-
-                    <Text style={styles.rewardValue}>
-                      +{formatAmount(reward)} {asset}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailLabel}>Protocol Fee</Text>
-
-                    <Text style={styles.detailValue}>
-                      {formatAmount(protocolFee)} {asset}
-                    </Text>
-                  </View>
-                </View>
+                <Ionicons name="copy-outline" size={12} color="#777777" />
               </View>
-
-              {/* CLAIM */}
-            </ScrollView>
-          </SafeAreaView>
+            </View>
+          </View>
         </View>
+
+        {/* TRANSACTION */}
+
+        {/* STATUS + PROGRESS */}
+        <View style={styles.statusCard}>
+          <View style={styles.statusTop}>
+            <View style={styles.statusLeft}>
+              <View
+                style={readyToClaim ? styles.statusIcon2 : styles.statusIcon}
+              >
+                <Ionicons
+                  name={readyToClaim ? "checkmark" : "time-outline"}
+                  size={16}
+                  color={readyToClaim ? "#00E58A" : "#FBE87C"}
+                />
+              </View>
+
+              <View>
+                <Text
+                  style={
+                    readyToClaim ? styles.statusTitle2 : styles.statusTitle
+                  }
+                >
+                  {status}
+                </Text>
+
+                <Text style={styles.statusDescription}>
+                  {readyToClaim
+                    ? "Position is ready to claim"
+                    : "Position is running on contract"}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.startDate}>
+              <Text style={styles.startDateLabel}>Start Date</Text>
+
+              <Text style={styles.startDateValue}>{formatDate(createdAt)}</Text>
+            </View>
+          </View>
+
+          <View style={styles.progressTextRow}>
+            <Text style={styles.progressDays}>
+              {elapsed} of {total} days
+            </Text>
+
+            <Text style={styles.progressPercent}>
+              {progressPercent.toFixed(2)}%
+            </Text>
+          </View>
+
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${Math.max(2, Math.min(100, progress))}%`,
+                },
+              ]}
+            />
+          </View>
+        </View>
+
+        {/* DETAILS */}
+        <View style={styles.detailsCard}>
+          <View style={styles.detailGrid}>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Asset</Text>
+
+              <Text style={styles.detailValue}>{asset}</Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Asset Type</Text>
+
+              <Text style={styles.detailValue}>{getAssetType(asset)}</Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Principal Amount</Text>
+
+              <Text style={styles.detailValue}>
+                {formatAmount(principal)} {asset}
+              </Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Total at Maturity</Text>
+
+              <Text style={styles.detailValue}>
+                {formatAmount(totalMaturity)} {asset}
+              </Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Lock Time</Text>
+
+              <Text style={styles.detailValue}>{term} Days</Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>APR</Text>
+
+              <Text style={styles.detailValue}>{apr.toFixed(2)}%</Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Start Date</Text>
+
+              <Text style={styles.detailValue}>{formatDate(createdAt)}</Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Maturity Date</Text>
+
+              <Text style={styles.detailValue}>{formatDate(maturityAt)}</Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Est. Earnings</Text>
+
+              <Text style={styles.rewardValue}>
+                +{formatAmount(reward)} {asset}
+              </Text>
+            </View>
+
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Protocol Fee</Text>
+
+              <Text style={styles.detailValue}>
+                {formatAmount(protocolFee)} {asset}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* CLAIM */}
       </View>
-    </Modal>
+    </ValoraSheet>
   );
 }
 

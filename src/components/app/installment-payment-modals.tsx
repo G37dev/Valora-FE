@@ -1,17 +1,13 @@
+import ValoraSheet from "@/components/ValoraSheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
-  FlatList,
-  Modal,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import GoldButton from "../GoldButton";
 
 const GOLD = "#FBE678";
@@ -158,34 +154,21 @@ export function LatestPaymentsModal({
   onSelect?: (item: InstallmentPaymentItem) => void;
 }) {
   return (
-    <Modal
+    <ValoraSheet
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      onClose={onClose}
+      snapPoints={["50%"]}
+      scrollable
     >
-      <View style={styles.overlay}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.outsideArea} />
-        </TouchableWithoutFeedback>
-
-        <View style={styles.modalContainer}>
-          <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
-            <SheetHeader title="Latest Payment" onClose={onClose} />
-
-            <FlatList
-              data={payments}
-              keyExtractor={(_, index) => index.toString()}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.listContent}
-              renderItem={({ item }) => (
-                <PaymentItemCard item={item} onPress={() => onSelect?.(item)} />
-              )}
-            />
-          </SafeAreaView>
-        </View>
-      </View>
-    </Modal>
+      <SheetHeader title="Latest Payment" onClose={onClose} />
+      {payments.map((item, index) => (
+        <PaymentItemCard
+          key={index}
+          item={item}
+          onPress={() => onSelect?.(item)}
+        />
+      ))}
+    </ValoraSheet>
   );
 }
 
@@ -218,59 +201,42 @@ export function PaymentDetailsModal({
   const total = payment.amount;
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.outsideArea} />
-        </TouchableWithoutFeedback>
+    <ValoraSheet visible={visible} onClose={onClose} snapPoints={["48%"]}>
+      <SheetHeader title="Payment Details" onClose={onClose} />
 
-        <View style={styles.modalContainer}>
-          <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
-            <SheetHeader title="Payment Details" onClose={onClose} />
+      <View style={styles.content}>
+        <View style={styles.card}>
+          <View style={styles.detailTopRow}>
+            <Text style={styles.detailAmount}>
+              {formatAmount(payment.amount)} IDR
+              {payment.note ? ` ${payment.note}` : ""}
+            </Text>
 
-            <View style={styles.content}>
-              <View style={styles.card}>
-                <View style={styles.detailTopRow}>
-                  <Text style={styles.detailAmount}>
-                    {formatAmount(payment.amount)} IDR
-                    {payment.note ? ` ${payment.note}` : ""}
-                  </Text>
+            <Text style={styles.detailDate}>{payment.date}</Text>
+          </View>
 
-                  <Text style={styles.detailDate}>{payment.date}</Text>
-                </View>
+          <DetailRow
+            label="Principal"
+            value={`${formatAmount(payment.principal)} IDR`}
+          />
 
-                <DetailRow
-                  label="Principal"
-                  value={`${formatAmount(payment.principal)} IDR`}
-                />
+          <DetailRow
+            label="Accrued Carrying Interest"
+            value={`${formatAmount(payment.carrying)} IDR`}
+          />
 
-                <DetailRow
-                  label="Accrued Carrying Interest"
-                  value={`${formatAmount(payment.carrying)} IDR`}
-                />
+          <DetailRow
+            label="Past Due Penalty"
+            value={`${formatAmount(payment.fees)} IDR`}
+          />
 
-                <DetailRow
-                  label="Past Due Penalty"
-                  value={`${formatAmount(payment.fees)} IDR`}
-                />
-
-                <View style={styles.totalBox}>
-                  <Text style={styles.totalLabel}>Total</Text>
-                  <Text style={styles.totalValue}>
-                    {formatAmount(total)} IDR
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </SafeAreaView>
+          <View style={styles.totalBox}>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalValue}>{formatAmount(total)} IDR</Text>
+          </View>
         </View>
       </View>
-    </Modal>
+    </ValoraSheet>
   );
 }
 
@@ -311,148 +277,110 @@ export function MakePaymentModal({
   };
 
   return (
-    <Modal
+    <ValoraSheet
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      onClose={onClose}
+      snapPoints={["55%"]}
+      scrollable
     >
-      <View style={styles.overlay}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.outsideArea} />
-        </TouchableWithoutFeedback>
+      <SheetHeader title="Make a Payment" onClose={onClose} />
 
-        <View style={styles.modalContainer}>
-          <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
-            <SheetHeader title="Make a Payment" onClose={onClose} />
+      <View style={styles.scrollContent}>
+        <View style={styles.card}>
+          <View style={styles.amountHeader}>
+            <Text style={styles.amountLabel}>
+              {isLocked ? "Amount Due" : "Payment Amount"}
+            </Text>
 
-            <ScrollView
-              style={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              <View style={styles.card}>
-                <View style={styles.amountHeader}>
-                  <Text style={styles.amountLabel}>
-                    {isLocked ? "Amount Due" : "Payment Amount"}
-                  </Text>
+            <Text style={styles.balanceText}>
+              Balance :{" "}
+              <Text style={styles.balanceValue}>
+                {formatAmount(balance)} IDR
+              </Text>
+            </Text>
+          </View>
 
-                  <Text style={styles.balanceText}>
-                    Balance :{" "}
-                    <Text style={styles.balanceValue}>
-                      {formatAmount(balance)} IDR
-                    </Text>
-                  </Text>
-                </View>
+          <View style={styles.amountDivider} />
 
-                <View style={styles.amountDivider} />
+          <View style={styles.inputBox}>
+            {isLocked ? (
+              <Text style={[styles.input, styles.lockedInput]}>
+                {formatAmount(lockedAmount!)}
+              </Text>
+            ) : (
+              <TextInput
+                style={styles.input}
+                value={amount}
+                onChangeText={setAmount}
+                placeholder="0"
+                placeholderTextColor="#888888"
+                keyboardType="number-pad"
+              />
+            )}
 
-                <View style={styles.inputBox}>
-                  {isLocked ? (
-                    <Text style={[styles.input, styles.lockedInput]}>
-                      {formatAmount(lockedAmount!)}
-                    </Text>
-                  ) : (
-                    <TextInput
-                      style={styles.input}
-                      value={amount}
-                      onChangeText={setAmount}
-                      placeholder="0"
-                      placeholderTextColor="#888888"
-                      keyboardType="number-pad"
-                    />
-                  )}
+            <Text style={styles.inputSuffix}>IDR</Text>
 
-                  <Text style={styles.inputSuffix}>IDR</Text>
+            {!isLocked && (
+              <>
+                <View style={styles.inputDivider} />
 
-                  {!isLocked && (
-                    <>
-                      <View style={styles.inputDivider} />
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    setAmount(
+                      String(
+                        Math.round(
+                          maxAmount != null && maxAmount > 0
+                            ? Math.min(maxAmount, balance)
+                            : balance,
+                        ),
+                      ),
+                    )
+                  }
+                >
+                  <Text style={styles.maxText}>Max</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
 
-                      <TouchableOpacity
-                        activeOpacity={0.7}
-                        onPress={() =>
-                          setAmount(
-                            String(
-                              Math.round(
-                                maxAmount != null && maxAmount > 0
-                                  ? Math.min(maxAmount, balance)
-                                  : balance,
-                              ),
-                            ),
-                          )
-                        }
-                      >
-                        <Text style={styles.maxText}>Max</Text>
-                      </TouchableOpacity>
-                    </>
-                  )}
-                </View>
-
-                <Text style={styles.minText}>
-                  {isLocked
-                    ? "Exact amount required by your installment bill"
-                    : `Minimum payment ${formatAmount(minPayment)} IDR`}
-                </Text>
-              </View>
-
-              {isLocked && breakdown && breakdown.length > 0 && (
-                <View style={[styles.card, styles.breakdownCard]}>
-                  <Text style={styles.breakdownTitle}>
-                    Outstanding Breakdown
-                  </Text>
-
-                  {breakdown.map((row) => (
-                    <DetailRow
-                      key={row.label}
-                      label={row.label}
-                      value={`${formatAmount(row.value)} IDR`}
-                    />
-                  ))}
-
-                  <View style={styles.totalBox}>
-                    <Text style={styles.totalLabel}>Total Due</Text>
-                    <Text style={styles.totalValue}>
-                      {formatAmount(lockedAmount!)} IDR
-                    </Text>
-                  </View>
-                </View>
-              )}
-            </ScrollView>
-
-            <View style={styles.footer}>
-              <GoldButton label="Confirm Payment" onPress={handleConfirm} />
-            </View>
-          </SafeAreaView>
+          <Text style={styles.minText}>
+            {isLocked
+              ? "Exact amount required by your installment bill"
+              : `Minimum payment ${formatAmount(minPayment)} IDR`}
+          </Text>
         </View>
+
+        {isLocked && breakdown && breakdown.length > 0 && (
+          <View style={[styles.card, styles.breakdownCard]}>
+            <Text style={styles.breakdownTitle}>Outstanding Breakdown</Text>
+
+            {breakdown.map((row) => (
+              <DetailRow
+                key={row.label}
+                label={row.label}
+                value={`${formatAmount(row.value)} IDR`}
+              />
+            ))}
+
+            <View style={styles.totalBox}>
+              <Text style={styles.totalLabel}>Total Due</Text>
+              <Text style={styles.totalValue}>
+                {formatAmount(lockedAmount!)} IDR
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
-    </Modal>
+
+      <View style={styles.footer}>
+        <GoldButton label="Confirm Payment" onPress={handleConfirm} />
+      </View>
+    </ValoraSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.78)",
-    justifyContent: "flex-end",
-  },
-
-  outsideArea: {
-    flex: 1,
-  },
-
-  modalContainer: {
-    height: "50%",
-    backgroundColor: "#131313",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: "hidden",
-  },
-
-  safeArea: {
-    flex: 1,
-  },
-
   header: {
     height: 58,
     paddingHorizontal: 14,

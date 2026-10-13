@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,6 +16,7 @@ import QRCode from "react-native-qrcode-svg";
 
 import { showAlert } from "../../components/AppAlert";
 import BackHeader from "../../components/BackHeader";
+import ValoraSheet from "../../components/ValoraSheet";
 import { getUserProfileApi } from "../../services/userService";
 import { activateWalletApi } from "../../services/walletService";
 
@@ -221,73 +221,66 @@ export default function CryptoDeposit() {
 
   const renderCryptoModal = () => {
     return (
-      <Modal
-        animationType="slide"
-        transparent
+      <ValoraSheet
         visible={cryptoModalVisible}
-        onRequestClose={() => setCryptoModalVisible(false)}
+        onClose={() => setCryptoModalVisible(false)}
+        snapPoints={["45%"]}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {/* HEADER */}
+        <View>
+          {/* HEADER */}
 
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Asset</Text>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Asset</Text>
 
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setCryptoModalVisible(false)}
-                style={styles.modalCloseButton}
-              >
-                <Ionicons name="close" size={22} color="#FFF" />
-              </TouchableOpacity>
-            </View>
-
-            {/* ASSETS */}
-
-            {CRYPTO_ASSETS.map((item) => {
-              const isSelected = selectedAsset.label === item.label;
-
-              return (
-                <TouchableOpacity
-                  key={item.label}
-                  activeOpacity={0.8}
-                  style={[
-                    styles.modalItem,
-                    isSelected && styles.modalItemSelected,
-                  ]}
-                  onPress={() => {
-                    setSelectedAsset(item);
-                    setCryptoModalVisible(false);
-                  }}
-                >
-                  <View style={styles.rowCenter}>
-                    <Image
-                      source={item.icon}
-                      style={styles.modalAssetImage}
-                      resizeMode="contain"
-                    />
-
-                    <View style={styles.modalAssetInfo}>
-                      <Text style={styles.modalItemText}>{item.label}</Text>
-
-                      <Text style={styles.modalItemSub}>{item.network}</Text>
-                    </View>
-                  </View>
-
-                  {isSelected && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={21}
-                      color="#FBE678"
-                    />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => setCryptoModalVisible(false)}
+              style={styles.modalCloseButton}
+            >
+              <Ionicons name="close" size={22} color="#FFF" />
+            </TouchableOpacity>
           </View>
+
+          {/* ASSETS */}
+
+          {CRYPTO_ASSETS.map((item) => {
+            const isSelected = selectedAsset.label === item.label;
+
+            return (
+              <TouchableOpacity
+                key={item.label}
+                activeOpacity={0.8}
+                style={[
+                  styles.modalItem,
+                  isSelected && styles.modalItemSelected,
+                ]}
+                onPress={() => {
+                  setSelectedAsset(item);
+                  setCryptoModalVisible(false);
+                }}
+              >
+                <View style={styles.rowCenter}>
+                  <Image
+                    source={item.icon}
+                    style={styles.modalAssetImage}
+                    resizeMode="contain"
+                  />
+
+                  <View style={styles.modalAssetInfo}>
+                    <Text style={styles.modalItemText}>{item.label}</Text>
+
+                    <Text style={styles.modalItemSub}>{item.network}</Text>
+                  </View>
+                </View>
+
+                {isSelected && (
+                  <Ionicons name="checkmark-circle" size={21} color="#FBE678" />
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
-      </Modal>
+      </ValoraSheet>
     );
   };
 

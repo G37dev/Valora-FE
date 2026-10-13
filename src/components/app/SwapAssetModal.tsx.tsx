@@ -1,13 +1,6 @@
+import ValoraSheet from "@/components/ValoraSheet";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  Image,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export type SwapAsset = {
   label: string;
@@ -104,105 +97,74 @@ export default function SwapAssetModal({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+    <ValoraSheet visible={visible} onClose={onClose} snapPoints={["58%"]}>
+      <View>
+        <View style={styles.header}>
+          <Text style={styles.title}>Select Asset</Text>
 
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Select Asset</Text>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={onClose}
-              style={styles.closeButton}
-            >
-              <Ionicons name="close" size={22} color="#FFF" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.divider} />
-
-          {SWAP_ASSETS.map((asset) => {
-            const isSelected = selectedAsset.label === asset.label;
-
-            const balance = getBalance(asset);
-            const price = getPrice(asset);
-            const idrValue = balance * price;
-
-            return (
-              <TouchableOpacity
-                key={asset.label}
-                activeOpacity={0.8}
-                onPress={() => onSelect(asset)}
-                style={[
-                  styles.assetItem,
-                  isSelected && styles.assetItemSelected,
-                ]}
-              >
-                <View style={styles.assetLeft}>
-                  <Image
-                    source={asset.icon}
-                    style={styles.assetIcon}
-                    resizeMode="contain"
-                  />
-
-                  <View style={styles.assetInfo}>
-                    <Text style={styles.assetLabel}>{asset.label}</Text>
-
-                    <Text style={styles.assetName}>{asset.name}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.assetRight}>
-                  <Text style={styles.balance}>
-                    {formatBalance(balance)} {asset.label}
-                  </Text>
-
-                  <Text style={styles.idrValue}>{formatIdr(idrValue)}</Text>
-                </View>
-
-                <View style={styles.selectionIcon}>
-                  {isSelected ? (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={20}
-                      color="#FBE678"
-                    />
-                  ) : (
-                    <Ionicons name="chevron-forward" size={18} color="#555" />
-                  )}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={onClose}
+            style={styles.closeButton}
+          >
+            <Ionicons name="close" size={22} color="#FFF" />
+          </TouchableOpacity>
         </View>
+
+        <View style={styles.divider} />
+
+        {SWAP_ASSETS.map((asset) => {
+          const isSelected = selectedAsset.label === asset.label;
+
+          const balance = getBalance(asset);
+          const price = getPrice(asset);
+          const idrValue = balance * price;
+
+          return (
+            <TouchableOpacity
+              key={asset.label}
+              activeOpacity={0.8}
+              onPress={() => onSelect(asset)}
+              style={[styles.assetItem, isSelected && styles.assetItemSelected]}
+            >
+              <View style={styles.assetLeft}>
+                <Image
+                  source={asset.icon}
+                  style={styles.assetIcon}
+                  resizeMode="contain"
+                />
+
+                <View style={styles.assetInfo}>
+                  <Text style={styles.assetLabel}>{asset.label}</Text>
+
+                  <Text style={styles.assetName}>{asset.name}</Text>
+                </View>
+              </View>
+
+              <View style={styles.assetRight}>
+                <Text style={styles.balance}>
+                  {formatBalance(balance)} {asset.label}
+                </Text>
+
+                <Text style={styles.idrValue}>{formatIdr(idrValue)}</Text>
+              </View>
+
+              <View style={styles.selectionIcon}>
+                {isSelected ? (
+                  <Ionicons name="checkmark-circle" size={20} color="#FBE678" />
+                ) : (
+                  <Ionicons name="chevron-forward" size={18} color="#555" />
+                )}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </View>
-    </Modal>
+    </ValoraSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.8)",
-    justifyContent: "flex-end",
-  },
-
-  container: {
-    backgroundColor: "#141414",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 35,
-  },
-
   header: {
     flexDirection: "row",
     alignItems: "center",

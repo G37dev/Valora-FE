@@ -3,17 +3,13 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 
 import Text from "../../CustomText";
+import ValoraSheet from "../../ValoraSheet";
 import OTPVerificationScreen from "./OTPVerificationScreen";
 
 interface TwoFactorVerifProps {
@@ -165,194 +161,164 @@ export default function TwoFactorVerif({
   };
 
   return (
-    <Modal
+    <ValoraSheet
       visible={visible}
-      animationType="slide"
-      transparent
-      statusBarTranslucent
-      onRequestClose={handleClose}
+      onClose={handleClose}
+      snapPoints={["70%"]}
+      scrollable
     >
-      <KeyboardAvoidingView
-        style={styles.keyboardContainer}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-              <View style={styles.modalContent}>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={handleClose}
-                  disabled={
-                    loading ||
-                    verificationStatus === "verifying" ||
-                    verificationStatus === "success"
-                  }
-                >
-                  <Ionicons name="close" size={22} color="#888" />
-                </TouchableOpacity>
+      <View style={styles.scrollContent}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={handleClose}
+          disabled={
+            loading ||
+            verificationStatus === "verifying" ||
+            verificationStatus === "success"
+          }
+        >
+          <Ionicons name="close" size={22} color="#888" />
+        </TouchableOpacity>
+        <View style={styles.iconContainer}>
+          <Ionicons
+            name={
+              passkeyAvailable && !showTotpFallback
+                ? "finger-print-outline"
+                : "shield-checkmark-outline"
+            }
+            size={28}
+            color="#FBE87C"
+          />
+        </View>
 
-                <ScrollView
-                  style={styles.scrollView}
-                  contentContainerStyle={styles.scrollContent}
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
-                  keyboardDismissMode="interactive"
-                  bounces={false}
-                  alwaysBounceVertical={false}
-                >
-                  <View style={styles.iconContainer}>
-                    <Ionicons
-                      name={
-                        passkeyAvailable && !showTotpFallback
-                          ? "finger-print-outline"
-                          : "shield-checkmark-outline"
-                      }
-                      size={28}
-                      color="#FBE87C"
-                    />
-                  </View>
+        <Text style={styles.modalTitle}>Two-Factor Authentication</Text>
 
-                  <Text style={styles.modalTitle}>
-                    Two-Factor Authentication
+        <Text style={styles.modalSubtitle}>
+          {passkeyAvailable && !showTotpFallback
+            ? "Verify your identity with your passkey."
+            : "Enter the 6-digit code from your authenticator app."}
+        </Text>
+
+        {passkeyAvailable && onVerifyPasskey && !showTotpFallback ? (
+          /*
+           * Passkey jadi metode utama — ceremony otomatis
+           * ke-trigger pas modal kebuka; TOTP jadi fallback.
+           */
+          <View style={styles.login2FAContainer}>
+            <TouchableOpacity
+              style={[
+                styles.submitModalBtn,
+                (loading ||
+                  verificationStatus === "verifying" ||
+                  verificationStatus === "success") &&
+                  styles.disabledButton,
+              ]}
+              onPress={handlePasskey}
+              disabled={
+                loading ||
+                verificationStatus === "verifying" ||
+                verificationStatus === "success"
+              }
+              activeOpacity={0.8}
+            >
+              {loading || verificationStatus === "verifying" ? (
+                <ActivityIndicator color="#000" />
+              ) : verificationStatus === "success" ? (
+                <Ionicons name="checkmark" size={22} color="#000" />
+              ) : (
+                <View style={styles.passkeyPrimaryContent}>
+                  <Ionicons
+                    name="finger-print-outline"
+                    size={20}
+                    color="#000"
+                  />
+                  <Text style={styles.submitModalBtnText}>
+                    Verify with Passkey
                   </Text>
+                </View>
+              )}
+            </TouchableOpacity>
 
-                  <Text style={styles.modalSubtitle}>
-                    {passkeyAvailable && !showTotpFallback
-                      ? "Verify your identity with your passkey."
-                      : "Enter the 6-digit code from your authenticator app."}
-                  </Text>
-
-                  {passkeyAvailable && onVerifyPasskey && !showTotpFallback ? (
-                    /*
-                     * Passkey jadi metode utama — ceremony otomatis
-                     * ke-trigger pas modal kebuka; TOTP jadi fallback.
-                     */
-                    <View style={styles.login2FAContainer}>
-                      <TouchableOpacity
-                        style={[
-                          styles.submitModalBtn,
-                          (loading ||
-                            verificationStatus === "verifying" ||
-                            verificationStatus === "success") &&
-                            styles.disabledButton,
-                        ]}
-                        onPress={handlePasskey}
-                        disabled={
-                          loading ||
-                          verificationStatus === "verifying" ||
-                          verificationStatus === "success"
-                        }
-                        activeOpacity={0.8}
-                      >
-                        {loading || verificationStatus === "verifying" ? (
-                          <ActivityIndicator color="#000" />
-                        ) : verificationStatus === "success" ? (
-                          <Ionicons name="checkmark" size={22} color="#000" />
-                        ) : (
-                          <View style={styles.passkeyPrimaryContent}>
-                            <Ionicons
-                              name="finger-print-outline"
-                              size={20}
-                              color="#000"
-                            />
-                            <Text style={styles.submitModalBtnText}>
-                              Verify with Passkey
-                            </Text>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        style={styles.fallbackLink}
-                        onPress={() => setShowTotpFallback(true)}
-                        disabled={
-                          loading ||
-                          verificationStatus === "verifying" ||
-                          verificationStatus === "success"
-                        }
-                      >
-                        <Text style={styles.fallbackLinkText}>
-                          Use authenticator code instead
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    <View style={styles.login2FAContainer}>
-                      <View style={styles.verificationContainer}>
-                        <OTPVerificationScreen
-                          onVerifyOTP={handleOTPComplete}
-                          verificationStatus={verificationStatus}
-                        />
-                      </View>
-
-                      <TouchableOpacity
-                        style={[
-                          styles.submitModalBtn,
-                          (loading ||
-                            verificationStatus === "verifying" ||
-                            verificationStatus === "success") &&
-                            styles.disabledButton,
-                        ]}
-                        onPress={handleVerify}
-                        disabled={
-                          loading ||
-                          verificationStatus === "verifying" ||
-                          verificationStatus === "success" ||
-                          totpCode.length !== 6
-                        }
-                        activeOpacity={0.8}
-                      >
-                        {loading || verificationStatus === "verifying" ? (
-                          <ActivityIndicator color="#000" />
-                        ) : verificationStatus === "success" ? (
-                          <Ionicons name="checkmark" size={22} color="#000" />
-                        ) : (
-                          <Text style={styles.submitModalBtnText}>
-                            Verify Login
-                          </Text>
-                        )}
-                      </TouchableOpacity>
-
-                      {passkeyAvailable && onVerifyPasskey && (
-                        <TouchableOpacity
-                          style={styles.fallbackLink}
-                          onPress={() => setShowTotpFallback(false)}
-                          disabled={
-                            loading ||
-                            verificationStatus === "verifying" ||
-                            verificationStatus === "success"
-                          }
-                        >
-                          <Text style={styles.fallbackLinkText}>
-                            Use passkey instead
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  )}
-
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={handleClose}
-                    disabled={
-                      loading ||
-                      verificationStatus === "verifying" ||
-                      verificationStatus === "success"
-                    }
-                  >
-                    <Text style={styles.cancelText}>Cancel</Text>
-                  </TouchableOpacity>
-                </ScrollView>
-              </View>
-            </TouchableWithoutFeedback>
+            <TouchableOpacity
+              style={styles.fallbackLink}
+              onPress={() => setShowTotpFallback(true)}
+              disabled={
+                loading ||
+                verificationStatus === "verifying" ||
+                verificationStatus === "success"
+              }
+            >
+              <Text style={styles.fallbackLinkText}>
+                Use authenticator code instead
+              </Text>
+            </TouchableOpacity>
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </Modal>
+        ) : (
+          <View style={styles.login2FAContainer}>
+            <View style={styles.verificationContainer}>
+              <OTPVerificationScreen
+                onVerifyOTP={handleOTPComplete}
+                verificationStatus={verificationStatus}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.submitModalBtn,
+                (loading ||
+                  verificationStatus === "verifying" ||
+                  verificationStatus === "success") &&
+                  styles.disabledButton,
+              ]}
+              onPress={handleVerify}
+              disabled={
+                loading ||
+                verificationStatus === "verifying" ||
+                verificationStatus === "success" ||
+                totpCode.length !== 6
+              }
+              activeOpacity={0.8}
+            >
+              {loading || verificationStatus === "verifying" ? (
+                <ActivityIndicator color="#000" />
+              ) : verificationStatus === "success" ? (
+                <Ionicons name="checkmark" size={22} color="#000" />
+              ) : (
+                <Text style={styles.submitModalBtnText}>Verify Login</Text>
+              )}
+            </TouchableOpacity>
+
+            {passkeyAvailable && onVerifyPasskey && (
+              <TouchableOpacity
+                style={styles.fallbackLink}
+                onPress={() => setShowTotpFallback(false)}
+                disabled={
+                  loading ||
+                  verificationStatus === "verifying" ||
+                  verificationStatus === "success"
+                }
+              >
+                <Text style={styles.fallbackLinkText}>Use passkey instead</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={handleClose}
+          disabled={
+            loading ||
+            verificationStatus === "verifying" ||
+            verificationStatus === "success"
+          }
+        >
+          <Text style={styles.cancelText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </ValoraSheet>
   );
 }
-
 const styles = StyleSheet.create({
   keyboardContainer: {
     flex: 1,

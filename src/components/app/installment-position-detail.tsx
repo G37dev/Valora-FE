@@ -1,17 +1,15 @@
+import ValoraSheet from "@/components/ValoraSheet";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, type ReactNode } from "react";
 import {
   Image,
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, {
   Circle,
   Defs,
@@ -213,463 +211,438 @@ export default function InstallmentPositionDetailModal({
   const balance = position.balance ?? 500000;
 
   return (
-    <Modal
+    <ValoraSheet
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      onClose={onClose}
+      snapPoints={["88%"]}
+      scrollable
     >
-      <View style={styles.overlay}>
-        <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.outsideArea} />
-        </TouchableWithoutFeedback>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Installment Position</Text>
 
-        <View style={styles.modalContainer}>
-          <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
-            {/* HEADER */}
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>Installment Position</Text>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={onClose}
+          style={styles.closeButton}
+        >
+          <Ionicons name="close" size={17} color="#777777" />
+        </TouchableOpacity>
+      </View>
 
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={onClose}
-                style={styles.closeButton}
-              >
-                <Ionicons name="close" size={17} color="#777777" />
-              </TouchableOpacity>
+      <View>
+        {/* ASSET + TX ID */}
+        <View style={styles.card}>
+          <View style={styles.assetRow}>
+            <View style={styles.assetLeft}>
+              <Image
+                style={styles.imgcard}
+                source={assetImage}
+                resizeMode="contain"
+              />
+
+              <View style={styles.assetInfo}>
+                <Text style={styles.assetAmount}>{position.amount}</Text>
+                <Text style={styles.assetPlan}>{position.plan}</Text>
+              </View>
             </View>
 
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContent}
-            >
-              {/* ASSET + TX ID */}
-              <View style={styles.card}>
-                <View style={styles.assetRow}>
-                  <View style={styles.assetLeft}>
-                    <Image
-                      style={styles.imgcard}
-                      source={assetImage}
-                      resizeMode="contain"
-                    />
-
-                    <View style={styles.assetInfo}>
-                      <Text style={styles.assetAmount}>{position.amount}</Text>
-                      <Text style={styles.assetPlan}>{position.plan}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.txColumn}>
-                    <View style={styles.txLabelRow}>
-                      <Text style={styles.txLabel}>Transaction ID</Text>
-                      <Ionicons name="copy-outline" size={11} color="#777777" />
-                    </View>
-
-                    <Text numberOfLines={1} style={styles.txValue}>
-                      {txId}
-                    </Text>
-                  </View>
-                </View>
+            <View style={styles.txColumn}>
+              <View style={styles.txLabelRow}>
+                <Text style={styles.txLabel}>Transaction ID</Text>
+                <Ionicons name="copy-outline" size={11} color="#777777" />
               </View>
 
-              {/* STATUS + COMPLETION */}
-              <View style={[styles.card, styles.statusCard]}>
-                <View style={styles.assetRow}>
-                  <View style={styles.assetLeft}>
-                    <View
-                      style={[
-                        styles.statusIcon,
-                        !isRunning && styles.statusIconFinished,
-                        hasOverdue && styles.statusIconDanger,
-                      ]}
-                    >
-                      <Ionicons
-                        name={
-                          hasOverdue
-                            ? "alert-circle-outline"
-                            : isRunning
-                              ? "time-outline"
-                              : "checkmark-outline"
-                        }
-                        size={16}
-                        color={
-                          hasOverdue ? "#F87171" : isRunning ? GOLD : "#10B981"
-                        }
-                      />
-                    </View>
+              <Text numberOfLines={1} style={styles.txValue}>
+                {txId}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-                    <View style={styles.assetInfo}>
-                      <Text
-                        style={[
-                          styles.statusTitle,
-                          !isRunning && styles.statusTitleFinished,
-                          hasOverdue && styles.statusTitleDanger,
-                        ]}
-                      >
-                        {statusTitle}
-                      </Text>
-                      <Text style={styles.statusSubtitle}>
-                        {isPastDue
-                          ? "Plan is past due — settle before cure period ends"
-                          : hasOverdue
-                            ? `${overdueCount} installment${overdueCount > 1 ? "s" : ""} overdue`
-                            : `Installment is ${isRunning ? "running" : "finished"}`}
-                      </Text>
-                    </View>
-                  </View>
+        {/* STATUS + COMPLETION */}
+        <View style={[styles.card, styles.statusCard]}>
+          <View style={styles.assetRow}>
+            <View style={styles.assetLeft}>
+              <View
+                style={[
+                  styles.statusIcon,
+                  !isRunning && styles.statusIconFinished,
+                  hasOverdue && styles.statusIconDanger,
+                ]}
+              >
+                <Ionicons
+                  name={
+                    hasOverdue
+                      ? "alert-circle-outline"
+                      : isRunning
+                        ? "time-outline"
+                        : "checkmark-outline"
+                  }
+                  size={16}
+                  color={hasOverdue ? "#F87171" : isRunning ? GOLD : "#10B981"}
+                />
+              </View>
 
-                  {!isFlexible && (
-                    <View style={styles.txColumn}>
-                      <Text style={styles.txLabel}>Start Date</Text>
-                      <Text numberOfLines={1} style={styles.txValue}>
-                        {startDate}
-                      </Text>
-                    </View>
-                  )}
-                </View>
+              <View style={styles.assetInfo}>
+                <Text
+                  style={[
+                    styles.statusTitle,
+                    !isRunning && styles.statusTitleFinished,
+                    hasOverdue && styles.statusTitleDanger,
+                  ]}
+                >
+                  {statusTitle}
+                </Text>
+                <Text style={styles.statusSubtitle}>
+                  {isPastDue
+                    ? "Plan is past due — settle before cure period ends"
+                    : hasOverdue
+                      ? `${overdueCount} installment${overdueCount > 1 ? "s" : ""} overdue`
+                      : `Installment is ${isRunning ? "running" : "finished"}`}
+                </Text>
+              </View>
+            </View>
 
-                {isFlexible && (
-                  <View style={[styles.assetRow, styles.dateRow]}>
-                    <View style={styles.dateCol}>
-                      <Text style={styles.txLabel}>Start Date</Text>
-                      <Text numberOfLines={1} style={styles.txValue}>
-                        {startDate}
-                      </Text>
-                    </View>
+            {!isFlexible && (
+              <View style={styles.txColumn}>
+                <Text style={styles.txLabel}>Start Date</Text>
+                <Text numberOfLines={1} style={styles.txValue}>
+                  {startDate}
+                </Text>
+              </View>
+            )}
+          </View>
 
-                    <View style={[styles.dateCol, styles.dateColRight]}>
-                      <Text style={styles.txLabel}>Max Tenor</Text>
-                      <Text numberOfLines={1} style={styles.txValue}>
-                        {maxTenor}
-                      </Text>
-                    </View>
-                  </View>
-                )}
+          {isFlexible && (
+            <View style={[styles.assetRow, styles.dateRow]}>
+              <View style={styles.dateCol}>
+                <Text style={styles.txLabel}>Start Date</Text>
+                <Text numberOfLines={1} style={styles.txValue}>
+                  {startDate}
+                </Text>
+              </View>
 
-                <View style={styles.completionRow}>
-                  <Text style={styles.completionLabel}>Completion</Text>
-                  <Text style={styles.completionValue}>{completion}%</Text>
-                </View>
+              <View style={[styles.dateCol, styles.dateColRight]}>
+                <Text style={styles.txLabel}>Max Tenor</Text>
+                <Text numberOfLines={1} style={styles.txValue}>
+                  {maxTenor}
+                </Text>
+              </View>
+            </View>
+          )}
 
-                <View style={styles.progressTrack}>
-                  <LinearGradient
-                    colors={["#FFF3A6", "#F5D13E"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={[
-                      styles.progressFill,
-                      { width: `${Math.max(2, completion)}%` },
-                    ]}
+          <View style={styles.completionRow}>
+            <Text style={styles.completionLabel}>Completion</Text>
+            <Text style={styles.completionValue}>{completion}%</Text>
+          </View>
+
+          <View style={styles.progressTrack}>
+            <LinearGradient
+              colors={["#FFF3A6", "#F5D13E"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[
+                styles.progressFill,
+                { width: `${Math.max(2, completion)}%` },
+              ]}
+            />
+          </View>
+        </View>
+
+        {/* OVERDUE BANNER */}
+        {hasOverdue && (
+          <View style={[styles.card, styles.overdueBanner]}>
+            <View style={styles.overdueBannerRow}>
+              <Ionicons name="warning-outline" size={16} color="#F87171" />
+              <View style={styles.overdueBannerText}>
+                <Text style={styles.overdueBannerTitle}>
+                  {isPastDue
+                    ? "Plan Past Due"
+                    : `${overdueCount} Installment${overdueCount > 1 ? "s" : ""} Overdue`}
+                </Text>
+                <Text style={styles.overdueBannerBody}>
+                  {overdueAmount > 0
+                    ? `Outstanding ${Math.round(overdueAmount).toLocaleString("id-ID")} IDR${overdueSinceLabel ? ` — overdue sejak ${overdueSinceLabel}` : ""}. `
+                    : ""}
+                  Late penalty 0.05%/day is accruing. Pay now to stop the
+                  charges.
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {isFlexible ? (
+          <>
+            {/* RING + STATS */}
+            <View style={[styles.card, styles.ringCard]}>
+              <View style={styles.flexRingRow}>
+                <ProgressRing
+                  size={RING_SIZE_SM}
+                  stroke={RING_STROKE_SM}
+                  completion={completion}
+                >
+                  <Text style={styles.ringLabelSm}>You've already paid</Text>
+                  <Text style={styles.ringValueSm}>
+                    {formatAmount(paidAmount)} IDR
+                  </Text>
+                  <Text style={styles.ringSubSm}>
+                    out of {formatAmount(totalAmount)} IDR
+                  </Text>
+                </ProgressRing>
+
+                <View style={styles.statColumn}>
+                  <StatBlock
+                    label="Eligible Plan Payment (EPP)"
+                    value={`${formatAmount(eppPaid)} IDR`}
+                    sub={`out of ${formatAmount(eppTotal)} IDR`}
+                  />
+
+                  <View style={styles.statDivider} />
+
+                  <StatBlock
+                    label="Principal Outstanding"
+                    value={`${formatAmount(principalOutstanding)} IDR`}
+                    sub={`${remainingPercent}% remaining`}
+                  />
+
+                  <View style={styles.statDivider} />
+
+                  <StatBlock
+                    label="Total Amount Spent"
+                    value={`${formatAmount(totalSpent)} IDR`}
+                    sub="EPP + Fees (not affecting completion)"
                   />
                 </View>
               </View>
+            </View>
 
-              {/* OVERDUE BANNER */}
-              {hasOverdue && (
-                <View style={[styles.card, styles.overdueBanner]}>
-                  <View style={styles.overdueBannerRow}>
-                    <Ionicons
-                      name="warning-outline"
-                      size={16}
-                      color="#F87171"
-                    />
-                    <View style={styles.overdueBannerText}>
-                      <Text style={styles.overdueBannerTitle}>
-                        {isPastDue
-                          ? "Plan Past Due"
-                          : `${overdueCount} Installment${overdueCount > 1 ? "s" : ""} Overdue`}
-                      </Text>
-                      <Text style={styles.overdueBannerBody}>
-                        {overdueAmount > 0
-                          ? `Outstanding ${Math.round(overdueAmount).toLocaleString("id-ID")} IDR${overdueSinceLabel ? ` — overdue sejak ${overdueSinceLabel}` : ""}. `
-                          : ""}
-                        Late penalty 0.05%/day is accruing. Pay now to stop the
-                        charges.
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              )}
+            {/* LATEST PAYMENT */}
+            <View style={[styles.card, styles.statusCard]}>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionTitle}>Latest Payment:</Text>
 
-              {isFlexible ? (
-                <>
-                  {/* RING + STATS */}
-                  <View style={[styles.card, styles.ringCard]}>
-                    <View style={styles.flexRingRow}>
-                      <ProgressRing
-                        size={RING_SIZE_SM}
-                        stroke={RING_STROKE_SM}
-                        completion={completion}
-                      >
-                        <Text style={styles.ringLabelSm}>
-                          You've already paid
-                        </Text>
-                        <Text style={styles.ringValueSm}>
-                          {formatAmount(paidAmount)} IDR
-                        </Text>
-                        <Text style={styles.ringSubSm}>
-                          out of {formatAmount(totalAmount)} IDR
-                        </Text>
-                      </ProgressRing>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setPaymentsVisible(true)}
+                  style={styles.viewAllButton}
+                >
+                  <Text style={styles.viewAllText}>View All</Text>
+                  <Ionicons name="chevron-forward" size={12} color={GOLD} />
+                </TouchableOpacity>
+              </View>
 
-                      <View style={styles.statColumn}>
-                        <StatBlock
-                          label="Eligible Plan Payment (EPP)"
-                          value={`${formatAmount(eppPaid)} IDR`}
-                          sub={`out of ${formatAmount(eppTotal)} IDR`}
-                        />
-
-                        <View style={styles.statDivider} />
-
-                        <StatBlock
-                          label="Principal Outstanding"
-                          value={`${formatAmount(principalOutstanding)} IDR`}
-                          sub={`${remainingPercent}% remaining`}
-                        />
-
-                        <View style={styles.statDivider} />
-
-                        <StatBlock
-                          label="Total Amount Spent"
-                          value={`${formatAmount(totalSpent)} IDR`}
-                          sub="EPP + Fees (not affecting completion)"
-                        />
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* LATEST PAYMENT */}
-                  <View style={[styles.card, styles.statusCard]}>
-                    <View style={styles.sectionHeaderRow}>
-                      <Text style={styles.sectionTitle}>Latest Payment:</Text>
-
-                      <TouchableOpacity
-                        activeOpacity={0.7}
-                        onPress={() => setPaymentsVisible(true)}
-                        style={styles.viewAllButton}
-                      >
-                        <Text style={styles.viewAllText}>View All</Text>
-                        <Ionicons
-                          name="chevron-forward"
-                          size={12}
-                          color={GOLD}
-                        />
-                      </TouchableOpacity>
-                    </View>
-
-                    {latestPayment ? (
-                      <PaymentItemCard
-                        item={latestPayment}
-                        onPress={() => setDetailPayment(latestPayment)}
-                        style={styles.latestItem}
-                      />
-                    ) : (
-                      <Text style={styles.scheduleNote}>No payments yet</Text>
-                    )}
-                  </View>
-
-                  {/* PRIORITY PAYMENT */}
-                  <View style={[styles.card, styles.statusCard]}>
-                    <View style={styles.chargeTitleRow}>
-                      <Text style={styles.sectionTitle}>Priority Payment</Text>
-                      <Ionicons
-                        name="information-circle"
-                        size={12}
-                        color="#696969"
-                        style={styles.chargeTitleIcon}
-                      />
-                    </View>
-
-                    <View style={styles.chargeRow}>
-                      <View style={styles.chargeLabelRow}>
-                        <Text style={styles.chargeLabel}>
-                          Accrued Carrying Interest
-                        </Text>
-                        <Ionicons
-                          name="information-circle"
-                          size={11}
-                          color="#696969"
-                        />
-                      </View>
-                      <Text style={styles.chargeValue}>
-                        {formatAmount(accruedInterest)} IDR
-                      </Text>
-                    </View>
-
-                    <View style={styles.chargeRow}>
-                      <View style={styles.chargeLabelRow}>
-                        <Text style={styles.chargeLabel}>Penalty Fee</Text>
-                        <Ionicons
-                          name="information-circle"
-                          size={11}
-                          color="#696969"
-                        />
-                      </View>
-                      <Text style={styles.chargeValue}>
-                        {formatAmount(penaltyFee)} IDR
-                      </Text>
-                    </View>
-
-                    <View style={styles.innerBox}>
-                      <Text style={styles.chargesTotalLabel}>
-                        Total Outstanding Charges
-                      </Text>
-                      <Text style={styles.chargesTotalValue}>
-                        {formatAmount(totalCharges)} IDR
-                      </Text>
-                    </View>
-                  </View>
-                </>
+              {latestPayment ? (
+                <PaymentItemCard
+                  item={latestPayment}
+                  onPress={() => setDetailPayment(latestPayment)}
+                  style={styles.latestItem}
+                />
               ) : (
-                /* RING + SCHEDULE */
-                <View style={[styles.card, styles.ringCard]}>
-                  <View style={styles.ringWrapper}>
-                    <ProgressRing
-                      size={RING_SIZE}
-                      stroke={RING_STROKE}
-                      completion={completion}
-                    >
-                      <Text style={styles.ringLabel}>You've already paid</Text>
-                      <Text style={styles.ringValue}>
-                        {formatAmount(paidAmount)} IDR
-                      </Text>
-                      <Text style={styles.ringSub}>
-                        out of {formatAmount(totalAmount)} IDR
-                      </Text>
-                    </ProgressRing>
-                  </View>
-
-                  <Text style={styles.scheduleTitle}>Payment Schedule</Text>
-
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.scheduleList}
-                  >
-                    {schedule.map((item, index) => (
-                      <SchedulePill
-                        key={`${item.month}-${item.year}-${index}`}
-                        item={item}
-                      />
-                    ))}
-                  </ScrollView>
-
-                  {!isClaimable && (
-                    <View style={styles.scheduleBottom}>
-                      <View>
-                        <Text style={styles.scheduleAmount}>
-                          {formatAmount(installmentAmount)} IDR
-                        </Text>
-                        <Text style={styles.scheduleNote}>
-                          Installment including interest
-                        </Text>
-                      </View>
-
-                      <View style={styles.scheduleRight}>
-                        <Text style={styles.scheduleNote}>Auto pay-on</Text>
-                        <Text style={styles.scheduleDate}>{autoPayDate}</Text>
-                      </View>
-                    </View>
-                  )}
-                </View>
+                <Text style={styles.scheduleNote}>No payments yet</Text>
               )}
+            </View>
+
+            {/* PRIORITY PAYMENT */}
+            <View style={[styles.card, styles.statusCard]}>
+              <View style={styles.chargeTitleRow}>
+                <Text style={styles.sectionTitle}>Priority Payment</Text>
+                <Ionicons
+                  name="information-circle"
+                  size={12}
+                  color="#696969"
+                  style={styles.chargeTitleIcon}
+                />
+              </View>
+
+              <View style={styles.chargeRow}>
+                <View style={styles.chargeLabelRow}>
+                  <Text style={styles.chargeLabel}>
+                    Accrued Carrying Interest
+                  </Text>
+                  <Ionicons
+                    name="information-circle"
+                    size={11}
+                    color="#696969"
+                  />
+                </View>
+                <Text style={styles.chargeValue}>
+                  {formatAmount(accruedInterest)} IDR
+                </Text>
+              </View>
+
+              <View style={styles.chargeRow}>
+                <View style={styles.chargeLabelRow}>
+                  <Text style={styles.chargeLabel}>Penalty Fee</Text>
+                  <Ionicons
+                    name="information-circle"
+                    size={11}
+                    color="#696969"
+                  />
+                </View>
+                <Text style={styles.chargeValue}>
+                  {formatAmount(penaltyFee)} IDR
+                </Text>
+              </View>
+
+              <View style={styles.innerBox}>
+                <Text style={styles.chargesTotalLabel}>
+                  Total Outstanding Charges
+                </Text>
+                <Text style={styles.chargesTotalValue}>
+                  {formatAmount(totalCharges)} IDR
+                </Text>
+              </View>
+            </View>
+          </>
+        ) : (
+          /* RING + SCHEDULE */
+          <View style={[styles.card, styles.ringCard]}>
+            <View style={styles.ringWrapper}>
+              <ProgressRing
+                size={RING_SIZE}
+                stroke={RING_STROKE}
+                completion={completion}
+              >
+                <Text style={styles.ringLabel}>You've already paid</Text>
+                <Text style={styles.ringValue}>
+                  {formatAmount(paidAmount)} IDR
+                </Text>
+                <Text style={styles.ringSub}>
+                  out of {formatAmount(totalAmount)} IDR
+                </Text>
+              </ProgressRing>
+            </View>
+
+            <Text style={styles.scheduleTitle}>Payment Schedule</Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.scheduleList}
+            >
+              {schedule.map((item, index) => (
+                <SchedulePill
+                  key={`${item.month}-${item.year}-${index}`}
+                  item={item}
+                />
+              ))}
             </ScrollView>
 
-            {/* ACTIONS */}
-            {(canPay || isClaimable || isClaiming) && (
-              <View style={styles.actionsRow}>
-                <GoldButton
-                  label={
-                    isClaiming
-                      ? "Processing…"
-                      : isClaimable
-                        ? "Claim"
-                        : isFlexible
-                          ? "Make Payment"
-                          : "Make Early Payment"
-                  }
-                  disabled={isClaiming}
-                  onPress={() =>
-                    isClaiming
-                      ? undefined
-                      : isClaimable
-                        ? onClaim
-                          ? onClaim(position)
-                          : undefined
-                        : setPayVisible(true)
-                  }
-                  style={{ flex: 1 }}
-                />
+            {!isClaimable && (
+              <View style={styles.scheduleBottom}>
+                <View>
+                  <Text style={styles.scheduleAmount}>
+                    {formatAmount(installmentAmount)} IDR
+                  </Text>
+                  <Text style={styles.scheduleNote}>
+                    Installment including interest
+                  </Text>
+                </View>
 
-                {position.canRestructure && onRestructure && (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => onRestructure(position)}
-                    style={styles.restructureButton}
-                  >
-                    <Text style={styles.restructureText}>Restructure</Text>
-                    <Text style={styles.restructureSub}>
-                      +{position.restructureQuote?.extensionMonths ?? 1} month
-                    </Text>
-                  </TouchableOpacity>
-                )}
-
-                {canPay && position.canCancel !== false && (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() =>
-                      onCancelPlan ? onCancelPlan(position) : onClose()
-                    }
-                    style={styles.cancelButton}
-                  >
-                    <Text style={styles.cancelText}>Cancel Plan</Text>
-                    {isFlexible && (
-                      <Text style={styles.cancelSub}>
-                        Available for {cancelDays} more days
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                )}
+                <View style={styles.scheduleRight}>
+                  <Text style={styles.scheduleNote}>Auto pay-on</Text>
+                  <Text style={styles.scheduleDate}>{autoPayDate}</Text>
+                </View>
               </View>
             )}
-          </SafeAreaView>
-        </View>
+          </View>
+        )}
 
-        <LatestPaymentsModal
-          visible={paymentsVisible}
-          payments={[...payments].reverse()}
-          onClose={() => setPaymentsVisible(false)}
-          onSelect={(item) => setDetailPayment(item)}
-        />
+        {/* ACTIONS */}
+        {(canPay || isClaimable || isClaiming) && (
+          <View style={styles.actionsRow}>
+            <GoldButton
+              label={
+                isClaiming
+                  ? "Processing…"
+                  : isClaimable
+                    ? "Claim"
+                    : isFlexible
+                      ? "Make Payment"
+                      : "Make Early Payment"
+              }
+              disabled={isClaiming}
+              onPress={() =>
+                isClaiming
+                  ? undefined
+                  : isClaimable
+                    ? onClaim
+                      ? onClaim(position)
+                      : undefined
+                    : setPayVisible(true)
+              }
+              style={{ flex: 1 }}
+            />
 
-        <PaymentDetailsModal
-          visible={detailPayment !== null}
-          payment={detailPayment}
-          onClose={() => setDetailPayment(null)}
-        />
+            {position.canRestructure && onRestructure && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => onRestructure(position)}
+                style={styles.restructureButton}
+              >
+                <Text style={styles.restructureText}>Restructure</Text>
+                <Text style={styles.restructureSub}>
+                  +{position.restructureQuote?.extensionMonths ?? 1} month
+                </Text>
+              </TouchableOpacity>
+            )}
 
-        <MakePaymentModal
-          visible={payVisible}
-          balance={balance}
-          lockedAmount={
-            position.mode === "Standard" ? position.dueAmount : undefined
-          }
-          maxAmount={position.dueAmount}
-          breakdown={
-            position.mode === "Standard" ? position.dueBreakdown : undefined
-          }
-          onClose={() => setPayVisible(false)}
-          onConfirm={
-            onMakePayment
-              ? (amount) => {
-                  setPayVisible(false);
-                  onMakePayment(position, amount);
+            {canPay && position.canCancel !== false && (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() =>
+                  onCancelPlan ? onCancelPlan(position) : onClose()
                 }
-              : undefined
-          }
-        />
+                style={styles.cancelButton}
+              >
+                <Text style={styles.cancelText}>Cancel Plan</Text>
+                {isFlexible && (
+                  <Text style={styles.cancelSub}>
+                    Available for {cancelDays} more days
+                  </Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </View>
-    </Modal>
+
+      <LatestPaymentsModal
+        visible={paymentsVisible}
+        payments={[...payments].reverse()}
+        onClose={() => setPaymentsVisible(false)}
+        onSelect={(item) => setDetailPayment(item)}
+      />
+
+      <PaymentDetailsModal
+        visible={detailPayment !== null}
+        payment={detailPayment}
+        onClose={() => setDetailPayment(null)}
+      />
+
+      <MakePaymentModal
+        visible={payVisible}
+        balance={balance}
+        lockedAmount={
+          position.mode === "Standard" ? position.dueAmount : undefined
+        }
+        maxAmount={position.dueAmount}
+        breakdown={
+          position.mode === "Standard" ? position.dueBreakdown : undefined
+        }
+        onClose={() => setPayVisible(false)}
+        onConfirm={
+          onMakePayment
+            ? (amount) => {
+                setPayVisible(false);
+                onMakePayment(position, amount);
+              }
+            : undefined
+        }
+      />
+    </ValoraSheet>
   );
 }
 

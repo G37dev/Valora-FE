@@ -1,6 +1,7 @@
+import ValoraSheet from "@/components/ValoraSheet";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface DepositOverlayProps {
   visible: boolean;
@@ -30,69 +31,57 @@ export default function DepositOverlay({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
+    <ValoraSheet visible={visible} onClose={onClose} snapPoints={["38%"]}>
+      <View>
+        {/* HEADER */}
+
+        <View style={styles.header}>
+          <Text style={styles.title}>Deposit Options</Text>
+
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+
+        {/* IDR */}
+
         <TouchableOpacity
-          activeOpacity={1}
-          style={styles.backdrop}
-          onPress={onClose}
-        />
+          activeOpacity={0.8}
+          style={styles.option}
+          onPress={() => handleDeposit("IDR")}
+        >
+          <View style={styles.optionContent}>
+            <Text style={styles.optionTitle}>Deposit IDR</Text>
 
-        <View style={styles.container}>
-          {/* HEADER */}
-
-          <View style={styles.header}>
-            <Text style={styles.title}>Deposit Options</Text>
-
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
+            <Text style={styles.optionDescription}>
+              Deposit Indonesian Rupiah
+            </Text>
           </View>
 
-          {/* IDR */}
+          <Ionicons name="chevron-forward" size={20} color="#666" />
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.option}
-            onPress={() => handleDeposit("IDR")}
-          >
-            <View style={styles.optionContent}>
-              <Text style={styles.optionTitle}>Deposit IDR</Text>
+        {/* CRYPTO */}
 
-              <Text style={styles.optionDescription}>
-                Deposit Indonesian Rupiah
-              </Text>
-            </View>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.option}
+          onPress={() => handleDeposit("CRYPTO")}
+        >
+          <View style={styles.optionContent}>
+            <Text style={styles.optionTitle}>Deposit Crypto</Text>
 
-            <Ionicons name="chevron-forward" size={20} color="#666" />
-          </TouchableOpacity>
+            <Text style={styles.optionDescription}>
+              Deposit USDT, USDC or XAUT
+            </Text>
+          </View>
 
-          {/* CRYPTO */}
+          <Ionicons name="chevron-forward" size={20} color="#666" />
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.option}
-            onPress={() => handleDeposit("CRYPTO")}
-          >
-            <View style={styles.optionContent}>
-              <Text style={styles.optionTitle}>Deposit Crypto</Text>
+        {/* GOLD */}
 
-              <Text style={styles.optionDescription}>
-                Deposit USDT, USDC or XAUT
-              </Text>
-            </View>
-
-            <Ionicons name="chevron-forward" size={20} color="#666" />
-          </TouchableOpacity>
-
-          {/* GOLD */}
-
-          {/* <TouchableOpacity
+        {/* <TouchableOpacity
             activeOpacity={0.8}
             style={styles.option2}
             onPress={() => handleDeposit("GOLD")}
@@ -107,34 +96,12 @@ export default function DepositOverlay({
 
             <Ionicons name="chevron-forward" size={20} color="#666" />
           </TouchableOpacity> */}
-        </View>
       </View>
-    </Modal>
+    </ValoraSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.72)",
-  },
-
-  container: {
-    backgroundColor: "#101010",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 35,
-    borderTopWidth: 1,
-    borderTopColor: "#292929",
-  },
-
   header: {
     flexDirection: "row",
     alignItems: "center",

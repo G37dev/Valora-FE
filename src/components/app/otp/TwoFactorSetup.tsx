@@ -4,16 +4,13 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
+
+import ValoraSheet from "../../ValoraSheet";
 
 import { showAlert } from "../../AppAlert";
 import Text from "../../CustomText";
@@ -134,191 +131,152 @@ export default function TwoFactorSetup({
   };
 
   return (
-    <Modal
+    <ValoraSheet
       visible={visible}
-      animationType="slide"
-      transparent
-      statusBarTranslucent
-      onRequestClose={handleClose}
+      onClose={handleClose}
+      snapPoints={["85%"]}
+      scrollable
     >
-      <KeyboardAvoidingView
-        style={styles.keyboardContainer}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-              <View style={styles.modalContent}>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={handleClose}
-                  disabled={
-                    loading ||
-                    verificationStatus === "verifying" ||
-                    verificationStatus === "success"
-                  }
-                >
-                  <Ionicons name="close" size={22} color="#888" />
-                </TouchableOpacity>
+      <View style={styles.scrollContent}>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={handleClose}
+          disabled={
+            loading ||
+            verificationStatus === "verifying" ||
+            verificationStatus === "success"
+          }
+        >
+          <Ionicons name="close" size={22} color="#888" />
+        </TouchableOpacity>
+        <View style={styles.iconContainer}>
+          <Ionicons name="shield-checkmark-outline" size={28} color="#FBE87C" />
+        </View>
 
-                <ScrollView
-                  style={styles.scrollView}
-                  contentContainerStyle={styles.scrollContent}
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
-                  keyboardDismissMode="interactive"
-                  bounces={false}
-                  alwaysBounceVertical={false}
-                >
-                  <View style={styles.iconContainer}>
-                    <Ionicons
-                      name="shield-checkmark-outline"
-                      size={28}
-                      color="#FBE87C"
-                    />
-                  </View>
+        <Text style={styles.modalTitle}>Set Up Authenticator</Text>
 
-                  <Text style={styles.modalTitle}>Set Up Authenticator</Text>
+        <Text style={styles.modalSubtitle}>
+          Scan the QR code with your authenticator app to secure your account.
+        </Text>
 
-                  <Text style={styles.modalSubtitle}>
-                    Scan the QR code with your authenticator app to secure your
-                    account.
+        {!showAuthenticatorInput ? (
+          <View style={styles.setupContainer}>
+            <TouchableOpacity
+              style={styles.methodBtn}
+              onPress={onSelectAuthenticator}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FBE87C" />
+              ) : (
+                <>
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={20}
+                    color="#FBE87C"
+                  />
+
+                  <Text style={styles.methodBtnText}>
+                    Set Up Google Authenticator
                   </Text>
-
-                  {!showAuthenticatorInput ? (
-                    <View style={styles.setupContainer}>
-                      <TouchableOpacity
-                        style={styles.methodBtn}
-                        onPress={onSelectAuthenticator}
-                        disabled={loading}
-                        activeOpacity={0.8}
-                      >
-                        {loading ? (
-                          <ActivityIndicator color="#FBE87C" />
-                        ) : (
-                          <>
-                            <Ionicons
-                              name="shield-checkmark-outline"
-                              size={20}
-                              color="#FBE87C"
-                            />
-
-                            <Text style={styles.methodBtnText}>
-                              Set Up Google Authenticator
-                            </Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  ) : (
-                    <View style={styles.setupContent}>
-                      <View style={styles.qrContainer}>
-                        {otpauth ? (
-                          <QRCode
-                            value={otpauth}
-                            size={190}
-                            backgroundColor="#FFFFFF"
-                            color="#000000"
-                          />
-                        ) : (
-                          <View style={styles.qrError}>
-                            <Ionicons
-                              name="alert-circle-outline"
-                              size={28}
-                              color="#FBE87C"
-                            />
-
-                            <Text style={styles.qrErrorText}>
-                              QR code unavailable
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-
-                      <Text style={styles.scanTitle}>Scan this QR code</Text>
-
-                      <Text style={styles.scanSubtitle}>
-                        Open Google Authenticator and scan the QR code above.
-                      </Text>
-
-                      <TouchableOpacity
-                        style={styles.copyButton}
-                        onPress={handleCopySecret}
-                        activeOpacity={0.8}
-                        disabled={
-                          loading ||
-                          verificationStatus === "verifying" ||
-                          verificationStatus === "success"
-                        }
-                      >
-                        <Ionicons
-                          name="copy-outline"
-                          size={18}
-                          color="#FBE87C"
-                        />
-
-                        <Text style={styles.copyButtonText}>
-                          Copy Setup Key
-                        </Text>
-                      </TouchableOpacity>
-
-                      <View style={styles.verificationContainer}>
-                        <OTPVerificationScreen
-                          onVerifyOTP={handleOTPComplete}
-                          verificationStatus={verificationStatus}
-                        />
-                      </View>
-
-                      <TouchableOpacity
-                        style={[
-                          styles.submitModalBtn,
-                          (loading ||
-                            verificationStatus === "verifying" ||
-                            verificationStatus === "success") &&
-                            styles.disabledButton,
-                        ]}
-                        onPress={handleVerify}
-                        disabled={
-                          loading ||
-                          verificationStatus === "verifying" ||
-                          verificationStatus === "success"
-                        }
-                        activeOpacity={0.8}
-                      >
-                        {loading || verificationStatus === "verifying" ? (
-                          <ActivityIndicator color="#000" />
-                        ) : verificationStatus === "success" ? (
-                          <Ionicons name="checkmark" size={22} color="#000" />
-                        ) : (
-                          <Text style={styles.submitModalBtnText}>
-                            Verify & Continue
-                          </Text>
-                        )}
-                      </TouchableOpacity>
-                    </View>
-                  )}
-
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={handleClose}
-                    disabled={
-                      loading ||
-                      verificationStatus === "verifying" ||
-                      verificationStatus === "success"
-                    }
-                  >
-                    <Text style={styles.cancelText}>Cancel</Text>
-                  </TouchableOpacity>
-                </ScrollView>
-              </View>
-            </TouchableWithoutFeedback>
+                </>
+              )}
+            </TouchableOpacity>
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </Modal>
+        ) : (
+          <View style={styles.setupContent}>
+            <View style={styles.qrContainer}>
+              {otpauth ? (
+                <QRCode
+                  value={otpauth}
+                  size={190}
+                  backgroundColor="#FFFFFF"
+                  color="#000000"
+                />
+              ) : (
+                <View style={styles.qrError}>
+                  <Ionicons
+                    name="alert-circle-outline"
+                    size={28}
+                    color="#FBE87C"
+                  />
+
+                  <Text style={styles.qrErrorText}>QR code unavailable</Text>
+                </View>
+              )}
+            </View>
+
+            <Text style={styles.scanTitle}>Scan this QR code</Text>
+
+            <Text style={styles.scanSubtitle}>
+              Open Google Authenticator and scan the QR code above.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.copyButton}
+              onPress={handleCopySecret}
+              activeOpacity={0.8}
+              disabled={
+                loading ||
+                verificationStatus === "verifying" ||
+                verificationStatus === "success"
+              }
+            >
+              <Ionicons name="copy-outline" size={18} color="#FBE87C" />
+
+              <Text style={styles.copyButtonText}>Copy Setup Key</Text>
+            </TouchableOpacity>
+
+            <View style={styles.verificationContainer}>
+              <OTPVerificationScreen
+                onVerifyOTP={handleOTPComplete}
+                verificationStatus={verificationStatus}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.submitModalBtn,
+                (loading ||
+                  verificationStatus === "verifying" ||
+                  verificationStatus === "success") &&
+                  styles.disabledButton,
+              ]}
+              onPress={handleVerify}
+              disabled={
+                loading ||
+                verificationStatus === "verifying" ||
+                verificationStatus === "success"
+              }
+              activeOpacity={0.8}
+            >
+              {loading || verificationStatus === "verifying" ? (
+                <ActivityIndicator color="#000" />
+              ) : verificationStatus === "success" ? (
+                <Ionicons name="checkmark" size={22} color="#000" />
+              ) : (
+                <Text style={styles.submitModalBtnText}>Verify & Continue</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={handleClose}
+          disabled={
+            loading ||
+            verificationStatus === "verifying" ||
+            verificationStatus === "success"
+          }
+        >
+          <Text style={styles.cancelText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </ValoraSheet>
   );
 }
-
 const styles = StyleSheet.create({
   keyboardContainer: {
     flex: 1,

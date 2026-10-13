@@ -1,14 +1,8 @@
+import ValoraSheet from "@/components/ValoraSheet";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
-import {
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "./CustomText";
 
 /* =========================================================
@@ -43,11 +37,17 @@ const detectType = (title: string, message?: string): AppAlertType => {
     return "success";
   }
 
-  if (/gagal|error|failed|invalid|salah|kadaluarsa|expired|denied|tidak valid/.test(t)) {
+  if (
+    /gagal|error|failed|invalid|salah|kadaluarsa|expired|denied|tidak valid/.test(
+      t,
+    )
+  ) {
     return "error";
   }
 
-  if (/peringatan|warning|required|wajib|masukkan|harap|login required/.test(t)) {
+  if (
+    /peringatan|warning|required|wajib|masukkan|harap|login required/.test(t)
+  ) {
     return "warning";
   }
 
@@ -76,7 +76,10 @@ export function showAlert(
    TYPE CONFIG
 ========================================================= */
 
-const TYPE_CONFIG: Record<AppAlertType, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+const TYPE_CONFIG: Record<
+  AppAlertType,
+  { icon: keyof typeof Ionicons.glyphMap; color: string }
+> = {
   info: { icon: "information", color: "#FBE678" },
   success: { icon: "checkmark", color: "#4ADE80" },
   error: { icon: "close", color: "#FF6B6B" },
@@ -88,8 +91,6 @@ const TYPE_CONFIG: Record<AppAlertType, { icon: keyof typeof Ionicons.glyphMap; 
 ========================================================= */
 
 export function AppAlertHost() {
-  const insets = useSafeAreaInsets();
-
   const [req, setReq] = useState<AlertRequest | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -116,21 +117,12 @@ export function AppAlertHost() {
   const isStacked = (req?.buttons.length ?? 0) > 2;
 
   return (
-    <Modal
+    <ValoraSheet
       visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={() => dismiss()}
-      statusBarTranslucent
+      onClose={() => dismiss()}
+      snapPoints={["42%"]}
     >
-      <TouchableWithoutFeedback onPress={() => dismiss()}>
-        <View style={styles.backdrop} />
-      </TouchableWithoutFeedback>
-
-      <View
-        style={[styles.sheet, { paddingBottom: insets.bottom + 20 }]}
-        pointerEvents="box-none"
-      >
+      <View style={styles.sheet}>
         <TouchableOpacity
           style={styles.closeBtn}
           onPress={() => dismiss()}
@@ -141,7 +133,9 @@ export function AppAlertHost() {
         </TouchableOpacity>
 
         <View style={[styles.iconCircle, { borderColor: `${cfg.color}55` }]}>
-          <View style={[styles.iconInner, { backgroundColor: `${cfg.color}1f` }]}>
+          <View
+            style={[styles.iconInner, { backgroundColor: `${cfg.color}1f` }]}
+          >
             <Ionicons name={cfg.icon} size={26} color={cfg.color} />
           </View>
         </View>
@@ -208,7 +202,7 @@ export function AppAlertHost() {
           })}
         </View>
       </View>
-    </Modal>
+    </ValoraSheet>
   );
 }
 
@@ -217,23 +211,7 @@ export function AppAlertHost() {
 ========================================================= */
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.65)",
-  },
-
   sheet: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "#0A0A0A",
-    borderTopLeftRadius: 26,
-    borderTopRightRadius: 26,
-    borderTopWidth: 1,
-    borderColor: "#1f1f1f",
-    paddingHorizontal: 24,
-    paddingTop: 28,
     alignItems: "center",
   },
 
