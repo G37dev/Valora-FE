@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Image,
   Modal,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -66,9 +67,9 @@ export default function MembershipSheet({
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
-    damping: 15,
-    stiffness: 140,
-    mass: 1,
+    damping: 14,
+    stiffness: 185,
+    mass: 0.8,
     overshootClamping: false,
   });
   const [details, setDetails] = useState(false);
@@ -85,6 +86,10 @@ export default function MembershipSheet({
       statusBarTranslucent
       onRequestClose={onClose}
     >
+      <Pressable
+        style={StyleSheet.absoluteFill}
+        onPress={() => sheetRef.current?.close()}
+      />
       <BottomSheet
         ref={sheetRef}
         index={0}

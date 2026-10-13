@@ -5,7 +5,13 @@ import BottomSheet, {
   useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
-import { Image, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Image,
+  Modal,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ComingSoonSheetProps {
@@ -20,9 +26,9 @@ export default function ComingSoonSheet({
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
-    damping: 15,
-    stiffness: 140,
-    mass: 1,
+    damping: 14,
+    stiffness: 185,
+    mass: 0.8,
     overshootClamping: false,
   });
 
@@ -34,6 +40,10 @@ export default function ComingSoonSheet({
       statusBarTranslucent
       onRequestClose={onClose}
     >
+      <Pressable
+        style={StyleSheet.absoluteFill}
+        onPress={() => sheetRef.current?.close()}
+      />
       <BottomSheet
         ref={sheetRef}
         index={0}
