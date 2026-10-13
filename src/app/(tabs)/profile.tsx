@@ -38,6 +38,13 @@ const QUICK = [
   },
 ];
 
+const LEVEL_CARDS: Record<number, number> = {
+  1: require("../../../assets/images/profile/cardProfile1.png"),
+  2: require("../../../assets/images/profile/cardProfile2.png"),
+  3: require("../../../assets/images/profile/cardProfile3.png"),
+  4: require("../../../assets/images/profile/cardProfile4.png"),
+};
+
 const RECENT = [
   {
     icon: require("../../../assets/images/icon/vaulting.png"),
@@ -161,7 +168,7 @@ export default function ProfileScreen() {
           style={styles.journeyCardBorder}
         >
           <ImageBackground
-            source={require("../../../assets/images/profile/cardProfile.png")}
+            source={LEVEL_CARDS[tier] || LEVEL_CARDS[1]}
             style={styles.journeyCard}
             imageStyle={styles.journeyCardBg}
           >
