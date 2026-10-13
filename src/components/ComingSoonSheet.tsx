@@ -30,6 +30,7 @@ export default function ComingSoonSheet({
       ref={sheetRef}
       onDismiss={onClose}
       enableDynamicSizing
+      snapPoints={["60%"]}
       enablePanDownToClose
       handleComponent={null}
       backgroundStyle={styles.sheetBg}

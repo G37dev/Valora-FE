@@ -82,6 +82,7 @@ export default function MembershipSheet({
       ref={sheetRef}
       onDismiss={onClose}
       enableDynamicSizing
+      snapPoints={["90%"]}
       maxDynamicContentSize={screenH * 0.9}
       enablePanDownToClose
       handleComponent={null}
