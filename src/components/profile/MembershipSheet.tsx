@@ -1,12 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
+import BottomSheet, {
   BottomSheetBackdrop,
-  BottomSheetModal,
   BottomSheetScrollView,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { useEffect, useRef, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LEVEL_BADGES } from "./ProfileChrome";
 
@@ -57,75 +63,78 @@ export default function MembershipSheet({
   onClose,
 }: MembershipSheetProps) {
   const insets = useSafeAreaInsets();
-  const sheetRef = useRef<BottomSheetModal>(null);
+  const sheetRef = useRef<BottomSheet>(null);
   const [details, setDetails] = useState(false);
 
   useEffect(() => {
-    if (visible) {
-      setDetails(false);
-      console.log("[MembershipSheet] present, ref:", !!sheetRef.current);
-      sheetRef.current?.present();
-    } else {
-      sheetRef.current?.dismiss();
-    }
+    if (visible) setDetails(false);
   }, [visible]);
 
   return (
-    <BottomSheetModal
-      ref={sheetRef}
-      onDismiss={onClose}
-      snapPoints={["75%", "92%"]}
-      enablePanDownToClose
-      handleComponent={null}
-      backgroundStyle={styles.sheetBg}
-      backdropComponent={(props) => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          opacity={0.65}
-          pressBehavior="close"
-        />
-      )}
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={onClose}
     >
-      {details ? (
-        <BottomSheetScrollView
-          style={styles.scroll}
-          contentContainerStyle={{
-            paddingHorizontal: 20,
-            paddingTop: 18,
-            paddingBottom: insets.bottom + 20,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          <DetailsView
-            tier={tier}
-            onBack={() => {
-              setDetails(false);
-              sheetRef.current?.snapToIndex(0);
-            }}
-            onClose={() => sheetRef.current?.dismiss()}
+      <BottomSheet
+        ref={sheetRef}
+        index={0}
+        snapPoints={["75%", "92%"]}
+        enablePanDownToClose
+        onClose={onClose}
+        handleComponent={null}
+        backgroundStyle={styles.sheetBg}
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop
+            {...props}
+            appearsOnIndex={0}
+            disappearsOnIndex={-1}
+            opacity={0.65}
+            pressBehavior="close"
           />
-        </BottomSheetScrollView>
-      ) : (
-        <BottomSheetView
-          style={{
-            paddingHorizontal: 20,
-            paddingTop: 18,
-            paddingBottom: insets.bottom + 20,
-          }}
-        >
-          <OverviewView
-            tier={tier}
-            onClose={() => sheetRef.current?.dismiss()}
-            onDetails={() => {
-              setDetails(true);
-              sheetRef.current?.snapToIndex(1);
+        )}
+      >
+        {details ? (
+          <BottomSheetScrollView
+            style={styles.scroll}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 18,
+              paddingBottom: insets.bottom + 20,
             }}
-          />
-        </BottomSheetView>
-      )}
-    </BottomSheetModal>
+            showsVerticalScrollIndicator={false}
+          >
+            <DetailsView
+              tier={tier}
+              onBack={() => {
+                setDetails(false);
+                sheetRef.current?.snapToIndex(0);
+              }}
+              onClose={() => sheetRef.current?.close()}
+            />
+          </BottomSheetScrollView>
+        ) : (
+          <BottomSheetView
+            style={{
+              paddingHorizontal: 20,
+              paddingTop: 18,
+              paddingBottom: insets.bottom + 20,
+            }}
+          >
+            <OverviewView
+              tier={tier}
+              onClose={() => sheetRef.current?.close()}
+              onDetails={() => {
+                setDetails(true);
+                sheetRef.current?.snapToIndex(1);
+              }}
+            />
+          </BottomSheetView>
+        )}
+      </BottomSheet>
+    </Modal>
   );
 }
 

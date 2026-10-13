@@ -1,11 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
+import BottomSheet, {
   BottomSheetBackdrop,
-  BottomSheetModal,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { useEffect, useRef } from "react";
-import { Image, StyleSheet, TouchableOpacity } from "react-native";
+import { useRef } from "react";
+import { Image, Modal, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ComingSoonSheetProps {
@@ -18,51 +17,54 @@ export default function ComingSoonSheet({
   onClose,
 }: ComingSoonSheetProps) {
   const insets = useSafeAreaInsets();
-  const sheetRef = useRef<BottomSheetModal>(null);
-
-  useEffect(() => {
-    if (visible) sheetRef.current?.present();
-    else sheetRef.current?.dismiss();
-  }, [visible]);
+  const sheetRef = useRef<BottomSheet>(null);
 
   return (
-    <BottomSheetModal
-      ref={sheetRef}
-      onDismiss={onClose}
-      enableDynamicSizing
-      snapPoints={["60%"]}
-      enablePanDownToClose
-      handleComponent={null}
-      backgroundStyle={styles.sheetBg}
-      backdropComponent={(props) => (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          opacity={0.65}
-          pressBehavior="close"
-        />
-      )}
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={onClose}
     >
-      <BottomSheetView
-        style={[styles.content, { paddingBottom: insets.bottom + 40 }]}
+      <BottomSheet
+        ref={sheetRef}
+        index={0}
+        snapPoints={["52%"]}
+        enablePanDownToClose
+        onClose={onClose}
+        handleComponent={null}
+        backgroundStyle={styles.sheetBg}
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop
+            {...props}
+            appearsOnIndex={0}
+            disappearsOnIndex={-1}
+            opacity={0.65}
+            pressBehavior="close"
+          />
+        )}
       >
-        <Image
-          source={require("@/assets/images/cs.png")}
-          style={styles.image}
-          resizeMode="contain"
-        />
-
-        <TouchableOpacity
-          style={styles.closeBtn}
-          onPress={() => sheetRef.current?.dismiss()}
-          hitSlop={12}
-          activeOpacity={0.7}
+        <BottomSheetView
+          style={[styles.content, { paddingBottom: insets.bottom + 40 }]}
         >
-          <Ionicons name="close" size={14} color="#999" />
-        </TouchableOpacity>
-      </BottomSheetView>
-    </BottomSheetModal>
+          <Image
+            source={require("@/assets/images/cs.png")}
+            style={styles.image}
+            resizeMode="contain"
+          />
+
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={() => sheetRef.current?.close()}
+            hitSlop={12}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="close" size={14} color="#999" />
+          </TouchableOpacity>
+        </BottomSheetView>
+      </BottomSheet>
+    </Modal>
   );
 }
 
