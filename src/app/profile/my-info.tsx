@@ -160,7 +160,7 @@ export default function MyInfoScreen() {
         onSelect={async (key) => {
           if (!user?.coreId) return;
           await updateUserProfileApi(user.coreId, { avatarUrl: key });
-          await data.reload();
+          await data.reload(true);
           setAvatarPicker(false);
         }}
       />

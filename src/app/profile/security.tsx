@@ -134,7 +134,7 @@ export default function SecurityScreen() {
       const token = await getAuthToken();
       if (!token) return;
       await registerPasskey(token);
-      await reload();
+      await reload(true);
       showAlert(
         "Passkey Terdaftar",
         "Passkey berhasil ditambahkan ke akun kamu.",
@@ -167,7 +167,7 @@ export default function SecurityScreen() {
               const token = await getAuthToken();
               if (!token) return;
               await deletePasskey(token, pk.id);
-              await reload();
+              await reload(true);
             } catch (error: any) {
               showAlert("Gagal", error?.message || "Gagal menghapus passkey.");
             }
@@ -371,7 +371,7 @@ export default function SecurityScreen() {
         onVerifyTotp={handleVerifyTotpCode}
         onSuccess={() => {
           setShowTwoFactorSetup(false);
-          reload();
+          reload(true);
           showAlert(
             "Authenticator Aktif",
             "Two-factor authentication berhasil diaktifkan untuk akun kamu.",
@@ -388,7 +388,7 @@ export default function SecurityScreen() {
         onVerifyTotp={handleDisableTotpCode}
         onSuccess={() => {
           setShowTwoFactorDisable(false);
-          reload();
+          reload(true);
           showAlert(
             "Authenticator Dinonaktifkan",
             "Two-factor authentication berhasil dimatikan. Kamu bisa mengaktifkannya lagi kapan saja.",
