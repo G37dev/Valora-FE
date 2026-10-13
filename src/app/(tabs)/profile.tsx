@@ -83,12 +83,15 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.topBar}>
-        <View style={{ width: 26 }} />
+        <TouchableOpacity
+          style={styles.topLeft}
+          onPress={() => setComingSoon(true)}
+          hitSlop={10}
+        >
+          <Ionicons name="moon-outline" size={21} color="#FFF" />
+        </TouchableOpacity>
         <Text style={styles.topTitle}>Profile</Text>
         <View style={styles.topIcons}>
-          <TouchableOpacity onPress={() => setComingSoon(true)} hitSlop={10}>
-            <Ionicons name="moon-outline" size={21} color="#FFF" />
-          </TouchableOpacity>
           <TouchableOpacity
             onPress={() => router.push("/profile/my-info")}
             hitSlop={10}
@@ -260,16 +263,23 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
+  topLeft: { position: "absolute", left: 16 },
   topTitle: {
     color: "#FFF",
     fontSize: 17,
     fontFamily: "Poppins_600SemiBold",
   },
-  topIcons: { flexDirection: "row", alignItems: "center", gap: 18 },
+  topIcons: {
+    position: "absolute",
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 18,
+  },
   userRow: {
     flexDirection: "row",
     alignItems: "center",
