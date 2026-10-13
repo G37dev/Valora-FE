@@ -41,7 +41,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { initialWindowMetrics, SafeAreaView } from "react-native-safe-area-context";
 
 export default function SecurityScreen() {
   const router = useRouter();
@@ -210,7 +210,11 @@ export default function SecurityScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "bottom"]}
+      initialMetrics={initialWindowMetrics}
+    >
       <SubPageShell
         title="Security"
         activeTab="security"
