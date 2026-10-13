@@ -326,8 +326,8 @@ function DetailsView({
                 <View style={styles.detailBadgeWrap}>
                   {active && (
                     <Svg
-                      width={130}
-                      height={130}
+                      width={150}
+                      height={150}
                       style={styles.detailBadgeHalo}
                     >
                       <Defs>
@@ -340,7 +340,17 @@ function DetailsView({
                           <Stop
                             offset="0"
                             stopColor="#FBE678"
-                            stopOpacity={0.3}
+                            stopOpacity={0.34}
+                          />
+                          <Stop
+                            offset="0.45"
+                            stopColor="#FBE678"
+                            stopOpacity={0.16}
+                          />
+                          <Stop
+                            offset="0.75"
+                            stopColor="#FBE678"
+                            stopOpacity={0.05}
                           />
                           <Stop
                             offset="1"
@@ -349,7 +359,7 @@ function DetailsView({
                           />
                         </RadialGradient>
                       </Defs>
-                      <Circle cx={65} cy={65} r={65} fill="url(#badgeHalo)" />
+                      <Circle cx={75} cy={75} r={75} fill="url(#badgeHalo)" />
                     </Svg>
                   )}
                   {active && (
@@ -627,6 +637,8 @@ const styles = StyleSheet.create({
   },
   detailBadgeHalo: {
     position: "absolute",
+    top: -37,
+    left: -37,
   },
   detailBadgeGlow: {
     position: "absolute",
