@@ -373,7 +373,7 @@ function DetailsView({
                       source={LEVEL_BADGES[lv]}
                       style={styles.detailBadgeGlow}
                       resizeMode="contain"
-                      blurRadius={4}
+                      blurRadius={8}
                     />
                   )}
                   <Image
@@ -384,7 +384,7 @@ function DetailsView({
                 </View>
                 {!last && (
                   <LinearGradient
-                    colors={["transparent", "#CDBE8A", "transparent"]}
+                    colors={["transparent", "#EFE6C4", "transparent"]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0, y: 1 }}
                     style={styles.detailConnector}
@@ -431,7 +431,7 @@ function DetailsView({
                           <Stop
                             offset="0"
                             stopColor="#FFF9D6"
-                            stopOpacity={0.6}
+                            stopOpacity={0.75}
                           />
                           <Stop
                             offset="0.4"
@@ -679,10 +679,10 @@ const styles = StyleSheet.create({
   },
   detailBadgeGlow: {
     position: "absolute",
-    width: 80,
-    height: 80,
-    tintColor: "#FBE678",
-    opacity: 0.22,
+    width: 88,
+    height: 88,
+    tintColor: "#FFF9D6",
+    opacity: 0.55,
   },
   detailBadge: { width: 74, height: 74 },
   detailConnector: {
