@@ -66,7 +66,7 @@ const LEVEL_FRAMES: Record<number, number> = {
   4: require("../../../assets/images/profile/d4.png"),
 };
 
-const LEVEL_BADGES: Record<number, number> = {
+export const LEVEL_BADGES: Record<number, number> = {
   1: require("../../../assets/images/profile/b1.png"),
   2: require("../../../assets/images/profile/b2.png"),
   3: require("../../../assets/images/profile/b3.png"),

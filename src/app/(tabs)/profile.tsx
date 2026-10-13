@@ -2,6 +2,7 @@ import ComingSoonSheet from "@/components/ComingSoonSheet";
 import {
   GOLD,
   GREEN,
+  LEVEL_BADGES,
   LevelAvatar,
   LevelBadge,
   securityLevel,
@@ -162,37 +163,46 @@ export default function ProfileScreen() {
             Growth, save and explore exclusive benefits as you level up.
           </Text>
 
-          <Text style={styles.journeyLevel}>{sec.label} Level</Text>
-          <View style={styles.progressTrack}>
-            <LinearGradient
-              colors={["#FFF3A6", "#F5D13E"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[
-                styles.progressFill,
-                {
-                  width: `${sec.level === "high" ? 75 : sec.level === "medium" ? 45 : 15}%`,
-                },
-              ]}
-            />
-          </View>
           <View style={styles.journeyBottom}>
-            <Text style={styles.journeyPoints}>Complete KYC to level up</Text>
-            <TouchableOpacity
-              style={styles.benefitsBtn}
-              onPress={() => setComingSoon(true)}
-              activeOpacity={0.85}
-            >
-              <LinearGradient
-                colors={["#ECC173", "#FFF3DD", "#ECC173"]}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={styles.benefitsGradient}
+            <View style={styles.journeyLeft}>
+              <Text style={styles.journeyLevel}>{sec.label} Level</Text>
+              <View style={styles.progressTrack}>
+                <LinearGradient
+                  colors={["#FFF3A6", "#F5D13E"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[
+                    styles.progressFill,
+                    {
+                      width: `${sec.level === "high" ? 75 : sec.level === "medium" ? 45 : 15}%`,
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={styles.journeyPoints}>Complete KYC to level up</Text>
+            </View>
+            <View style={styles.journeyRight}>
+              <Image
+                source={LEVEL_BADGES[tier]}
+                style={styles.journeyBadge}
+                resizeMode="contain"
+              />
+              <TouchableOpacity
+                style={styles.benefitsBtn}
+                onPress={() => setComingSoon(true)}
+                activeOpacity={0.85}
               >
-                <Text style={styles.benefitsBtnText}>View Benefits</Text>
-                <Ionicons name="arrow-forward" size={14} color="#000" />
-              </LinearGradient>
-            </TouchableOpacity>
+                <LinearGradient
+                  colors={["#ECC173", "#FFF3DD", "#ECC173"]}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={styles.benefitsGradient}
+                >
+                  <Text style={styles.benefitsBtnText}>View Benefits</Text>
+                  <Ionicons name="arrow-forward" size={14} color="#000" />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </View>
         </ImageBackground>
 
@@ -347,11 +357,17 @@ const styles = StyleSheet.create({
     marginTop: 6,
     maxWidth: "80%",
   },
+  journeyBottom: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    marginTop: 22,
+  },
+  journeyLeft: { flex: 1, marginRight: 16 },
   journeyLevel: {
     color: "#FFF",
     fontSize: 13,
     fontFamily: "Poppins_600SemiBold",
-    marginTop: 18,
   },
   progressTrack: {
     height: 8,
@@ -363,15 +379,17 @@ const styles = StyleSheet.create({
   progressFill: {
     height: "100%",
     borderRadius: 4,
-    backgroundColor: GOLD,
   },
-  journeyBottom: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 10,
+  journeyPoints: {
+    color: "#8A8A8A",
+    fontSize: 10,
+    marginTop: 6,
   },
-  journeyPoints: { color: "#8A8A8A", fontSize: 11 },
+  journeyRight: {
+    alignItems: "flex-end",
+    gap: 8,
+  },
+  journeyBadge: { width: 22, height: 22 },
   benefitsBtnText: {
     color: "#000",
     fontSize: 12,
