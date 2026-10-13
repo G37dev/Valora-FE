@@ -11,7 +11,10 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+} from "react-native-safe-area-context";
 import { AppAlertHost } from "../components/AppAlert";
 import TransactionProvider from "../context/TransactionContext";
 import { getAuthToken } from "../services/authStorage";
@@ -68,7 +71,7 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <GestureHandlerRootView
         style={{
           flex: 1,
