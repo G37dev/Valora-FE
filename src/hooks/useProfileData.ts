@@ -1,14 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { securityLevel } from "../components/profile/ProfileChrome";
 import { get2FAStatusApi } from "../services/authService";
 import { getAuthToken } from "../services/authStorage";
 import { listPasskeys, PasskeyInfo } from "../services/passkeyService";
-import { securityLevel } from "../components/profile/ProfileChrome";
-import {
-  getUserProfileApi,
-  UserProfile,
-} from "../services/userService";
+import { getUserProfileApi, UserProfile } from "../services/userService";
 
 export interface ProfileData {
   user: UserProfile | null;
@@ -22,6 +19,19 @@ export function useProfileData(): ProfileData {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [passkeys, setPasskeys] = useState<PasskeyInfo[]>([]);
+
+  // Hydrate dari cache supaya tidak ada flash data kosong/avatar default.
+  useEffect(() => {
+    let alive = true;
+    AsyncStorage.getItem("userData")
+      .then((raw) => {
+        if (alive && raw) setUser(JSON.parse(raw));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const reload = useCallback(async () => {
     try {
