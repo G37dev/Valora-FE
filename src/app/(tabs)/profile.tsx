@@ -18,7 +18,6 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Image,
-  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
@@ -47,6 +46,13 @@ const LEVEL_CARDS: Record<number, number> = {
   3: require("../../../assets/images/profile/cardProfile3.png"),
   4: require("../../../assets/images/profile/cardProfile4.png"),
 };
+
+const CARD_ASPECT: Record<number, number> = Object.fromEntries(
+  Object.entries(LEVEL_CARDS).map(([k, src]) => {
+    const s = Image.resolveAssetSource(src);
+    return [k, s?.width && s?.height ? s.width / s.height : 2];
+  }),
+);
 
 const RECENT = [
   {
@@ -176,11 +182,15 @@ export default function ProfileScreen() {
           end={{ x: 1, y: 1 }}
           style={styles.journeyCardBorder}
         >
-          <ImageBackground
-            source={LEVEL_CARDS[tier] || LEVEL_CARDS[1]}
-            style={styles.journeyCard}
-            imageStyle={styles.journeyCardBg}
-          >
+          <View style={styles.journeyCard}>
+            <Image
+              source={LEVEL_CARDS[tier] || LEVEL_CARDS[1]}
+              style={[
+                styles.journeyCardBg,
+                { aspectRatio: CARD_ASPECT[tier] || CARD_ASPECT[1] },
+              ]}
+              resizeMode="cover"
+            />
             <Text style={styles.journeyEyebrow}>YOUR JOURNEY</Text>
             <Text style={styles.journeyTitle}>Grow with VIVALORA</Text>
             <Text style={styles.journeySub}>
@@ -234,7 +244,7 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-          </ImageBackground>
+          </View>
         </LinearGradient>
 
         <View style={styles.quickRow}>
@@ -382,7 +392,13 @@ const styles = StyleSheet.create({
     padding: 18,
     overflow: "hidden",
   },
-  journeyCardBg: { borderRadius: 17, resizeMode: "cover" },
+  journeyCardBg: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 17,
+  },
   journeyEyebrow: {
     color: GOLD,
     fontSize: 10,
