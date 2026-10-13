@@ -340,17 +340,17 @@ function DetailsView({
                           <Stop
                             offset="0"
                             stopColor="#FBE678"
-                            stopOpacity={0.34}
+                            stopOpacity={0.2}
                           />
                           <Stop
                             offset="0.45"
                             stopColor="#FBE678"
-                            stopOpacity={0.16}
+                            stopOpacity={0.09}
                           />
                           <Stop
                             offset="0.75"
                             stopColor="#FBE678"
-                            stopOpacity={0.05}
+                            stopOpacity={0.03}
                           />
                           <Stop
                             offset="1"
@@ -413,10 +413,11 @@ function DetailsView({
                     <LinearGradient
                       colors={[
                         "rgba(251,230,120,0)",
-                        "rgba(251,230,120,0.18)",
-                        "rgba(251,230,120,0.55)",
+                        "rgba(251,230,120,0.08)",
+                        "rgba(251,230,120,0.2)",
+                        "rgba(251,230,120,0.38)",
                       ]}
-                      locations={[0, 0.55, 1]}
+                      locations={[0, 0.45, 0.8, 1]}
                       start={{ x: 0, y: 0.5 }}
                       end={{ x: 1, y: 0.5 }}
                       style={styles.detailActiveGlow}
@@ -622,7 +623,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    width: "42%",
+    width: "30%",
   },
   detailBadgeCol: {
     width: 76,
