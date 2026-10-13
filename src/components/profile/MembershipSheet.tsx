@@ -66,9 +66,9 @@ export default function MembershipSheet({
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
-    damping: 11,
-    stiffness: 250,
-    mass: 0.5,
+    damping: 15,
+    stiffness: 140,
+    mass: 1,
     overshootClamping: false,
   });
   const [details, setDetails] = useState(false);
