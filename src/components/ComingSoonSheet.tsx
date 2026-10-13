@@ -20,9 +20,9 @@ export default function ComingSoonSheet({
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
-    damping: 16,
-    stiffness: 220,
-    mass: 0.7,
+    damping: 11,
+    stiffness: 250,
+    mass: 0.5,
     overshootClamping: false,
   });
 
@@ -50,6 +50,7 @@ export default function ComingSoonSheet({
             disappearsOnIndex={-1}
             opacity={0.65}
             pressBehavior="close"
+            onPress={() => sheetRef.current?.close()}
           />
         )}
       >
