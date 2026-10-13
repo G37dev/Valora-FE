@@ -5,7 +5,7 @@ import BottomSheet, {
   BottomSheetView,
   useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
-import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
 import {
   Image,
@@ -211,49 +211,59 @@ function OverviewView({
       </Text>
 
       <View style={styles.trackCard}>
-        <View style={styles.trackLine} />
         <View style={styles.trackRow}>
-          {MEMBER_LEVELS.map((l, i) => (
-            <View key={l.name} style={styles.trackItem}>
-              <View style={styles.trackBadgeWrap}>
-                {i + 1 === tier && (
-                  <View style={styles.trackGlowWrap}>
-                    <View style={styles.trackGlowRing} />
-                    <BlurView
-                      intensity={16}
-                      tint="dark"
-                      style={StyleSheet.absoluteFill}
+          {MEMBER_LEVELS.map((l, i) => {
+            const lv = i + 1;
+            const active = lv === tier;
+            const locked = lv > tier;
+            return (
+              <View key={l.name} style={styles.trackItem}>
+                {i > 0 && (
+                  <LinearGradient
+                    colors={["transparent", "#CDBE8A", "transparent"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.trackConnector}
+                  />
+                )}
+                <View style={styles.trackBadgeWrap}>
+                  {active && (
+                    <Image
+                      source={LEVEL_BADGES[lv]}
+                      style={styles.trackBadgeGlow}
+                      resizeMode="contain"
+                      blurRadius={6}
                     />
+                  )}
+                  <Image
+                    source={LEVEL_BADGES[lv]}
+                    style={[styles.trackBadge, locked && { opacity: 0.7 }]}
+                    resizeMode="contain"
+                  />
+                </View>
+                {locked ? (
+                  <View style={styles.lockDot}>
+                    <Ionicons name="lock-closed" size={10} color="#1A1A1A" />
+                  </View>
+                ) : (
+                  <View style={styles.checkDot}>
+                    <Ionicons name="checkmark" size={12} color="#1A1A1A" />
                   </View>
                 )}
-                <Image
-                  source={LEVEL_BADGES[i + 1]}
-                  style={styles.trackBadge}
-                  resizeMode="contain"
-                />
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={[
+                    styles.trackLabel,
+                    active && styles.trackLabelActive,
+                    locked && styles.trackLabelLocked,
+                  ]}
+                >
+                  {l.name}
+                </Text>
               </View>
-              {i + 1 <= tier ? (
-                <View style={styles.checkDot}>
-                  <Ionicons name="checkmark" size={11} color="#1A1A1A" />
-                </View>
-              ) : (
-                <View style={styles.lockDot}>
-                  <Ionicons name="lock-closed" size={11} color="#8A8A8A" />
-                </View>
-              )}
-              <Text
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                style={[
-                  styles.trackLabel,
-                  i + 1 === tier && styles.trackLabelActive,
-                  i + 1 > tier && styles.trackLabelLocked,
-                ]}
-              >
-                {l.name}
-              </Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </View>
 
@@ -391,13 +401,13 @@ const styles = StyleSheet.create({
     marginHorizontal: -20,
   },
   hero: {
-    height: 210,
+    height: 240,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 2,
+    marginTop: 6,
   },
-  glow: { position: "absolute", width: 270, height: 205, opacity: 1 },
-  heroBadge: { width: 132, height: 132 },
+  glow: { position: "absolute", width: 300, height: 228 },
+  heroBadge: { width: 150, height: 150, marginTop: 10 },
   levelName: {
     color: "#FFF",
     fontSize: 28,
@@ -414,70 +424,66 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   trackCard: {
-    backgroundColor: "#111",
-    borderRadius: 18,
+    backgroundColor: "#141414",
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#232323",
-    marginTop: 18,
-    paddingTop: 22,
-    paddingBottom: 16,
-    paddingHorizontal: 14,
+    borderColor: "#262626",
+    marginTop: 20,
+    paddingTop: 20,
+    paddingBottom: 18,
+    paddingHorizontal: 10,
   },
   trackRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
   },
-  trackItem: { alignItems: "center", width: "25%", gap: 8 },
-  trackBadgeWrap: { alignItems: "center", justifyContent: "center" },
-  trackBadge: { width: 56, height: 56 },
-  trackGlowWrap: {
+  trackItem: { flex: 1, alignItems: "center", gap: 8 },
+  trackConnector: {
     position: "absolute",
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    overflow: "hidden",
+    top: 34,
+    left: -22,
+    width: 44,
+    height: 2,
+    borderRadius: 1,
   },
-  trackGlowRing: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    borderWidth: 2.5,
-    borderColor: "#F5D13E",
-    backgroundColor: "rgba(245,209,62,0.12)",
+  trackBadgeWrap: {
+    width: 70,
+    height: 70,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  trackBadge: { width: 64, height: 64 },
+  trackBadgeGlow: {
+    position: "absolute",
+    width: 78,
+    height: 78,
+    tintColor: "#FFF4C2",
+    opacity: 0.9,
   },
   checkDot: {
-    width: 19,
-    height: 19,
+    width: 20,
+    height: 20,
     borderRadius: 10,
     backgroundColor: "#F5D13E",
     alignItems: "center",
     justifyContent: "center",
   },
   lockDot: {
-    width: 19,
-    height: 19,
+    width: 20,
+    height: 20,
     borderRadius: 10,
-    backgroundColor: "#3A3A3A",
+    backgroundColor: "#8A8A8A",
     alignItems: "center",
     justifyContent: "center",
   },
   trackLabel: {
     color: "#FFF",
-    fontSize: 11,
-    fontFamily: "Poppins_500Medium",
+    fontSize: 12,
+    fontFamily: "Poppins_600SemiBold",
     textAlign: "center",
+    marginTop: 2,
   },
   trackLabelActive: { color: "#F5D13E" },
   trackLabelLocked: { color: "#8A8A8A" },
-  trackLine: {
-    position: "absolute",
-    top: 50,
-    left: "12%",
-    right: "12%",
-    height: 2,
-    backgroundColor: "#9A9070",
-    opacity: 0.8,
-  },
   detailsBtn: {
     flexDirection: "row",
     alignItems: "center",
