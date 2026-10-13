@@ -18,7 +18,13 @@ import {
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
+import Svg, {
+  Circle,
+  Defs,
+  RadialGradient,
+  Rect,
+  Stop,
+} from "react-native-svg";
 import { LEVEL_BADGES } from "./ProfileChrome";
 
 const GLOW = require("../../../assets/images/profile/bgMembershiplvl.png");
@@ -367,7 +373,7 @@ function DetailsView({
                       source={LEVEL_BADGES[lv]}
                       style={styles.detailBadgeGlow}
                       resizeMode="contain"
-                      blurRadius={6}
+                      blurRadius={10}
                     />
                   )}
                   <Image
@@ -410,18 +416,48 @@ function DetailsView({
                   style={styles.detailActiveBorder}
                 >
                   <View style={styles.detailActiveInner}>
-                    <LinearGradient
-                      colors={[
-                        "rgba(251,230,120,0)",
-                        "rgba(251,230,120,0.08)",
-                        "rgba(251,230,120,0.2)",
-                        "rgba(251,230,120,0.38)",
-                      ]}
-                      locations={[0, 0.45, 0.8, 1]}
-                      start={{ x: 0, y: 0.5 }}
-                      end={{ x: 1, y: 0.5 }}
+                    <Svg
                       style={styles.detailActiveGlow}
-                    />
+                      width="100%"
+                      height="100%"
+                    >
+                      <Defs>
+                        <RadialGradient
+                          id="cardGlow"
+                          cx="115%"
+                          cy="45%"
+                          r="110%"
+                        >
+                          <Stop
+                            offset="0"
+                            stopColor="#FBE678"
+                            stopOpacity={0.45}
+                          />
+                          <Stop
+                            offset="0.45"
+                            stopColor="#FBE678"
+                            stopOpacity={0.16}
+                          />
+                          <Stop
+                            offset="0.75"
+                            stopColor="#FBE678"
+                            stopOpacity={0.05}
+                          />
+                          <Stop
+                            offset="1"
+                            stopColor="#FBE678"
+                            stopOpacity={0}
+                          />
+                        </RadialGradient>
+                      </Defs>
+                      <Rect
+                        x="0"
+                        y="0"
+                        width="100%"
+                        height="100%"
+                        fill="url(#cardGlow)"
+                      />
+                    </Svg>
                     {body}
                   </View>
                 </LinearGradient>
@@ -623,7 +659,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    width: "30%",
+    width: "55%",
   },
   detailBadgeCol: {
     width: 76,
@@ -643,10 +679,10 @@ const styles = StyleSheet.create({
   },
   detailBadgeGlow: {
     position: "absolute",
-    width: 80,
-    height: 80,
+    width: 92,
+    height: 92,
     tintColor: "#FBE678",
-    opacity: 0.55,
+    opacity: 0.4,
   },
   detailBadge: { width: 74, height: 74 },
   detailConnector: {
