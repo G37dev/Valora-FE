@@ -1,6 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import {
+  Image,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import type { UserProfile } from "../../services/userService";
 
 export const GOLD = "#DEC236";
@@ -17,7 +26,38 @@ export function maskEmail(email?: string | null) {
   return `${visible}***@${domain}`;
 }
 
-const DEFAULT_AVATAR = require("../../../assets/images/profile/a5.png");
+const DEFAULT_AVATAR = require("../../../assets/images/profile/a1.png");
+
+export const AVATARS: Record<string, number> = {
+  a1: require("../../../assets/images/profile/a1.png"),
+  a2: require("../../../assets/images/profile/a2.png"),
+  a3: require("../../../assets/images/profile/a3.png"),
+  a4: require("../../../assets/images/profile/a4.png"),
+  a5: require("../../../assets/images/profile/a5.png"),
+  a6: require("../../../assets/images/profile/a6.png"),
+  a7: require("../../../assets/images/profile/a7.png"),
+  a8: require("../../../assets/images/profile/a8.png"),
+};
+
+// avatarUrl bisa berisi key preset ("a1"-"a8") atau URL remote.
+// User lama tanpa avatar dapat preset deterministik dari coreId (a1-a6).
+export function avatarSource(
+  avatarUrl?: string | null,
+  coreId?: string | null,
+): any {
+  if (avatarUrl) {
+    if (AVATARS[avatarUrl]) return AVATARS[avatarUrl];
+    if (/^https?:\/\//.test(avatarUrl)) return { uri: avatarUrl };
+  }
+  if (coreId) {
+    let h = 0;
+    for (let i = 0; i < coreId.length; i++) {
+      h = (h * 31 + coreId.charCodeAt(i)) >>> 0;
+    }
+    return AVATARS[`a${(h % 6) + 1}`];
+  }
+  return DEFAULT_AVATAR;
+}
 
 const LEVEL_FRAMES: Record<number, number> = {
   1: require("../../../assets/images/profile/d1.png"),
@@ -48,10 +88,12 @@ export function securityTier(opts: {
 
 export function LevelAvatar({
   uri,
+  coreId,
   tier = 1,
   size = 72,
 }: {
   uri?: string | null;
+  coreId?: string | null;
   tier?: number;
   size?: number;
 }) {
@@ -60,7 +102,7 @@ export function LevelAvatar({
   return (
     <View style={{ width: size, height: size }}>
       <Image
-        source={uri ? { uri } : DEFAULT_AVATAR}
+        source={avatarSource(uri, coreId)}
         style={{
           position: "absolute",
           top: offset,
@@ -139,6 +181,7 @@ export function ProfileHead({
     <View style={styles.headRow}>
       <LevelAvatar
         uri={user?.avatarUrl}
+        coreId={user?.coreId}
         tier={securityTierFromLevel(secLevel)}
         size={72}
       />
@@ -304,7 +347,93 @@ export function SettingRow({
   return content;
 }
 
+export function AvatarPicker({
+  visible,
+  current,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  current?: string | null;
+  onSelect: (key: string) => void;
+  onClose: () => void;
+}) {
+  const [saving, setSaving] = useState<string | null>(null);
+  return (
+    <Modal visible={visible} transparent animationType="slide">
+      <Pressable style={styles.pickerBackdrop} onPress={onClose} />
+      <View style={styles.pickerSheet}>
+        <View style={styles.pickerHandle} />
+        <Text style={styles.pickerTitle}>Choose Your Avatar</Text>
+        <View style={styles.pickerGrid}>
+          {Object.keys(AVATARS).map((key) => (
+            <TouchableOpacity
+              key={key}
+              style={[
+                styles.pickerItem,
+                current === key && styles.pickerItemActive,
+              ]}
+              disabled={saving !== null}
+              onPress={async () => {
+                setSaving(key);
+                try {
+                  await onSelect(key);
+                } finally {
+                  setSaving(null);
+                }
+              }}
+              activeOpacity={0.8}
+            >
+              <Image source={AVATARS[key]} style={styles.pickerAvatar} />
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 const styles = StyleSheet.create({
+  pickerBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)" },
+  pickerSheet: {
+    backgroundColor: "#141414",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 36,
+    borderTopWidth: 1,
+    borderColor: BORDER,
+  },
+  pickerHandle: {
+    alignSelf: "center",
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#3A3A3A",
+    marginTop: 10,
+    marginBottom: 16,
+  },
+  pickerTitle: {
+    color: "#FFF",
+    fontSize: 16,
+    fontFamily: "Poppins_600SemiBold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  pickerGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 18,
+  },
+  pickerItem: {
+    borderRadius: 44,
+    borderWidth: 2,
+    borderColor: "transparent",
+    padding: 3,
+  },
+  pickerItemActive: { borderColor: GOLD },
+  pickerAvatar: { width: 72, height: 72, borderRadius: 36 },
   topBar: {
     flexDirection: "row",
     alignItems: "center",

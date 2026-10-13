@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Image,
+  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
@@ -101,49 +102,60 @@ export default function ProfileScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <TouchableOpacity
-          style={styles.userRow}
-          onPress={() => router.push("/profile/my-info")}
-          activeOpacity={0.8}
+        <ImageBackground
+          source={require("../../../assets/images/profile/cardProfile.png")}
+          style={styles.userCard}
+          imageStyle={styles.userCardBg}
         >
-          <LevelAvatar uri={user?.avatarUrl} tier={tier} size={76} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.userName} numberOfLines={1}>
-              {name}
-            </Text>
-            <View style={styles.vidRow}>
-              <Text style={styles.vidText}>VID : {user?.coreId || "-"}</Text>
-              <TouchableOpacity
-                onPress={() =>
-                  user?.coreId && Clipboard.setStringAsync(user.coreId)
-                }
-                hitSlop={8}
-              >
-                <Ionicons name="copy-outline" size={14} color="#8A8A8A" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.badgeRow}>
-              {verified ? (
-                <View style={[styles.badge, styles.badgeVerified]}>
-                  <Ionicons name="checkmark-circle" size={12} color="#000" />
-                  <Text style={styles.badgeVerifiedText}>Verified</Text>
-                </View>
-              ) : (
+          <TouchableOpacity
+            style={styles.userRow}
+            onPress={() => router.push("/profile/my-info")}
+            activeOpacity={0.8}
+          >
+            <LevelAvatar
+              uri={user?.avatarUrl}
+              coreId={user?.coreId}
+              tier={tier}
+              size={76}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.userName} numberOfLines={1}>
+                {name}
+              </Text>
+              <View style={styles.vidRow}>
+                <Text style={styles.vidText}>VID : {user?.coreId || "-"}</Text>
                 <TouchableOpacity
-                  style={[styles.badge, styles.badgeDim]}
-                  onPress={() => router.push("/kyc-screen")}
+                  onPress={() =>
+                    user?.coreId && Clipboard.setStringAsync(user.coreId)
+                  }
+                  hitSlop={8}
                 >
-                  <Ionicons name="alert-circle" size={12} color={GOLD} />
-                  <Text style={styles.badgeDimText}>
-                    {kycStatus === "PENDING" ? "Pending" : "Unverified"}
-                  </Text>
+                  <Ionicons name="copy-outline" size={14} color="#8A8A8A" />
                 </TouchableOpacity>
-              )}
-              <LevelBadge tier={tier} label={`${sec.label} Level`} />
+              </View>
+              <View style={styles.badgeRow}>
+                {verified ? (
+                  <View style={[styles.badge, styles.badgeVerified]}>
+                    <Ionicons name="checkmark-circle" size={12} color="#000" />
+                    <Text style={styles.badgeVerifiedText}>Verified</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.badge, styles.badgeDim]}
+                    onPress={() => router.push("/kyc-screen")}
+                  >
+                    <Ionicons name="alert-circle" size={12} color={GOLD} />
+                    <Text style={styles.badgeDimText}>
+                      {kycStatus === "PENDING" ? "Pending" : "Unverified"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                <LevelBadge tier={tier} label={`${sec.label} Level`} />
+              </View>
             </View>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#555" />
-        </TouchableOpacity>
+            <Ionicons name="chevron-forward" size={20} color="#555" />
+          </TouchableOpacity>
+        </ImageBackground>
 
         <View style={styles.journeyCard}>
           <Text style={styles.journeyEyebrow}>Y O U R J O U R N E Y</Text>
@@ -246,13 +258,24 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   topIcons: { flexDirection: "row", alignItems: "center", gap: 18 },
+  userCard: {
+    marginHorizontal: 16,
+    marginTop: 6,
+    marginBottom: 18,
+    borderRadius: 18,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#3A3520",
+    minHeight: 108,
+    justifyContent: "center",
+  },
+  userCardBg: { borderRadius: 18, resizeMode: "cover" },
   userRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    paddingHorizontal: 20,
-    marginTop: 6,
-    marginBottom: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
   },
   recentIcon: { width: 30, height: 30 },
   userName: {

@@ -1,5 +1,7 @@
 import ComingSoonSheet from "@/components/ComingSoonSheet";
 import {
+  AvatarPicker,
+  avatarSource,
   GREEN,
   maskEmail,
   maskPhone,
@@ -8,11 +10,12 @@ import {
   SubPageShell,
 } from "@/components/profile/ProfileChrome";
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
+import { updateUserProfileApi } from "@/services/userService";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyInfoScreen() {
@@ -20,12 +23,17 @@ export default function MyInfoScreen() {
   const data = useProfileData();
   const sec = useSecurityLevel(data);
   const [comingSoon, setComingSoon] = useState(false);
+  const [avatarPicker, setAvatarPicker] = useState(false);
   const { user, kycStatus } = data;
   const name =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "-";
 
   const kycColor =
-    kycStatus === "VERIFIED" ? GREEN : kycStatus === "PENDING" ? "#DEC236" : "#FF5252";
+    kycStatus === "VERIFIED"
+      ? GREEN
+      : kycStatus === "PENDING"
+        ? "#DEC236"
+        : "#FF5252";
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -46,11 +54,12 @@ export default function MyInfoScreen() {
             <SettingRow
               label="Profile Picture"
               right={
-                user?.avatarUrl ? undefined : (
-                  <Ionicons name="person-circle" size={28} color="#DEC236" />
-                )
+                <Image
+                  source={avatarSource(user?.avatarUrl, user?.coreId)}
+                  style={styles.avatarThumb}
+                />
               }
-              onPress={() => setComingSoon(true)}
+              onPress={() => setAvatarPicker(true)}
             />
             <SettingRow
               label="Display Name"
@@ -129,9 +138,7 @@ export default function MyInfoScreen() {
             />
             <SettingRow
               label="Linked Accounts"
-              right={
-                <Ionicons name="logo-google" size={20} color="#FFF" />
-              }
+              right={<Ionicons name="logo-google" size={20} color="#FFF" />}
               onPress={() => setComingSoon(true)}
               last
             />
@@ -145,6 +152,18 @@ export default function MyInfoScreen() {
         visible={comingSoon}
         onClose={() => setComingSoon(false)}
       />
+
+      <AvatarPicker
+        visible={avatarPicker}
+        current={user?.avatarUrl}
+        onClose={() => setAvatarPicker(false)}
+        onSelect={async (key) => {
+          if (!user?.coreId) return;
+          await updateUserProfileApi(user.coreId, { avatarUrl: key });
+          await data.reload();
+          setAvatarPicker(false);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -156,4 +175,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins_400Regular",
   },
+  avatarThumb: { width: 32, height: 32, borderRadius: 16 },
 });

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import ComingSoonSheet from "./ComingSoonSheet";
 import Text from "./CustomText";
+import { avatarSource } from "./profile/ProfileChrome";
 
 interface FixedHeaderProps {
   userData: {
@@ -54,6 +55,7 @@ export default function FixedHeader({ userData }: FixedHeaderProps) {
   // ==========================================
 
   const avatarUrl = userData?.avatarUrl || null;
+  const avatarImg = avatarSource(avatarUrl, userData?.coreId);
 
   const [comingSoon, setComingSoon] = useState(false);
 
@@ -61,8 +63,8 @@ export default function FixedHeader({ userData }: FixedHeaderProps) {
     <View>
       <View style={styles.fixedHeader}>
         <View style={styles.userInfo}>
-          {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+          {avatarImg ? (
+            <Image source={avatarImg} style={styles.avatarImage} />
           ) : (
             <Ionicons name="person-circle" size={40} color="#EBB42C" />
           )}
