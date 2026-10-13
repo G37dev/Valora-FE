@@ -163,16 +163,16 @@ export default function ProfileScreen() {
             Growth, save and explore exclusive benefits as you level up.
           </Text>
 
-          <View style={styles.journeyLevelRow}>
-            <Text style={styles.journeyLevel}>{sec.label} Level</Text>
-            <Image
-              source={LEVEL_BADGES[tier]}
-              style={styles.journeyBadge}
-              resizeMode="contain"
-            />
-          </View>
           <View style={styles.journeyBottom}>
             <View style={styles.journeyLeft}>
+              <View style={styles.journeyLevelRow}>
+                <Text style={styles.journeyLevel}>{sec.label} Level</Text>
+                <Image
+                  source={LEVEL_BADGES[tier]}
+                  style={styles.journeyBadge}
+                  resizeMode="contain"
+                />
+              </View>
               <View style={styles.progressTrack}>
                 <LinearGradient
                   colors={["#FFF3A6", "#F5D13E"]}
@@ -362,26 +362,26 @@ const styles = StyleSheet.create({
   journeyLevelRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 22,
+    gap: 6,
   },
   journeyLevel: {
     color: "#FFF",
     fontSize: 13,
     fontFamily: "Poppins_600SemiBold",
   },
-  journeyBadge: { width: 22, height: 22 },
+  journeyBadge: { width: 20, height: 20 },
   journeyBottom: {
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
-    marginTop: 8,
+    marginTop: 22,
   },
   journeyLeft: { flex: 1, marginRight: 16 },
   progressTrack: {
     height: 8,
     borderRadius: 4,
     backgroundColor: "#262620",
+    marginTop: 8,
     overflow: "hidden",
   },
   progressFill: {
