@@ -232,7 +232,7 @@ function OverviewView({
                       source={LEVEL_BADGES[lv]}
                       style={styles.trackBadgeGlow}
                       resizeMode="contain"
-                      blurRadius={3}
+                      blurRadius={6}
                     />
                   )}
                   <Image
@@ -301,44 +301,40 @@ function DetailsView({
     <View>
       <View style={styles.headRowDetail}>
         <TouchableOpacity onPress={onBack} hitSlop={12}>
-          <Ionicons name="chevron-back" size={24} color="#FFF" />
+          <Ionicons name="chevron-back" size={26} color="#FFF" />
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.titleCenter}>Membership Levels</Text>
-        </View>
         <CloseBtn onPress={onClose} />
       </View>
+      <View style={styles.divider} />
+
+      <Text style={styles.titleCenter}>Membership Levels</Text>
       <Text style={styles.detailSub}>
         Complete activities and achieve higher levels{"\n"}to unlock more
         benefits.
       </Text>
 
-      <View style={{ marginTop: 18 }}>
+      <View style={styles.detailCard}>
         {items.map((l, i) => {
           const lv = MEMBER_LEVELS.length - i;
           const active = lv === tier;
-          return (
-            <View
-              key={l.name}
-              style={[styles.detailItem, active && styles.detailItemActive]}
-            >
+          const last = i === items.length - 1;
+
+          const body = (
+            <View style={styles.detailItem}>
               <View style={styles.detailBadgeWrap}>
                 {active && (
                   <Image
-                    source={GLOW}
-                    style={styles.detailGlow}
+                    source={LEVEL_BADGES[lv]}
+                    style={styles.detailBadgeGlow}
                     resizeMode="contain"
+                    blurRadius={3}
                   />
                 )}
                 <Image
                   source={LEVEL_BADGES[lv]}
-                  style={[
-                    styles.detailBadge,
-                    active && { width: 72, height: 72 },
-                  ]}
+                  style={styles.detailBadge}
                   resizeMode="contain"
                 />
-                {i < items.length - 1 && <View style={styles.detailLine} />}
               </View>
               <View style={{ flex: 1 }}>
                 <View style={styles.detailNameRow}>
@@ -352,6 +348,39 @@ function DetailsView({
                 <Text style={styles.detailStripes}>{l.stripes} Stripes</Text>
                 <Text style={styles.detailDesc}>{l.desc}</Text>
               </View>
+            </View>
+          );
+
+          return (
+            <View key={l.name}>
+              {active ? (
+                <LinearGradient
+                  colors={["#5A5035", "#2A2619", "#8D7F5A"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.detailActiveBorder}
+                >
+                  <View style={styles.detailActiveInner}>
+                    <Image
+                      source={GLOW}
+                      style={styles.detailActiveGlow}
+                      resizeMode="cover"
+                      blurRadius={18}
+                    />
+                    {body}
+                  </View>
+                </LinearGradient>
+              ) : (
+                body
+              )}
+              {!last && (
+                <LinearGradient
+                  colors={["transparent", "#CDBE8A", "transparent"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={styles.detailConnector}
+                />
+              )}
             </View>
           );
         })}
@@ -377,14 +406,15 @@ const styles = StyleSheet.create({
   headRowDetail: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    justifyContent: "space-between",
   },
   title: { color: "#FFF", fontSize: 20, fontFamily: "Poppins_600SemiBold" },
   titleCenter: {
     color: "#FFF",
-    fontSize: 17,
+    fontSize: 20,
     fontFamily: "Poppins_600SemiBold",
     textAlign: "center",
+    marginTop: 22,
   },
   closeBtn: {
     width: 34,
@@ -456,14 +486,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: 70,
     height: 70,
-    tintColor: "#FFF4C2",
+    tintColor: "#fff4c26c",
     opacity: 0.9,
   },
   checkDot: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#F5D13E",
+    backgroundColor: "#FBE678",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -482,7 +512,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 2,
   },
-  trackLabelActive: { color: "#F5D13E" },
+  trackLabelActive: { color: "#FBE678" },
   trackLabelLocked: { color: "#8A8A8A" },
   detailsBtn: {
     flexDirection: "row",
@@ -516,33 +546,60 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginTop: 10,
   },
+  detailCard: {
+    backgroundColor: "#141414",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#262626",
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
   detailItem: {
     flexDirection: "row",
-    gap: 16,
-    paddingVertical: 16,
+    alignItems: "flex-start",
+    gap: 14,
+    paddingVertical: 12,
     paddingHorizontal: 8,
+  },
+  detailActiveBorder: {
     borderRadius: 16,
+    padding: 1,
   },
-  detailItemActive: {
-    backgroundColor: "#161309",
-    borderWidth: 1,
-    borderColor: "#8D7F5A",
+  detailActiveInner: {
+    borderRadius: 15,
+    backgroundColor: "#1E1C17",
+    overflow: "hidden",
   },
-  detailBadgeWrap: { width: 72, alignItems: "center" },
-  detailGlow: {
+  detailActiveGlow: {
     position: "absolute",
-    width: 110,
-    height: 90,
-    top: -8,
-    opacity: 0.75,
+    right: -60,
+    top: -30,
+    width: 220,
+    height: 200,
+    tintColor: "#FBE678",
+    opacity: 0.35,
   },
-  detailBadge: { width: 60, height: 60 },
-  detailLine: {
+  detailBadgeWrap: {
+    width: 76,
+    height: 76,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  detailBadgeGlow: {
+    position: "absolute",
+    width: 82,
+    height: 82,
+    tintColor: "#fff4c26c",
+    opacity: 0.9,
+  },
+  detailBadge: { width: 74, height: 74 },
+  detailConnector: {
     width: 2,
-    flex: 1,
-    minHeight: 14,
-    marginTop: 6,
-    backgroundColor: "#8D7F5A",
+    height: 22,
+    marginLeft: 8 + 38 - 1,
+    marginVertical: -4,
+    borderRadius: 1,
   },
   detailNameRow: {
     flexDirection: "row",
@@ -551,14 +608,14 @@ const styles = StyleSheet.create({
   },
   detailName: {
     color: "#FFF",
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: "Poppins_600SemiBold",
   },
   currentPill: {
-    backgroundColor: "#E8C657",
-    borderRadius: 14,
+    backgroundColor: "#FBE678",
+    borderRadius: 16,
     paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingVertical: 6,
   },
   currentPillText: {
     color: "#1A1A1A",
@@ -567,14 +624,14 @@ const styles = StyleSheet.create({
   },
   detailStripes: {
     color: "#8A8A8A",
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: 13,
+    marginTop: 2,
   },
   detailDesc: {
-    color: "#6E6E6E",
+    color: "#8A8A8A",
     fontSize: 13,
-    lineHeight: 19,
-    marginTop: 8,
-    paddingRight: 8,
+    lineHeight: 20,
+    marginTop: 10,
+    paddingRight: 6,
   },
 });
