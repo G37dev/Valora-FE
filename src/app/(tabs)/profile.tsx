@@ -102,62 +102,60 @@ export default function ProfileScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+        <TouchableOpacity
+          style={styles.userRow}
+          onPress={() => router.push("/profile/my-info")}
+          activeOpacity={0.8}
+        >
+          <LevelAvatar
+            uri={user?.avatarUrl}
+            coreId={user?.coreId}
+            tier={tier}
+            size={76}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.userName} numberOfLines={1}>
+              {name}
+            </Text>
+            <View style={styles.vidRow}>
+              <Text style={styles.vidText}>VID : {user?.coreId || "-"}</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  user?.coreId && Clipboard.setStringAsync(user.coreId)
+                }
+                hitSlop={8}
+              >
+                <Ionicons name="copy-outline" size={14} color="#8A8A8A" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.badgeRow}>
+              {verified ? (
+                <View style={[styles.badge, styles.badgeVerified]}>
+                  <Ionicons name="checkmark-circle" size={12} color="#000" />
+                  <Text style={styles.badgeVerifiedText}>Verified</Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={[styles.badge, styles.badgeDim]}
+                  onPress={() => router.push("/kyc-screen")}
+                >
+                  <Ionicons name="alert-circle" size={12} color={GOLD} />
+                  <Text style={styles.badgeDimText}>
+                    {kycStatus === "PENDING" ? "Pending" : "Unverified"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              <LevelBadge tier={tier} label={`${sec.label} Level`} />
+            </View>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#555" />
+        </TouchableOpacity>
+
         <ImageBackground
           source={require("../../../assets/images/profile/cardProfile.png")}
-          style={styles.userCard}
-          imageStyle={styles.userCardBg}
+          style={styles.journeyCard}
+          imageStyle={styles.journeyCardBg}
         >
-          <TouchableOpacity
-            style={styles.userRow}
-            onPress={() => router.push("/profile/my-info")}
-            activeOpacity={0.8}
-          >
-            <LevelAvatar
-              uri={user?.avatarUrl}
-              coreId={user?.coreId}
-              tier={tier}
-              size={76}
-            />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.userName} numberOfLines={1}>
-                {name}
-              </Text>
-              <View style={styles.vidRow}>
-                <Text style={styles.vidText}>VID : {user?.coreId || "-"}</Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    user?.coreId && Clipboard.setStringAsync(user.coreId)
-                  }
-                  hitSlop={8}
-                >
-                  <Ionicons name="copy-outline" size={14} color="#8A8A8A" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.badgeRow}>
-                {verified ? (
-                  <View style={[styles.badge, styles.badgeVerified]}>
-                    <Ionicons name="checkmark-circle" size={12} color="#000" />
-                    <Text style={styles.badgeVerifiedText}>Verified</Text>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={[styles.badge, styles.badgeDim]}
-                    onPress={() => router.push("/kyc-screen")}
-                  >
-                    <Ionicons name="alert-circle" size={12} color={GOLD} />
-                    <Text style={styles.badgeDimText}>
-                      {kycStatus === "PENDING" ? "Pending" : "Unverified"}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                <LevelBadge tier={tier} label={`${sec.label} Level`} />
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#555" />
-          </TouchableOpacity>
-        </ImageBackground>
-
-        <View style={styles.journeyCard}>
           <Text style={styles.journeyEyebrow}>Y O U R J O U R N E Y</Text>
           <Text style={styles.journeyTitle}>Grow with VIVALORA</Text>
           <Text style={styles.journeySub}>
@@ -166,7 +164,10 @@ export default function ProfileScreen() {
 
           <Text style={styles.journeyLevel}>{sec.label} Level</Text>
           <View style={styles.progressTrack}>
-            <View
+            <LinearGradient
+              colors={["#FBE678", "#F5D13E"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
               style={[
                 styles.progressFill,
                 {
@@ -193,7 +194,7 @@ export default function ProfileScreen() {
               </LinearGradient>
             </TouchableOpacity>
           </View>
-        </View>
+        </ImageBackground>
 
         <View style={styles.quickRow}>
           {QUICK.map((q) => (
@@ -258,24 +259,13 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_600SemiBold",
   },
   topIcons: { flexDirection: "row", alignItems: "center", gap: 18 },
-  userCard: {
-    marginHorizontal: 16,
-    marginTop: 6,
-    marginBottom: 18,
-    borderRadius: 18,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#3A3520",
-    minHeight: 108,
-    justifyContent: "center",
-  },
-  userCardBg: { borderRadius: 18, resizeMode: "cover" },
   userRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 18,
+    paddingHorizontal: 20,
+    marginTop: 6,
+    marginBottom: 18,
   },
   recentIcon: { width: 30, height: 30 },
   userName: {
@@ -330,13 +320,14 @@ const styles = StyleSheet.create({
   },
   journeyCard: {
     marginHorizontal: 20,
-    backgroundColor: "#141410",
-    borderWidth: 1,
-    borderColor: "#3A3520",
     borderRadius: 18,
     padding: 18,
     marginBottom: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#3A3520",
   },
+  journeyCardBg: { borderRadius: 18, resizeMode: "cover" },
   journeyEyebrow: {
     color: GOLD,
     fontSize: 10,
