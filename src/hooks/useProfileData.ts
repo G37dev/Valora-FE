@@ -28,63 +28,66 @@ export function setCachedProfile(profile: UserProfile | null) {
 const STALE_MS = 20_000;
 let inflight: Promise<void> | null = null;
 
+// Fetch profil + security state, dibagi semua screen.
+// Skip kalau data masih fresh; call konkuren di-merge.
+export function refreshProfile(force = false): Promise<void> {
+  const { user: curUser, lastFetch } = useProfileStore.getState();
+  if (!force && Date.now() - lastFetch < STALE_MS && curUser) {
+    return Promise.resolve();
+  }
+  if (inflight) return inflight;
+
+  const { setUser, setSecurity, markFetched } = useProfileStore.getState();
+
+  const run = async () => {
+    try {
+      const coreId = await AsyncStorage.getItem("coreId");
+      if (!coreId) {
+        setUser(null);
+        return;
+      }
+
+      const profile = await getUserProfileApi(coreId);
+      setUser(profile);
+      markFetched();
+
+      const token = await getAuthToken();
+      if (!token) return;
+
+      let twoFA = false;
+      let keys: PasskeyInfo[] = [];
+
+      try {
+        const res = await get2FAStatusApi(token);
+        twoFA = Boolean(res?.enabled);
+      } catch (e) {
+        console.error("Gagal cek status 2FA:", e);
+      }
+
+      try {
+        keys = await listPasskeys(token);
+      } catch (e) {
+        console.error("Gagal memuat passkey:", e);
+      }
+
+      setSecurity(twoFA, keys);
+    } catch (error) {
+      console.error("Gagal memuat data profil:", error);
+    }
+  };
+
+  inflight = run().finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
 export function useProfileData(): ProfileData {
   const user = useProfileStore((s) => s.user);
   const twoFAEnabled = useProfileStore((s) => s.twoFAEnabled);
   const passkeys = useProfileStore((s) => s.passkeys);
-  const { setUser, setSecurity, markFetched } = useProfileStore.getState();
 
-  const reload = useCallback(
-    async (force = false) => {
-      const { user: curUser, lastFetch } = useProfileStore.getState();
-      // Skip fetch kalau data masih fresh (<20s) — dedupe call konkuren.
-      if (!force && Date.now() - lastFetch < STALE_MS && curUser) return;
-      if (inflight) return inflight;
-
-      const run = async () => {
-        try {
-          const coreId = await AsyncStorage.getItem("coreId");
-          if (!coreId) {
-            setUser(null);
-            return;
-          }
-
-          const profile = await getUserProfileApi(coreId);
-          setUser(profile);
-          markFetched();
-
-          const token = await getAuthToken();
-          if (!token) return;
-
-          let twoFA = false;
-          let keys: PasskeyInfo[] = [];
-
-          try {
-            const res = await get2FAStatusApi(token);
-            twoFA = Boolean(res?.enabled);
-          } catch (e) {
-            console.error("Gagal cek status 2FA:", e);
-          }
-
-          try {
-            keys = await listPasskeys(token);
-          } catch (e) {
-            console.error("Gagal memuat passkey:", e);
-          }
-
-          setSecurity(twoFA, keys);
-        } catch (error) {
-          console.error("Gagal memuat data profil:", error);
-        }
-      };
-
-      inflight = run().finally(() => {
-        inflight = null;
-      });
-      return inflight;
-    },
-    [setUser, setSecurity, markFetched],
-  );
+  const reload = useCallback((force = false) => refreshProfile(force), []);
 
   useFocusEffect(
     useCallback(() => {

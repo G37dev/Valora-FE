@@ -20,7 +20,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import Text from "../../components/CustomText";
-import { getUserProfileApi } from "../../services/userService";
+import { refreshProfile } from "../../hooks/useProfileData";
 import { useProfileStore } from "../../stores/profileStore";
 
 // ======================================================
@@ -78,14 +78,10 @@ export default function HomeScreen() {
     try {
       const coreId = await AsyncStorage.getItem("coreId");
 
-      const savedUser = await AsyncStorage.getItem("userData");
-
       if (coreId) {
         setIsLoggedIn(true);
 
-        const profile = await getUserProfileApi(coreId);
-
-        setUserData(profile);
+        await refreshProfile();
       } else {
         setIsLoggedIn(false);
         setUserData(null);
@@ -101,36 +97,7 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      const getLatestDataFromStorage = async () => {
-        try {
-          const coreId = await AsyncStorage.getItem("coreId");
-
-          const savedUser = await AsyncStorage.getItem("userData");
-
-          if (coreId) {
-            setIsLoggedIn(true);
-
-            // Tampilkan data lokal terlebih dahulu
-            if (savedUser) {
-              try {
-                setUserData(JSON.parse(savedUser));
-              } catch (parseError) {
-                console.error("Gagal parsing userData:", parseError);
-              }
-            }
-
-            // Ambil data terbaru dari backend
-            await loadData();
-          } else {
-            setIsLoggedIn(false);
-            setUserData(null);
-          }
-        } catch (error) {
-          console.error("Gagal membaca lokal data:", error);
-        }
-      };
-
-      getLatestDataFromStorage();
+      loadData();
     }, []),
   );
 

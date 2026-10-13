@@ -18,9 +18,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { showAlert } from "../../components/AppAlert";
 import SkeletonBox from "../../components/SkeletonBox";
 import { TransactionContext } from "../../context/TransactionContext";
+import { refreshProfile } from "../../hooks/useProfileData";
 import { apiClient } from "../../services/apiClient";
 import { notifyApp } from "../../services/notificationService";
-import { getUserProfileApi } from "../../services/userService";
 import { activateWalletApi } from "../../services/walletService";
 import { useProfileStore } from "../../stores/profileStore";
 
@@ -62,9 +62,9 @@ export default function WalletScreen() {
       const coreId = await AsyncStorage.getItem("coreId");
       if (coreId) {
         setIsLoggedIn(true); // Set login true
-        // 1. Ambil Profil User
-        const profile = await getUserProfileApi(coreId);
-        setUserData(profile);
+        // 1. Ambil Profil User (via store — throttled + deduped)
+        await refreshProfile();
+        const profile = useProfileStore.getState().user;
 
         // 2. Cek apakah wallet sudah aktif sebelum mengambil saldo
         if (profile?.isWalletActive) {
@@ -96,19 +96,7 @@ export default function WalletScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      const getLatestDataFromStorage = async () => {
-        try {
-          const savedUser = await AsyncStorage.getItem("userData");
-          if (savedUser) {
-            setUserData(JSON.parse(savedUser));
-          }
-          loadData();
-        } catch (error) {
-          console.error("Gagal membaca lokal data:", error);
-        }
-      };
-
-      getLatestDataFromStorage();
+      loadData();
     }, []),
   );
 
