@@ -154,61 +154,70 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={20} color="#555" />
         </TouchableOpacity>
 
-        <ImageBackground
-          source={require("../../../assets/images/profile/cardProfile.png")}
-          style={styles.journeyCard}
-          imageStyle={styles.journeyCardBg}
+        <LinearGradient
+          colors={["#8D7F5A", "#262015", "#A17C51"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.journeyCardBorder}
         >
-          <Text style={styles.journeyEyebrow}>YOUR JOURNEY</Text>
-          <Text style={styles.journeyTitle}>Grow with VIVALORA</Text>
-          <Text style={styles.journeySub}>
-            Growth, save and explore{"\n"}exclusive benefits as you level up.
-          </Text>
+          <ImageBackground
+            source={require("../../../assets/images/profile/cardProfile.png")}
+            style={styles.journeyCard}
+            imageStyle={styles.journeyCardBg}
+          >
+            <Text style={styles.journeyEyebrow}>YOUR JOURNEY</Text>
+            <Text style={styles.journeyTitle}>Grow with VIVALORA</Text>
+            <Text style={styles.journeySub}>
+              Growth, save and explore{"\n"}exclusive benefits as you level up.
+            </Text>
 
-          <View style={styles.journeyBottom}>
-            <View style={styles.journeyLeft}>
-              <View style={styles.journeyLevelRow}>
-                <Text style={styles.journeyLevel}>{sec.label} Level</Text>
-                <Image
-                  source={LEVEL_BADGES[tier]}
-                  style={styles.journeyBadge}
-                  resizeMode="contain"
-                />
+            <View style={styles.journeyBottom}>
+              <View style={styles.journeyLeft}>
+                <View style={styles.journeyLevelRow}>
+                  <Text style={styles.journeyLevel}>{sec.label} Level</Text>
+                  <Image
+                    source={LEVEL_BADGES[tier]}
+                    style={styles.journeyBadge}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.progressTrack}>
+                  <LinearGradient
+                    colors={["#FFF3A6", "#F5D13E"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={[
+                      styles.progressFill,
+                      {
+                        width: `${sec.level === "high" ? 75 : sec.level === "medium" ? 45 : 15}%`,
+                      },
+                    ]}
+                  />
+                </View>
+                <Text style={styles.journeyPoints}>
+                  Complete KYC to level up
+                </Text>
               </View>
-              <View style={styles.progressTrack}>
-                <LinearGradient
-                  colors={["#FFF3A6", "#F5D13E"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={[
-                    styles.progressFill,
-                    {
-                      width: `${sec.level === "high" ? 75 : sec.level === "medium" ? 45 : 15}%`,
-                    },
-                  ]}
-                />
-              </View>
-              <Text style={styles.journeyPoints}>Complete KYC to level up</Text>
-            </View>
-            <View style={styles.journeyRight}>
-              <TouchableOpacity
-                style={styles.benefitsBtn}
-                onPress={() => setComingSoon(true)}
-                activeOpacity={0.85}
-              >
-                <LinearGradient
-                  colors={["#ECC173", "#FFF3DD", "#ECC173"]}
-                  start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
-                  style={styles.benefitsGradient}
+              <View style={styles.journeyRight}>
+                <TouchableOpacity
+                  style={styles.benefitsBtn}
+                  onPress={() => setComingSoon(true)}
+                  activeOpacity={0.85}
                 >
-                  <Text style={styles.benefitsBtnText}>View Benefits</Text>
-                  <Ionicons name="arrow-forward" size={14} color="#000" />
-                </LinearGradient>
-              </TouchableOpacity>
+                  <LinearGradient
+                    colors={["#ECC173", "#FFF3DD", "#ECC173"]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={styles.benefitsGradient}
+                  >
+                    <Text style={styles.benefitsBtnText}>View Benefits</Text>
+                    <Ionicons name="arrow-forward" size={14} color="#000" />
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </ImageBackground>
+          </ImageBackground>
+        </LinearGradient>
 
         <View style={styles.quickRow}>
           {QUICK.map((q) => (
@@ -339,12 +348,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 9,
   },
-  journeyCard: {
+  journeyCardBorder: {
     marginHorizontal: 20,
-    padding: 18,
+    borderRadius: 18,
+    padding: 1,
     marginBottom: 16,
   },
-  journeyCardBg: { resizeMode: "cover" },
+  journeyCard: {
+    borderRadius: 17,
+    padding: 18,
+    overflow: "hidden",
+  },
+  journeyCardBg: { borderRadius: 17, resizeMode: "cover" },
   journeyEyebrow: {
     color: GOLD,
     fontSize: 10,
