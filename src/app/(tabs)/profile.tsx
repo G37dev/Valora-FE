@@ -184,9 +184,9 @@ export default function ProfileScreen() {
               activeOpacity={0.85}
             >
               <LinearGradient
-                colors={["#FFF3A6", "#F5D13E"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
+                colors={["#ECC173", "#FFF3DD", "#ECC173"]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
                 style={styles.benefitsGradient}
               >
                 <Text style={styles.benefitsBtnText}>View Benefits</Text>
