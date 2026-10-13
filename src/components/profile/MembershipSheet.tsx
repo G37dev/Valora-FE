@@ -5,6 +5,7 @@ import BottomSheet, {
   BottomSheetView,
   useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
+import { BlurView } from "expo-blur";
 import { useEffect, useRef, useState } from "react";
 import {
   Image,
@@ -216,10 +217,14 @@ function OverviewView({
             <View key={l.name} style={styles.trackItem}>
               <View style={styles.trackBadgeWrap}>
                 {i + 1 === tier && (
-                  <>
-                    <View style={styles.trackGlowOuter} />
-                    <View style={styles.trackGlowInner} />
-                  </>
+                  <View style={styles.trackGlowWrap}>
+                    <View style={styles.trackGlowDot} />
+                    <BlurView
+                      intensity={28}
+                      tint="dark"
+                      style={StyleSheet.absoluteFill}
+                    />
+                  </View>
                 )}
                 <Image
                   source={LEVEL_BADGES[i + 1]}
@@ -362,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  title: { color: "#FFF", fontSize: 18, fontFamily: "Poppins_600SemiBold" },
+  title: { color: "#FFF", fontSize: 20, fontFamily: "Poppins_600SemiBold" },
   titleCenter: {
     color: "#FFF",
     fontSize: 17,
@@ -370,10 +375,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   closeBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#2A2A2A",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#3A3A3A",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -384,19 +389,19 @@ const styles = StyleSheet.create({
     marginHorizontal: -20,
   },
   hero: {
-    height: 230,
+    height: 210,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 4,
+    marginTop: 2,
   },
-  glow: { position: "absolute", width: 330, height: 230, opacity: 1 },
-  heroBadge: { width: 118, height: 118 },
+  glow: { position: "absolute", width: 260, height: 200, opacity: 1 },
+  heroBadge: { width: 100, height: 100 },
   levelName: {
     color: "#FFF",
-    fontSize: 26,
+    fontSize: 28,
     fontFamily: "Poppins_600SemiBold",
     textAlign: "center",
-    marginTop: 6,
+    marginTop: 4,
   },
   levelSub: {
     color: "#8A8A8A",
@@ -423,21 +428,18 @@ const styles = StyleSheet.create({
   trackItem: { alignItems: "center", width: "22%", gap: 8 },
   trackBadgeWrap: { alignItems: "center", justifyContent: "center" },
   trackBadge: { width: 56, height: 56 },
-  trackGlowOuter: {
-    position: "absolute",
-    width: 78,
-    height: 78,
-    borderRadius: 39,
-    backgroundColor: "rgba(245,209,62,0.10)",
-  },
-  trackGlowInner: {
+  trackGlowWrap: {
     position: "absolute",
     width: 62,
     height: 62,
     borderRadius: 31,
-    backgroundColor: "rgba(245,209,62,0.16)",
-    borderWidth: 1,
-    borderColor: "rgba(245,209,62,0.45)",
+    overflow: "hidden",
+  },
+  trackGlowDot: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: "rgba(245,209,62,0.85)",
   },
   checkDot: {
     width: 19,
@@ -465,12 +467,12 @@ const styles = StyleSheet.create({
   trackLabelLocked: { color: "#8A8A8A" },
   trackLine: {
     position: "absolute",
-    top: 48,
-    left: "11%",
-    right: "11%",
+    top: 50,
+    left: "12%",
+    right: "12%",
     height: 2,
-    backgroundColor: "#8D7F5A",
-    opacity: 0.55,
+    backgroundColor: "#9A9070",
+    opacity: 0.8,
   },
   detailsBtn: {
     flexDirection: "row",
