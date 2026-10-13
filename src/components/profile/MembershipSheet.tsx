@@ -210,6 +210,7 @@ function OverviewView({
       </Text>
 
       <View style={styles.trackCard}>
+        <View style={styles.trackLine} />
         <View style={styles.trackRow}>
           {MEMBER_LEVELS.map((l, i) => (
             <View key={l.name} style={styles.trackItem}>
@@ -223,11 +224,11 @@ function OverviewView({
               </View>
               {i + 1 <= tier ? (
                 <View style={styles.checkDot}>
-                  <Ionicons name="checkmark" size={10} color="#1A1A1A" />
+                  <Ionicons name="checkmark" size={11} color="#1A1A1A" />
                 </View>
               ) : (
                 <View style={styles.lockDot}>
-                  <Ionicons name="lock-closed" size={10} color="#8A8A8A" />
+                  <Ionicons name="lock-closed" size={11} color="#8A8A8A" />
                 </View>
               )}
               <Text
@@ -242,7 +243,6 @@ function OverviewView({
             </View>
           ))}
         </View>
-        <View style={styles.trackLine} />
       </View>
 
       <TouchableOpacity
@@ -250,9 +250,16 @@ function OverviewView({
         onPress={onDetails}
         activeOpacity={0.8}
       >
-        <Ionicons name="bar-chart" size={16} color="#FFF" />
-        <Text style={styles.detailsBtnText}>View Leveling Details</Text>
-        <Ionicons name="chevron-forward" size={16} color="#8A8A8A" />
+        <View style={styles.detailsBtnLeft}>
+          <Ionicons name="bar-chart" size={16} color="#FFF" />
+          <Text style={styles.detailsBtnText}>View Leveling Details</Text>
+        </View>
+        <Ionicons
+          name="chevron-forward"
+          size={16}
+          color="#8A8A8A"
+          style={styles.detailsBtnChevron}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -372,19 +379,19 @@ const styles = StyleSheet.create({
     marginHorizontal: -20,
   },
   hero: {
-    height: 190,
+    height: 230,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
+    marginTop: 4,
   },
-  glow: { position: "absolute", width: 240, height: 190, opacity: 0.9 },
-  heroBadge: { width: 92, height: 92 },
+  glow: { position: "absolute", width: 330, height: 230, opacity: 1 },
+  heroBadge: { width: 118, height: 118 },
   levelName: {
     color: "#FFF",
-    fontSize: 22,
+    fontSize: 26,
     fontFamily: "Poppins_600SemiBold",
     textAlign: "center",
-    marginTop: 4,
+    marginTop: 6,
   },
   levelSub: {
     color: "#8A8A8A",
@@ -408,29 +415,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  trackItem: { alignItems: "center", width: "22%", gap: 6 },
+  trackItem: { alignItems: "center", width: "22%", gap: 8 },
   trackBadgeWrap: { alignItems: "center", justifyContent: "center" },
-  trackBadge: { width: 52, height: 52 },
+  trackBadge: { width: 56, height: 56 },
   trackBadgeHalo: {
     position: "absolute",
-    width: 62,
-    height: 62,
-    borderRadius: 31,
+    width: 66,
+    height: 66,
+    borderRadius: 33,
     borderWidth: 1.5,
     borderColor: "#F5D13E",
   },
   checkDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#E8C657",
+    width: 19,
+    height: 19,
+    borderRadius: 10,
+    backgroundColor: "#F5D13E",
     alignItems: "center",
     justifyContent: "center",
   },
   lockDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 19,
+    height: 19,
+    borderRadius: 10,
     backgroundColor: "#3A3A3A",
     alignItems: "center",
     justifyContent: "center",
@@ -446,22 +453,31 @@ const styles = StyleSheet.create({
   trackLine: {
     position: "absolute",
     top: 48,
-    left: 40,
-    right: 40,
+    left: "11%",
+    right: "11%",
     height: 2,
-    backgroundColor: "#3A3520",
+    backgroundColor: "#8D7F5A",
+    opacity: 0.55,
   },
   detailsBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
     backgroundColor: "#1A1A1A",
     borderWidth: 1,
     borderColor: "#2A2A2A",
     borderRadius: 26,
-    paddingVertical: 15,
+    paddingVertical: 16,
     marginTop: 18,
+  },
+  detailsBtnLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  detailsBtnChevron: {
+    position: "absolute",
+    right: 20,
   },
   detailsBtnText: {
     color: "#FFF",
