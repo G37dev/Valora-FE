@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    width: "38%",
+    width: "24%",
   },
   detailBadgeCol: {
     width: 76,
@@ -679,8 +679,8 @@ const styles = StyleSheet.create({
   },
   detailBadgeGlow: {
     position: "absolute",
-    width: 88,
-    height: 88,
+    width: 80,
+    height: 80,
     tintColor: "#FFF9D6",
     opacity: 0.55,
   },
