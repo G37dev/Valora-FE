@@ -163,9 +163,16 @@ export default function ProfileScreen() {
             Growth, save and explore exclusive benefits as you level up.
           </Text>
 
+          <View style={styles.journeyLevelRow}>
+            <Text style={styles.journeyLevel}>{sec.label} Level</Text>
+            <Image
+              source={LEVEL_BADGES[tier]}
+              style={styles.journeyBadge}
+              resizeMode="contain"
+            />
+          </View>
           <View style={styles.journeyBottom}>
             <View style={styles.journeyLeft}>
-              <Text style={styles.journeyLevel}>{sec.label} Level</Text>
               <View style={styles.progressTrack}>
                 <LinearGradient
                   colors={["#FFF3A6", "#F5D13E"]}
@@ -182,11 +189,6 @@ export default function ProfileScreen() {
               <Text style={styles.journeyPoints}>Complete KYC to level up</Text>
             </View>
             <View style={styles.journeyRight}>
-              <Image
-                source={LEVEL_BADGES[tier]}
-                style={styles.journeyBadge}
-                resizeMode="contain"
-              />
               <TouchableOpacity
                 style={styles.benefitsBtn}
                 onPress={() => setComingSoon(true)}
@@ -357,23 +359,29 @@ const styles = StyleSheet.create({
     marginTop: 6,
     maxWidth: "80%",
   },
-  journeyBottom: {
+  journeyLevelRow: {
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "center",
     justifyContent: "space-between",
     marginTop: 22,
   },
-  journeyLeft: { flex: 1, marginRight: 16 },
   journeyLevel: {
     color: "#FFF",
     fontSize: 13,
     fontFamily: "Poppins_600SemiBold",
   },
+  journeyBadge: { width: 22, height: 22 },
+  journeyBottom: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+  journeyLeft: { flex: 1, marginRight: 16 },
   progressTrack: {
     height: 8,
     borderRadius: 4,
     backgroundColor: "#262620",
-    marginTop: 8,
     overflow: "hidden",
   },
   progressFill: {
@@ -389,7 +397,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     gap: 8,
   },
-  journeyBadge: { width: 22, height: 22 },
   benefitsBtnText: {
     color: "#000",
     fontSize: 12,
