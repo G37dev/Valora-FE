@@ -159,7 +159,7 @@ export default function ProfileScreen() {
           <Text style={styles.journeyEyebrow}>YOUR JOURNEY</Text>
           <Text style={styles.journeyTitle}>Grow with VIVALORA</Text>
           <Text style={styles.journeySub}>
-            Growth, save and explore exclusive benefits as you level up.
+            Growth, save and explore{"\n"}exclusive benefits as you level up.
           </Text>
 
           <View style={styles.journeyBottom}>
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 18,
   },
-  recentIcon: { width: 30, height: 30 },
+  recentIcon: { width: 24, height: 24 },
   userName: {
     color: "#FFF",
     fontSize: 18,
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins_600SemiBold",
   },
-  journeyBadge: { width: 20, height: 20 },
+  journeyBadge: { width: 26, height: 26 },
   journeyBottom: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -424,10 +424,10 @@ const styles = StyleSheet.create({
   },
   quickTitle: {
     color: "#FFF",
-    fontSize: 13,
+    fontSize: 10,
     fontFamily: "Poppins_600SemiBold",
   },
-  quickDesc: { color: "#8A8A8A", fontSize: 11, marginTop: 3 },
+  quickDesc: { color: "#8A8A8A", fontSize: 9, marginTop: 1 },
   sectionTitle: {
     color: "#FFF",
     fontSize: 15,
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   },
   recentLabel: {
     color: "#FFF",
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: "Poppins_500Medium",
   },
 });
