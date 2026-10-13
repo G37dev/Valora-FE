@@ -327,7 +327,7 @@ function DetailsView({
                     source={LEVEL_BADGES[lv]}
                     style={styles.detailBadgeGlow}
                     resizeMode="contain"
-                    blurRadius={3}
+                    blurRadius={10}
                   />
                 )}
                 <Image
@@ -361,11 +361,16 @@ function DetailsView({
                   style={styles.detailActiveBorder}
                 >
                   <View style={styles.detailActiveInner}>
-                    <Image
-                      source={GLOW}
+                    <LinearGradient
+                      colors={[
+                        "rgba(251,230,120,0)",
+                        "rgba(251,230,120,0.18)",
+                        "rgba(251,230,120,0.55)",
+                      ]}
+                      locations={[0, 0.55, 1]}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
                       style={styles.detailActiveGlow}
-                      resizeMode="cover"
-                      blurRadius={18}
                     />
                     {body}
                   </View>
@@ -559,7 +564,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 14,
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 8,
   },
   detailActiveBorder: {
@@ -573,13 +578,10 @@ const styles = StyleSheet.create({
   },
   detailActiveGlow: {
     position: "absolute",
-    right: -30,
-    top: -60,
-    width: 300,
-    height: 280,
-    tintColor: "#FBE678",
-    opacity: 0.5,
-    transform: [{ rotate: "-90deg" }],
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: "42%",
   },
   detailBadgeWrap: {
     width: 76,
@@ -589,17 +591,16 @@ const styles = StyleSheet.create({
   },
   detailBadgeGlow: {
     position: "absolute",
-    width: 82,
-    height: 82,
-    tintColor: "#fff4c26c",
-    opacity: 0.9,
+    width: 90,
+    height: 90,
+    tintColor: "#FFF4C2",
+    opacity: 0.75,
   },
   detailBadge: { width: 74, height: 74 },
   detailConnector: {
     width: 2,
-    height: 26,
-    marginLeft: 8 + 38,
-    marginVertical: -6,
+    height: 20,
+    marginLeft: 8 + 38 - 1,
     borderRadius: 1,
   },
   detailNameRow: {
