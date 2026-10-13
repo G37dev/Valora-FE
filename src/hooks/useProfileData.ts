@@ -15,8 +15,12 @@ export interface ProfileData {
   reload: () => Promise<void>;
 }
 
+// Cache di memori — antar screen dapat data sinkron, tanpa flash.
+// AsyncStorage hanya untuk cold start.
+let memUser: UserProfile | null = null;
+
 export function useProfileData(): ProfileData {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(memUser);
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [passkeys, setPasskeys] = useState<PasskeyInfo[]>([]);
 
@@ -25,7 +29,10 @@ export function useProfileData(): ProfileData {
     let alive = true;
     AsyncStorage.getItem("userData")
       .then((raw) => {
-        if (alive && raw) setUser(JSON.parse(raw));
+        if (alive && raw) {
+          memUser = JSON.parse(raw);
+          setUser((cur) => cur ?? memUser);
+        }
       })
       .catch(() => {});
     return () => {
@@ -42,6 +49,7 @@ export function useProfileData(): ProfileData {
       }
 
       const profile = await getUserProfileApi(coreId);
+      memUser = profile;
       setUser(profile);
       await AsyncStorage.setItem("userData", JSON.stringify(profile));
 
