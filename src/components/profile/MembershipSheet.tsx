@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 import { LEVEL_BADGES } from "./ProfileChrome";
 
 const GLOW = require("../../../assets/images/profile/bgMembershiplvl.png");
@@ -324,11 +325,39 @@ function DetailsView({
               <View style={styles.detailBadgeCol}>
                 <View style={styles.detailBadgeWrap}>
                   {active && (
+                    <Svg
+                      width={130}
+                      height={130}
+                      style={styles.detailBadgeHalo}
+                    >
+                      <Defs>
+                        <RadialGradient
+                          id="badgeHalo"
+                          cx="50%"
+                          cy="50%"
+                          r="50%"
+                        >
+                          <Stop
+                            offset="0"
+                            stopColor="#FBE678"
+                            stopOpacity={0.3}
+                          />
+                          <Stop
+                            offset="1"
+                            stopColor="#FBE678"
+                            stopOpacity={0}
+                          />
+                        </RadialGradient>
+                      </Defs>
+                      <Circle cx={65} cy={65} r={65} fill="url(#badgeHalo)" />
+                    </Svg>
+                  )}
+                  {active && (
                     <Image
                       source={LEVEL_BADGES[lv]}
                       style={styles.detailBadgeGlow}
                       resizeMode="contain"
-                      blurRadius={4}
+                      blurRadius={6}
                     />
                   )}
                   <Image
@@ -596,11 +625,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  detailBadgeHalo: {
+    position: "absolute",
+  },
   detailBadgeGlow: {
     position: "absolute",
     width: 80,
     height: 80,
-    tintColor: "#F5D13E",
+    tintColor: "#FBE678",
     opacity: 0.55,
   },
   detailBadge: { width: 74, height: 74 },
