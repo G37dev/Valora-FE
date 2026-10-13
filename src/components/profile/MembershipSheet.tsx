@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Image,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -74,6 +75,9 @@ export default function MembershipSheet({
   onClose,
 }: MembershipSheetProps) {
   const insets = useSafeAreaInsets();
+  const bottomPad =
+    (Platform.OS === "android" ? Math.max(insets.bottom, 28) : insets.bottom) +
+    20;
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
     damping: 14,
@@ -134,7 +138,7 @@ export default function MembershipSheet({
               contentContainerStyle={{
                 paddingHorizontal: 20,
                 paddingTop: 18,
-                paddingBottom: insets.bottom + 20,
+                paddingBottom: bottomPad,
               }}
               showsVerticalScrollIndicator={false}
             >
@@ -152,7 +156,7 @@ export default function MembershipSheet({
               style={{
                 paddingHorizontal: 20,
                 paddingTop: 18,
-                paddingBottom: insets.bottom + 20,
+                paddingBottom: bottomPad,
               }}
             >
               <OverviewView

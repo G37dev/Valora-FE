@@ -8,6 +8,7 @@ import { useRef } from "react";
 import {
   Image,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -25,6 +26,9 @@ export default function ComingSoonSheet({
   onClose,
 }: ComingSoonSheetProps) {
   const insets = useSafeAreaInsets();
+  const bottomPad =
+    (Platform.OS === "android" ? Math.max(insets.bottom, 28) : insets.bottom) +
+    40;
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
     damping: 14,
@@ -75,7 +79,7 @@ export default function ComingSoonSheet({
           )}
         >
           <BottomSheetView
-            style={[styles.content, { paddingBottom: insets.bottom + 40 }]}
+            style={[styles.content, { paddingBottom: bottomPad }]}
           >
             <Image
               source={require("@/assets/images/cs.png")}

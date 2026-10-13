@@ -5,7 +5,7 @@ import BottomSheet, {
   useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
 import { useRef } from "react";
-import { Modal, Pressable, StyleSheet } from "react-native";
+import { Modal, Platform, Pressable, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -33,6 +33,11 @@ export default function ValoraSheet({
   children,
 }: ValoraSheetProps) {
   const insets = useSafeAreaInsets();
+  // Modal di Android punya window terpisah — insets.bottom bisa 0
+  // padahal nav bar overlay sheet-nya. Fallback 28dp buat 3-button nav.
+  const bottomPad =
+    (Platform.OS === "android" ? Math.max(insets.bottom, 28) : insets.bottom) +
+    20;
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
     damping: 14,
@@ -79,7 +84,7 @@ export default function ValoraSheet({
             contentContainerStyle={{
               paddingHorizontal: 20,
               paddingTop: 18,
-              paddingBottom: insets.bottom + 20,
+              paddingBottom: bottomPad,
             }}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
@@ -91,7 +96,7 @@ export default function ValoraSheet({
             style={{
               paddingHorizontal: 20,
               paddingTop: 18,
-              paddingBottom: insets.bottom + 20,
+              paddingBottom: bottomPad,
             }}
           >
             {children}
