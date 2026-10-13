@@ -551,10 +551,10 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     color: "#FFF",
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: "Poppins_600SemiBold",
   },
-  cardSub: { color: MUTED, fontSize: 11, marginTop: 2 },
+  cardSub: { color: MUTED, fontSize: 10, marginTop: 2 },
   cardBody: {
     backgroundColor: "#181818",
     borderWidth: 1,
@@ -574,8 +574,8 @@ const styles = StyleSheet.create({
   rowLabelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   rowLabel: {
     color: "#FFF",
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins_500Medium",
   },
-  rowDesc: { color: MUTED, fontSize: 11, marginTop: 2 },
+  rowDesc: { color: MUTED, fontSize: 10, marginTop: 2 },
 });

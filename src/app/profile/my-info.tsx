@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#050505" },
   rowValue: {
     color: "#8A8A8A",
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: "Poppins_400Regular",
   },
   avatarThumb: { width: 32, height: 32, borderRadius: 16 },
