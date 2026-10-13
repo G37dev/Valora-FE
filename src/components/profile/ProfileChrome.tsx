@@ -17,6 +17,82 @@ export function maskEmail(email?: string | null) {
   return `${visible}***@${domain}`;
 }
 
+const DEFAULT_AVATAR = require("../../../assets/images/profile/a5.png");
+
+const LEVEL_FRAMES: Record<number, number> = {
+  1: require("../../../assets/images/profile/d1.png"),
+  2: require("../../../assets/images/profile/d2.png"),
+  3: require("../../../assets/images/profile/d3.png"),
+  4: require("../../../assets/images/profile/d4.png"),
+};
+
+const LEVEL_BADGES: Record<number, number> = {
+  1: require("../../../assets/images/profile/b1.png"),
+  2: require("../../../assets/images/profile/b2.png"),
+  3: require("../../../assets/images/profile/b3.png"),
+  4: require("../../../assets/images/profile/b4.png"),
+};
+
+// Tier 1-4 dihitung dari jumlah proteksi aktif (KYC + 2FA + passkey).
+export function securityTier(opts: {
+  kycVerified: boolean;
+  twoFA: boolean;
+  passkeys: number;
+}): number {
+  const score =
+    (opts.kycVerified ? 1 : 0) +
+    (opts.twoFA ? 1 : 0) +
+    (opts.passkeys > 0 ? 1 : 0);
+  return Math.min(4, score + 1);
+}
+
+export function LevelAvatar({
+  uri,
+  tier = 1,
+  size = 72,
+}: {
+  uri?: string | null;
+  tier?: number;
+  size?: number;
+}) {
+  const inner = size * 0.74;
+  const offset = (size - inner) / 2;
+  return (
+    <View style={{ width: size, height: size }}>
+      <Image
+        source={uri ? { uri } : DEFAULT_AVATAR}
+        style={{
+          position: "absolute",
+          top: offset,
+          left: offset,
+          width: inner,
+          height: inner,
+          borderRadius: inner / 2,
+        }}
+      />
+      <Image
+        source={LEVEL_FRAMES[tier] || LEVEL_FRAMES[1]}
+        style={{ width: size, height: size }}
+        resizeMode="contain"
+      />
+    </View>
+  );
+}
+
+export function LevelBadge({ tier, label }: { tier: number; label: string }) {
+  return (
+    <View style={styles.levelBadge}>
+      <Image
+        source={LEVEL_BADGES[tier] || LEVEL_BADGES[1]}
+        style={styles.levelBadgeImg}
+        resizeMode="contain"
+      />
+      <Text style={styles.levelBadgeText}>{label}</Text>
+      <Ionicons name="chevron-forward" size={12} color={GOLD} />
+    </View>
+  );
+}
+
 export function maskPhone(phone?: string | null) {
   if (!phone) return "-";
   const digits = phone.replace(/\D/g, "");
@@ -25,6 +101,10 @@ export function maskPhone(phone?: string | null) {
 }
 
 type SecLevel = "low" | "medium" | "high";
+
+export function securityTierFromLevel(level: SecLevel): number {
+  return level === "high" ? 4 : level === "medium" ? 3 : 1;
+}
 
 export function securityLevel(opts: {
   kycVerified: boolean;
@@ -57,13 +137,11 @@ export function ProfileHead({
 
   return (
     <View style={styles.headRow}>
-      <View style={styles.avatarRing}>
-        {user?.avatarUrl ? (
-          <Image source={{ uri: user.avatarUrl }} style={styles.avatarImg} />
-        ) : (
-          <Ionicons name="person" size={34} color={GOLD} />
-        )}
-      </View>
+      <LevelAvatar
+        uri={user?.avatarUrl}
+        tier={securityTierFromLevel(secLevel)}
+        size={72}
+      />
       <View style={{ flex: 1 }}>
         <Text style={styles.headName} numberOfLines={1}>
           {name}
@@ -246,18 +324,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 16,
   },
-  avatarRing: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 2,
-    borderColor: GOLD,
-    backgroundColor: "#1A1A10",
+  levelBadge: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
+    gap: 6,
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: "#3A3520",
+    backgroundColor: "#1A1A10",
   },
-  avatarImg: { width: "100%", height: "100%" },
+  levelBadgeImg: { width: 18, height: 18 },
+  levelBadgeText: {
+    color: GOLD,
+    fontSize: 11,
+    fontFamily: "Poppins_500Medium",
+  },
   headName: {
     color: "#FFF",
     fontSize: 20,

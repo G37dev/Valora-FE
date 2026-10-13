@@ -1,8 +1,16 @@
 import ComingSoonSheet from "@/components/ComingSoonSheet";
-import { GOLD, GREEN, securityLevel } from "@/components/profile/ProfileChrome";
+import {
+  GOLD,
+  GREEN,
+  LevelAvatar,
+  LevelBadge,
+  securityLevel,
+  securityTier,
+} from "@/components/profile/ProfileChrome";
 import { useProfileData } from "@/hooks/useProfileData";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -31,22 +39,22 @@ const QUICK = [
 
 const RECENT = [
   {
-    icon: "wallet-outline" as const,
+    icon: require("../../../assets/images/icon/vaulting.png"),
     label: "Earn",
     route: "/screen/earning-screen",
   },
   {
-    icon: "flash-outline" as const,
+    icon: require("../../../assets/images/icon/goldInstallment.png"),
     label: "Installment",
     route: "/installment/installment-screen",
   },
   {
-    icon: "swap-horizontal" as const,
+    icon: require("../../../assets/images/icon/portofolio.png"),
     label: "Swap",
     route: "/swap/swap-screen",
   },
   {
-    icon: "download-outline" as const,
+    icon: require("../../../assets/images/icon/deposit.png"),
     label: "Deposit",
     route: "/deposit/IdrTopUp",
   },
@@ -60,6 +68,11 @@ export default function ProfileScreen() {
   const name =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
   const sec = securityLevel({
+    kycVerified: kycStatus === "VERIFIED",
+    twoFA: twoFAEnabled,
+    passkeys: passkeys.length,
+  });
+  const tier = securityTier({
     kycVerified: kycStatus === "VERIFIED",
     twoFA: twoFAEnabled,
     passkeys: passkeys.length,
@@ -93,16 +106,7 @@ export default function ProfileScreen() {
           onPress={() => router.push("/profile/my-info")}
           activeOpacity={0.8}
         >
-          <View style={styles.avatarRing}>
-            {user?.avatarUrl ? (
-              <Image
-                source={{ uri: user.avatarUrl }}
-                style={styles.avatarImg}
-              />
-            ) : (
-              <Ionicons name="person" size={34} color={GOLD} />
-            )}
-          </View>
+          <LevelAvatar uri={user?.avatarUrl} tier={tier} size={76} />
           <View style={{ flex: 1 }}>
             <Text style={styles.userName} numberOfLines={1}>
               {name}
@@ -135,11 +139,7 @@ export default function ProfileScreen() {
                   </Text>
                 </TouchableOpacity>
               )}
-              <View style={[styles.badge, styles.badgeGold]}>
-                <Ionicons name="ribbon" size={12} color={GOLD} />
-                <Text style={styles.badgeGoldText}>Member</Text>
-                <Ionicons name="chevron-forward" size={12} color={GOLD} />
-              </View>
+              <LevelBadge tier={tier} label={`${sec.label} Level`} />
             </View>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#555" />
@@ -168,9 +168,17 @@ export default function ProfileScreen() {
             <TouchableOpacity
               style={styles.benefitsBtn}
               onPress={() => setComingSoon(true)}
+              activeOpacity={0.85}
             >
-              <Text style={styles.benefitsBtnText}>View Benefits</Text>
-              <Ionicons name="arrow-forward" size={14} color="#000" />
+              <LinearGradient
+                colors={["#FBE678", "#F5D13E"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.benefitsGradient}
+              >
+                <Text style={styles.benefitsBtnText}>View Benefits</Text>
+                <Ionicons name="arrow-forward" size={14} color="#000" />
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         </View>
@@ -202,7 +210,11 @@ export default function ProfileScreen() {
               onPress={() => router.push(r.route as never)}
               activeOpacity={0.8}
             >
-              <Ionicons name={r.icon} size={26} color={GOLD} />
+              <Image
+                source={r.icon}
+                style={styles.recentIcon}
+                resizeMode="contain"
+              />
               <Text style={styles.recentLabel}>{r.label}</Text>
             </TouchableOpacity>
           ))}
@@ -242,18 +254,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 18,
   },
-  avatarRing: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 2,
-    borderColor: GOLD,
-    backgroundColor: "#1A1A10",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  avatarImg: { width: "100%", height: "100%" },
+  recentIcon: { width: 30, height: 30 },
   userName: {
     color: "#FFF",
     fontSize: 18,
@@ -293,11 +294,16 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: "Poppins_500Medium",
   },
-  badgeGold: { backgroundColor: "#1A1A10", borderColor: "#3A3520" },
-  badgeGoldText: {
-    color: GOLD,
-    fontSize: 11,
-    fontFamily: "Poppins_500Medium",
+  benefitsBtn: {
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  benefitsGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
   },
   journeyCard: {
     marginHorizontal: 20,
@@ -352,15 +358,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   journeyPoints: { color: "#8A8A8A", fontSize: 11 },
-  benefitsBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: GOLD,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
   benefitsBtnText: {
     color: "#000",
     fontSize: 12,
