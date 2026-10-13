@@ -373,7 +373,7 @@ function DetailsView({
                       source={LEVEL_BADGES[lv]}
                       style={styles.detailBadgeGlow}
                       resizeMode="contain"
-                      blurRadius={10}
+                      blurRadius={4}
                     />
                   )}
                   <Image
@@ -424,7 +424,7 @@ function DetailsView({
                       <Defs>
                         <RadialGradient
                           id="cardGlow"
-                          cx="115%"
+                          cx="140%"
                           cy="45%"
                           r="110%"
                         >
@@ -679,10 +679,10 @@ const styles = StyleSheet.create({
   },
   detailBadgeGlow: {
     position: "absolute",
-    width: 92,
-    height: 92,
+    width: 80,
+    height: 80,
     tintColor: "#FBE678",
-    opacity: 0.4,
+    opacity: 0.22,
   },
   detailBadge: { width: 74, height: 74 },
   detailConnector: {
