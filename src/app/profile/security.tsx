@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#050505" },
   rowValue: {
     color: "#8A8A8A",
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Poppins_400Regular",
   },
   pill: {
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: "#141414",
   },
-  pillText: { fontSize: 11, fontFamily: "Poppins_600SemiBold" },
+  pillText: { fontSize: 10, fontFamily: "Poppins_600SemiBold" },
   pillTextOn: { color: "#8A8A8A" },
   pillTextOff: { color: "#141414" },
   recBadge: {
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   recBadgeText: {
     color: GOLD,
-    fontSize: 9,
+    fontSize: 8,
     fontFamily: "Poppins_500Medium",
   },
   passkeyBox: {
@@ -471,12 +471,12 @@ const styles = StyleSheet.create({
   passkeyName: {
     flex: 1,
     color: "#FFF",
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Poppins_500Medium",
   },
   passkeyDelete: {
     color: "#FF4D4D",
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Poppins_600SemiBold",
   },
   addPasskeyBtn: {
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   },
   addPasskeyText: {
     color: "#000",
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins_600SemiBold",
   },
   signOutBtn: {
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     color: "#FFF",
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins_600SemiBold",
   },
 });

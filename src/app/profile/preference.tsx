@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#050505" },
   rowValue: {
     color: "#8A8A8A",
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: "Poppins_400Regular",
   },
   signOutBtn: {
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     color: "#FFF",
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Poppins_600SemiBold",
   },
 });

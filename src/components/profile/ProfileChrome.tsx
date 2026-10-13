@@ -574,8 +574,8 @@ const styles = StyleSheet.create({
   rowLabelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   rowLabel: {
     color: "#FFF",
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Poppins_500Medium",
   },
-  rowDesc: { color: MUTED, fontSize: 10, marginTop: 2 },
+  rowDesc: { color: MUTED, fontSize: 9, marginTop: 2 },
 });
