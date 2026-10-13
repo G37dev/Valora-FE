@@ -324,7 +324,6 @@ function DetailsView({
         {items.map((l, i) => {
           const lv = MEMBER_LEVELS.length - i;
           const active = lv === tier;
-          const last = i === items.length - 1;
 
           const body = (
             <View style={styles.detailItem}>
@@ -382,14 +381,6 @@ function DetailsView({
                     resizeMode="contain"
                   />
                 </View>
-                {!last && (
-                  <LinearGradient
-                    colors={["transparent", "#EFE6C4", "transparent"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 0, y: 1 }}
-                    style={styles.detailConnector}
-                  />
-                )}
               </View>
               <View style={{ flex: 1 }}>
                 <View style={styles.detailNameRow}>
@@ -463,14 +454,6 @@ function DetailsView({
                 </LinearGradient>
               ) : (
                 body
-              )}
-              {!last && (
-                <LinearGradient
-                  colors={["transparent", "#EFE6C4", "transparent"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  style={styles.detailGapConnector}
-                />
               )}
             </View>
           );
@@ -668,11 +651,6 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
   },
-  detailBadgeCol: {
-    width: 76,
-    alignSelf: "stretch",
-    alignItems: "center",
-  },
   detailBadgeWrap: {
     width: 76,
     height: 76,
@@ -692,20 +670,10 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   detailBadge: { width: 74, height: 74 },
-  detailGapConnector: {
-    width: 2,
-    height: 22,
-    marginLeft: 8 + 8 + 38 - 1,
-    marginTop: -2,
-    borderRadius: 1,
-  },
-  detailConnector: {
-    width: 2,
-    flex: 1,
-    minHeight: 14,
-    marginTop: 8,
-    marginBottom: 6,
-    borderRadius: 1,
+  detailBadgeCol: {
+    width: 76,
+    alignSelf: "stretch",
+    alignItems: "center",
   },
   detailNameRow: {
     flexDirection: "row",
@@ -714,7 +682,7 @@ const styles = StyleSheet.create({
   },
   detailName: {
     color: "#FFF",
-    fontSize: 17,
+    fontSize: 14,
     fontFamily: "Poppins_600SemiBold",
   },
   currentPill: {
@@ -725,12 +693,12 @@ const styles = StyleSheet.create({
   },
   currentPillText: {
     color: "#1A1A1A",
-    fontSize: 11,
+    fontSize: 9,
     fontFamily: "Poppins_600SemiBold",
   },
   detailStripes: {
     color: "#8A8A8A",
-    fontSize: 13,
+    fontSize: 9,
     marginTop: 2,
   },
   detailDesc: {
