@@ -156,7 +156,7 @@ export default function ProfileScreen() {
           style={styles.journeyCard}
           imageStyle={styles.journeyCardBg}
         >
-          <Text style={styles.journeyEyebrow}>Y O U R J O U R N E Y</Text>
+          <Text style={styles.journeyEyebrow}>YOUR JOURNEY</Text>
           <Text style={styles.journeyTitle}>Grow with VIVALORA</Text>
           <Text style={styles.journeySub}>
             Growth, save and explore exclusive benefits as you level up.
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   journeyEyebrow: {
     color: GOLD,
     fontSize: 10,
-    letterSpacing: 2,
+    letterSpacing: 4,
     fontFamily: "Poppins_500Medium",
   },
   journeyTitle: {
