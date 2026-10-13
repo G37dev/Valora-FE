@@ -218,9 +218,9 @@ function OverviewView({
               <View style={styles.trackBadgeWrap}>
                 {i + 1 === tier && (
                   <View style={styles.trackGlowWrap}>
-                    <View style={styles.trackGlowDot} />
+                    <View style={styles.trackGlowRing} />
                     <BlurView
-                      intensity={28}
+                      intensity={16}
                       tint="dark"
                       style={StyleSheet.absoluteFill}
                     />
@@ -242,6 +242,8 @@ function OverviewView({
                 </View>
               )}
               <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
                 style={[
                   styles.trackLabel,
                   i + 1 === tier && styles.trackLabelActive,
@@ -394,8 +396,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 2,
   },
-  glow: { position: "absolute", width: 260, height: 200, opacity: 1 },
-  heroBadge: { width: 100, height: 100 },
+  glow: { position: "absolute", width: 270, height: 205, opacity: 1 },
+  heroBadge: { width: 132, height: 132 },
   levelName: {
     color: "#FFF",
     fontSize: 28,
@@ -425,21 +427,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  trackItem: { alignItems: "center", width: "22%", gap: 8 },
+  trackItem: { alignItems: "center", width: "25%", gap: 8 },
   trackBadgeWrap: { alignItems: "center", justifyContent: "center" },
   trackBadge: { width: 56, height: 56 },
   trackGlowWrap: {
     position: "absolute",
-    width: 62,
-    height: 62,
-    borderRadius: 31,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     overflow: "hidden",
   },
-  trackGlowDot: {
+  trackGlowRing: {
     width: 62,
     height: 62,
     borderRadius: 31,
-    backgroundColor: "rgba(245,209,62,0.85)",
+    borderWidth: 2.5,
+    borderColor: "#F5D13E",
+    backgroundColor: "rgba(245,209,62,0.12)",
   },
   checkDot: {
     width: 19,
