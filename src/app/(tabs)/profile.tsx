@@ -1,7 +1,6 @@
 import ComingSoonSheet from "@/components/ComingSoonSheet";
 import {
   GOLD,
-  GREEN,
   LEVEL_BADGES,
   LevelAvatar,
   LevelBadge,
@@ -132,7 +131,7 @@ export default function ProfileScreen() {
             <View style={styles.badgeRow}>
               {verified ? (
                 <View style={[styles.badge, styles.badgeVerified]}>
-                  <Ionicons name="checkmark-circle" size={12} color="#000" />
+                  <Ionicons name="shield-checkmark" size={12} color="#4ADE80" />
                   <Text style={styles.badgeVerifiedText}>Verified</Text>
                 </View>
               ) : (
@@ -307,9 +306,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderWidth: 1,
   },
-  badgeVerified: { backgroundColor: GREEN, borderColor: GREEN },
+  badgeVerified: { backgroundColor: "#0F2C1A", borderColor: "#3EBA6C" },
   badgeVerifiedText: {
-    color: "#000",
+    color: "#4ADE80",
     fontSize: 11,
     fontFamily: "Poppins_600SemiBold",
   },
@@ -363,6 +362,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    justifyContent: "space-between",
   },
   journeyLevel: {
     color: "#FFF",
