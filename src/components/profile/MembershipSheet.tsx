@@ -216,15 +216,14 @@ function OverviewView({
             <View key={l.name} style={styles.trackItem}>
               <View style={styles.trackBadgeWrap}>
                 {i + 1 === tier && (
-                  <Image
-                    source={GLOW}
-                    style={styles.trackGlow}
-                    resizeMode="contain"
-                  />
+                  <>
+                    <View style={styles.trackGlowOuter} />
+                    <View style={styles.trackGlowInner} />
+                  </>
                 )}
                 <Image
                   source={LEVEL_BADGES[i + 1]}
-                  style={[styles.trackBadge, i + 1 > tier && { opacity: 0.65 }]}
+                  style={styles.trackBadge}
                   resizeMode="contain"
                 />
               </View>
@@ -424,11 +423,21 @@ const styles = StyleSheet.create({
   trackItem: { alignItems: "center", width: "22%", gap: 8 },
   trackBadgeWrap: { alignItems: "center", justifyContent: "center" },
   trackBadge: { width: 56, height: 56 },
-  trackGlow: {
+  trackGlowOuter: {
     position: "absolute",
-    width: 115,
-    height: 85,
-    opacity: 0.95,
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    backgroundColor: "rgba(245,209,62,0.10)",
+  },
+  trackGlowInner: {
+    position: "absolute",
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: "rgba(245,209,62,0.16)",
+    borderWidth: 1,
+    borderColor: "rgba(245,209,62,0.45)",
   },
   checkDot: {
     width: 19,
