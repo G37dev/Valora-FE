@@ -573,12 +573,13 @@ const styles = StyleSheet.create({
   },
   detailActiveGlow: {
     position: "absolute",
-    right: -60,
-    top: -30,
-    width: 220,
-    height: 200,
+    right: -30,
+    top: -60,
+    width: 300,
+    height: 280,
     tintColor: "#FBE678",
-    opacity: 0.35,
+    opacity: 0.5,
+    transform: [{ rotate: "-90deg" }],
   },
   detailBadgeWrap: {
     width: 76,
@@ -596,9 +597,9 @@ const styles = StyleSheet.create({
   detailBadge: { width: 74, height: 74 },
   detailConnector: {
     width: 2,
-    height: 22,
-    marginLeft: 8 + 38 - 1,
-    marginVertical: -4,
+    height: 26,
+    marginLeft: 8 + 38,
+    marginVertical: -6,
     borderRadius: 1,
   },
   detailNameRow: {
