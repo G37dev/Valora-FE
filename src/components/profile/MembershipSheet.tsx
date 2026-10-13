@@ -321,20 +321,30 @@ function DetailsView({
 
           const body = (
             <View style={styles.detailItem}>
-              <View style={styles.detailBadgeWrap}>
-                {active && (
+              <View style={styles.detailBadgeCol}>
+                <View style={styles.detailBadgeWrap}>
+                  {active && (
+                    <Image
+                      source={LEVEL_BADGES[lv]}
+                      style={styles.detailBadgeGlow}
+                      resizeMode="contain"
+                      blurRadius={4}
+                    />
+                  )}
                   <Image
                     source={LEVEL_BADGES[lv]}
-                    style={styles.detailBadgeGlow}
+                    style={styles.detailBadge}
                     resizeMode="contain"
-                    blurRadius={10}
+                  />
+                </View>
+                {!last && (
+                  <LinearGradient
+                    colors={["transparent", "#CDBE8A", "transparent"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={styles.detailConnector}
                   />
                 )}
-                <Image
-                  source={LEVEL_BADGES[lv]}
-                  style={styles.detailBadge}
-                  resizeMode="contain"
-                />
               </View>
               <View style={{ flex: 1 }}>
                 <View style={styles.detailNameRow}>
@@ -377,14 +387,6 @@ function DetailsView({
                 </LinearGradient>
               ) : (
                 body
-              )}
-              {!last && (
-                <LinearGradient
-                  colors={["transparent", "#CDBE8A", "transparent"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  style={styles.detailConnector}
-                />
               )}
             </View>
           );
@@ -583,6 +585,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "42%",
   },
+  detailBadgeCol: {
+    width: 76,
+    alignSelf: "stretch",
+    alignItems: "center",
+  },
   detailBadgeWrap: {
     width: 76,
     height: 76,
@@ -591,16 +598,18 @@ const styles = StyleSheet.create({
   },
   detailBadgeGlow: {
     position: "absolute",
-    width: 90,
-    height: 90,
-    tintColor: "#FFF4C2",
-    opacity: 0.75,
+    width: 80,
+    height: 80,
+    tintColor: "#fff4c26c",
+    opacity: 0.9,
   },
   detailBadge: { width: 74, height: 74 },
   detailConnector: {
     width: 2,
-    height: 20,
-    marginLeft: 8 + 38 - 1,
+    flex: 1,
+    minHeight: 18,
+    marginTop: 6,
+    marginBottom: -8,
     borderRadius: 1,
   },
   detailNameRow: {
