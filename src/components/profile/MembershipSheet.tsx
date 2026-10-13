@@ -232,7 +232,7 @@ function OverviewView({
                       source={LEVEL_BADGES[lv]}
                       style={styles.trackBadgeGlow}
                       resizeMode="contain"
-                      blurRadius={6}
+                      blurRadius={3}
                     />
                   )}
                   <Image
@@ -454,8 +454,8 @@ const styles = StyleSheet.create({
   trackBadge: { width: 64, height: 64 },
   trackBadgeGlow: {
     position: "absolute",
-    width: 78,
-    height: 78,
+    width: 70,
+    height: 70,
     tintColor: "#FFF4C2",
     opacity: 0.9,
   },
