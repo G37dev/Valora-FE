@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LEVEL_BADGES } from "./ProfileChrome";
 
@@ -91,68 +92,73 @@ export default function MembershipSheet({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <Pressable style={StyleSheet.absoluteFill} onPress={() => closeSheet()} />
-      <BottomSheet
-        ref={sheetRef}
-        index={0}
-        snapPoints={["75%", "92%"]}
-        animationConfigs={springConfig}
-        enablePanDownToClose
-        onChange={(i) => {
-          if (i === -1) onClose();
-        }}
-        onClose={onClose}
-        handleComponent={null}
-        backgroundStyle={styles.sheetBg}
-        backdropComponent={(props) => (
-          <BottomSheetBackdrop
-            {...props}
-            appearsOnIndex={0}
-            disappearsOnIndex={-1}
-            opacity={0.65}
-            pressBehavior="close"
-            onPress={() => closeSheet()}
-          />
-        )}
-      >
-        {details ? (
-          <BottomSheetScrollView
-            style={styles.scroll}
-            contentContainerStyle={{
-              paddingHorizontal: 20,
-              paddingTop: 18,
-              paddingBottom: insets.bottom + 20,
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <DetailsView
-              tier={tier}
-              onBack={() => {
-                setDetails(false);
-                sheetRef.current?.snapToIndex(0);
-              }}
-              onClose={() => closeSheet()}
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={() => closeSheet()}
+        />
+        <BottomSheet
+          ref={sheetRef}
+          index={0}
+          snapPoints={["75%", "92%"]}
+          animationConfigs={springConfig}
+          enablePanDownToClose
+          onChange={(i) => {
+            if (i === -1) onClose();
+          }}
+          onClose={onClose}
+          handleComponent={null}
+          backgroundStyle={styles.sheetBg}
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop
+              {...props}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+              opacity={0.65}
+              pressBehavior="close"
+              onPress={() => closeSheet()}
             />
-          </BottomSheetScrollView>
-        ) : (
-          <BottomSheetView
-            style={{
-              paddingHorizontal: 20,
-              paddingTop: 18,
-              paddingBottom: insets.bottom + 20,
-            }}
-          >
-            <OverviewView
-              tier={tier}
-              onClose={() => closeSheet()}
-              onDetails={() => {
-                setDetails(true);
-                sheetRef.current?.snapToIndex(1);
+          )}
+        >
+          {details ? (
+            <BottomSheetScrollView
+              style={styles.scroll}
+              contentContainerStyle={{
+                paddingHorizontal: 20,
+                paddingTop: 18,
+                paddingBottom: insets.bottom + 20,
               }}
-            />
-          </BottomSheetView>
-        )}
-      </BottomSheet>
+              showsVerticalScrollIndicator={false}
+            >
+              <DetailsView
+                tier={tier}
+                onBack={() => {
+                  setDetails(false);
+                  sheetRef.current?.snapToIndex(0);
+                }}
+                onClose={() => closeSheet()}
+              />
+            </BottomSheetScrollView>
+          ) : (
+            <BottomSheetView
+              style={{
+                paddingHorizontal: 20,
+                paddingTop: 18,
+                paddingBottom: insets.bottom + 20,
+              }}
+            >
+              <OverviewView
+                tier={tier}
+                onClose={() => closeSheet()}
+                onDetails={() => {
+                  setDetails(true);
+                  sheetRef.current?.snapToIndex(1);
+                }}
+              />
+            </BottomSheetView>
+          )}
+        </BottomSheet>
+      </GestureHandlerRootView>
     </Modal>
   );
 }

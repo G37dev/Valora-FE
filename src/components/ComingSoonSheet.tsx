@@ -12,6 +12,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ComingSoonSheetProps {
@@ -45,49 +46,54 @@ export default function ComingSoonSheet({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <Pressable style={StyleSheet.absoluteFill} onPress={() => closeSheet()} />
-      <BottomSheet
-        ref={sheetRef}
-        index={0}
-        snapPoints={["52%"]}
-        animationConfigs={springConfig}
-        enablePanDownToClose
-        onChange={(i) => {
-          if (i === -1) onClose();
-        }}
-        onClose={onClose}
-        handleComponent={null}
-        backgroundStyle={styles.sheetBg}
-        backdropComponent={(props) => (
-          <BottomSheetBackdrop
-            {...props}
-            appearsOnIndex={0}
-            disappearsOnIndex={-1}
-            opacity={0.65}
-            pressBehavior="close"
-            onPress={() => closeSheet()}
-          />
-        )}
-      >
-        <BottomSheetView
-          style={[styles.content, { paddingBottom: insets.bottom + 40 }]}
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={() => closeSheet()}
+        />
+        <BottomSheet
+          ref={sheetRef}
+          index={0}
+          snapPoints={["52%"]}
+          animationConfigs={springConfig}
+          enablePanDownToClose
+          onChange={(i) => {
+            if (i === -1) onClose();
+          }}
+          onClose={onClose}
+          handleComponent={null}
+          backgroundStyle={styles.sheetBg}
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop
+              {...props}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+              opacity={0.65}
+              pressBehavior="close"
+              onPress={() => closeSheet()}
+            />
+          )}
         >
-          <Image
-            source={require("@/assets/images/cs.png")}
-            style={styles.image}
-            resizeMode="contain"
-          />
-
-          <TouchableOpacity
-            style={styles.closeBtn}
-            onPress={() => closeSheet()}
-            hitSlop={12}
-            activeOpacity={0.7}
+          <BottomSheetView
+            style={[styles.content, { paddingBottom: insets.bottom + 40 }]}
           >
-            <Ionicons name="close" size={14} color="#999" />
-          </TouchableOpacity>
-        </BottomSheetView>
-      </BottomSheet>
+            <Image
+              source={require("@/assets/images/cs.png")}
+              style={styles.image}
+              resizeMode="contain"
+            />
+
+            <TouchableOpacity
+              style={styles.closeBtn}
+              onPress={() => closeSheet()}
+              hitSlop={12}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="close" size={14} color="#999" />
+            </TouchableOpacity>
+          </BottomSheetView>
+        </BottomSheet>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
