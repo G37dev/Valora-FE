@@ -27,14 +27,18 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const QUICK = [
-  { icon: "sparkles" as const, title: "Rewards Hub", desc: "Explore rewards" },
   {
-    icon: "person-add" as const,
+    icon: require("../../../assets/images/profile/rewardsHub.png"),
+    title: "Rewards Hub",
+    desc: "Explore rewards",
+  },
+  {
+    icon: require("../../../assets/images/profile/inviteFriends.png"),
     title: "Invite Friends",
     desc: "Earn together",
   },
   {
-    icon: "headset" as const,
+    icon: require("../../../assets/images/profile/helpCenter.png"),
     title: "Help Center",
     desc: "Get support",
   },
@@ -269,7 +273,11 @@ export default function ProfileScreen() {
               activeOpacity={0.8}
             >
               <View style={styles.quickHead}>
-                <Ionicons name={q.icon} size={20} color={GOLD} />
+                <Image
+                  source={q.icon}
+                  style={styles.quickIcon}
+                  resizeMode="contain"
+                />
                 <Ionicons name="chevron-forward" size={14} color="#555" />
               </View>
               <Text style={styles.quickTitle}>{q.title}</Text>
@@ -494,6 +502,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 14,
   },
+  quickIcon: { width: 22, height: 22 },
   quickTitle: {
     color: "#FFF",
     fontSize: 10,
