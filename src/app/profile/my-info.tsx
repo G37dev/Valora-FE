@@ -53,6 +53,7 @@ export default function MyInfoScreen() {
         user={user}
         secLabel={sec.label}
         secLevel={sec.level}
+        tier={tier}
         onThemePress={() => setComingSoon(true)}
       >
         <ScrollView showsVerticalScrollIndicator={false}>

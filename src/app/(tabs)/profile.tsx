@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 14,
     paddingHorizontal: 20,
-    marginTop: 6,
+    marginTop: 20,
     marginBottom: 18,
   },
   recentIcon: { width: 24, height: 24 },
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginTop: 3,
+    marginVertical: 4,
   },
   vidText: { color: "#8A8A8A", fontSize: 12 },
   badgeRow: {

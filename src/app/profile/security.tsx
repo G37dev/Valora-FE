@@ -7,6 +7,7 @@ import {
   maskEmail,
   maskPhone,
   SectionCard,
+  securityTier,
   SettingRow,
   SubPageShell,
 } from "@/components/profile/ProfileChrome";
@@ -234,6 +235,11 @@ export default function SecurityScreen() {
         user={user}
         secLabel={sec.label}
         secLevel={sec.level}
+        tier={securityTier({
+          kycVerified: data.kycStatus === "VERIFIED",
+          twoFA: data.twoFAEnabled,
+          passkeys: data.passkeys.length,
+        })}
         onThemePress={() => setComingSoon(true)}
       >
         <ScrollView showsVerticalScrollIndicator={false}>

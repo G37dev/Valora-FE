@@ -2,6 +2,7 @@ import { showAlert } from "@/components/AppAlert";
 import ComingSoonSheet from "@/components/ComingSoonSheet";
 import {
   SectionCard,
+  securityTier,
   SettingRow,
   SubPageShell,
 } from "@/components/profile/ProfileChrome";
@@ -71,6 +72,11 @@ export default function OthersScreen() {
         user={data.user}
         secLabel={sec.label}
         secLevel={sec.level}
+        tier={securityTier({
+          kycVerified: data.kycStatus === "VERIFIED",
+          twoFA: data.twoFAEnabled,
+          passkeys: data.passkeys.length,
+        })}
         onThemePress={() => setComingSoon(true)}
       >
         <ScrollView showsVerticalScrollIndicator={false}>

@@ -160,10 +160,12 @@ export function ProfileHead({
   user,
   secLabel,
   secLevel,
+  tier = 1,
 }: {
   user: UserProfile | null;
   secLabel: string;
   secLevel: SecLevel;
+  tier?: number;
 }) {
   const name =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
@@ -176,8 +178,8 @@ export function ProfileHead({
       <LevelAvatar
         uri={user?.avatarUrl}
         coreId={user?.coreId}
-        tier={securityTierFromLevel(secLevel)}
-        size={72}
+        tier={tier}
+        size={76}
       />
       <View style={{ flex: 1 }}>
         <Text style={styles.headName} numberOfLines={1}>
@@ -215,6 +217,7 @@ export function SubPageShell({
   user,
   secLabel,
   secLevel,
+  tier,
   onThemePress,
   children,
 }: {
@@ -223,6 +226,7 @@ export function SubPageShell({
   user: UserProfile | null;
   secLabel: string;
   secLevel: SecLevel;
+  tier?: number;
   onThemePress?: () => void;
   children: React.ReactNode;
 }) {
@@ -238,7 +242,12 @@ export function SubPageShell({
           <Ionicons name="moon-outline" size={22} color="#FFF" />
         </TouchableOpacity>
       </View>
-      <ProfileHead user={user} secLabel={secLabel} secLevel={secLevel} />
+      <ProfileHead
+        user={user}
+        secLabel={secLabel}
+        secLevel={secLevel}
+        tier={tier}
+      />
       <ProfileTabs active={activeTab} />
       {children}
     </View>
@@ -461,6 +470,7 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingHorizontal: 20,
     marginBottom: 16,
+    marginTop: 20,
   },
   levelBadge: {
     flexDirection: "row",
@@ -481,15 +491,15 @@ const styles = StyleSheet.create({
   },
   headName: {
     color: "#FFF",
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: "Poppins_600SemiBold",
   },
-  headSub: { color: MUTED, fontSize: 12, marginTop: 2 },
+  headSub: { color: MUTED, fontSize: 12, marginVertical: 4 },
   secRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginTop: 4,
+    marginTop: 10,
   },
   secLabel: { fontSize: 12, fontFamily: "Poppins_600SemiBold" },
   secBar: { width: 22, height: 4, borderRadius: 2 },
@@ -508,7 +518,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     color: "#777",
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Poppins_500Medium",
   },
   tabLabelActive: { color: "#FFF", fontFamily: "Poppins_600SemiBold" },
