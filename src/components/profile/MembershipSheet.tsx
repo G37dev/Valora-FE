@@ -6,14 +6,7 @@ import {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { useEffect, useRef, useState } from "react";
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LEVEL_BADGES } from "./ProfileChrome";
 
@@ -64,13 +57,13 @@ export default function MembershipSheet({
   onClose,
 }: MembershipSheetProps) {
   const insets = useSafeAreaInsets();
-  const { height: screenH } = useWindowDimensions();
   const sheetRef = useRef<BottomSheetModal>(null);
   const [details, setDetails] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setDetails(false);
+      console.log("[MembershipSheet] present, ref:", !!sheetRef.current);
       sheetRef.current?.present();
     } else {
       sheetRef.current?.dismiss();
@@ -81,9 +74,7 @@ export default function MembershipSheet({
     <BottomSheetModal
       ref={sheetRef}
       onDismiss={onClose}
-      enableDynamicSizing
-      snapPoints={["90%"]}
-      maxDynamicContentSize={screenH * 0.9}
+      snapPoints={["75%", "92%"]}
       enablePanDownToClose
       handleComponent={null}
       backgroundStyle={styles.sheetBg}
@@ -109,7 +100,10 @@ export default function MembershipSheet({
         >
           <DetailsView
             tier={tier}
-            onBack={() => setDetails(false)}
+            onBack={() => {
+              setDetails(false);
+              sheetRef.current?.snapToIndex(0);
+            }}
             onClose={() => sheetRef.current?.dismiss()}
           />
         </BottomSheetScrollView>
@@ -124,7 +118,10 @@ export default function MembershipSheet({
           <OverviewView
             tier={tier}
             onClose={() => sheetRef.current?.dismiss()}
-            onDetails={() => setDetails(true)}
+            onDetails={() => {
+              setDetails(true);
+              sheetRef.current?.snapToIndex(1);
+            }}
           />
         </BottomSheetView>
       )}
