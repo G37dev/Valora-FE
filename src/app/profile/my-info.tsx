@@ -1,4 +1,7 @@
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import MembershipSheet, {
+  memberLevelName,
+} from "@/components/profile/MembershipSheet";
 import {
   AvatarPicker,
   avatarSource,
@@ -6,6 +9,7 @@ import {
   maskEmail,
   maskPhone,
   SectionCard,
+  securityTier,
   SettingRow,
   SubPageShell,
 } from "@/components/profile/ProfileChrome";
@@ -24,7 +28,13 @@ export default function MyInfoScreen() {
   const sec = useSecurityLevel(data);
   const [comingSoon, setComingSoon] = useState(false);
   const [avatarPicker, setAvatarPicker] = useState(false);
+  const [memberSheet, setMemberSheet] = useState(false);
   const { user, kycStatus } = data;
+  const tier = securityTier({
+    kycVerified: kycStatus === "VERIFIED",
+    twoFA: data.twoFAEnabled,
+    passkeys: data.passkeys.length,
+  });
   const name =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "-";
 
@@ -77,10 +87,10 @@ export default function MyInfoScreen() {
               label="Membership Level"
               right={
                 <Text style={[styles.rowValue, { color: "#DEC236" }]}>
-                  Member
+                  {memberLevelName(tier)}
                 </Text>
               }
-              onPress={() => setComingSoon(true)}
+              onPress={() => setMemberSheet(true)}
               last
             />
           </SectionCard>
@@ -148,6 +158,11 @@ export default function MyInfoScreen() {
         </ScrollView>
       </SubPageShell>
 
+      <MembershipSheet
+        visible={memberSheet}
+        tier={tier}
+        onClose={() => setMemberSheet(false)}
+      />
       <ComingSoonSheet
         visible={comingSoon}
         onClose={() => setComingSoon(false)}

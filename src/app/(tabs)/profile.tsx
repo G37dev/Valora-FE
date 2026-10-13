@@ -1,4 +1,7 @@
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import MembershipSheet, {
+  memberLevelName,
+} from "@/components/profile/MembershipSheet";
 import {
   GOLD,
   LEVEL_BADGES,
@@ -72,6 +75,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, kycStatus, twoFAEnabled, passkeys } = useProfileData();
   const [comingSoon, setComingSoon] = useState(false);
+  const [memberSheet, setMemberSheet] = useState(false);
 
   const name =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
@@ -155,7 +159,12 @@ export default function ProfileScreen() {
                   </Text>
                 </TouchableOpacity>
               )}
-              <LevelBadge tier={tier} label={`${sec.label} Level`} />
+              <TouchableOpacity
+                onPress={() => setMemberSheet(true)}
+                hitSlop={8}
+              >
+                <LevelBadge tier={tier} label={memberLevelName(tier)} />
+              </TouchableOpacity>
             </View>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#555" />
@@ -181,7 +190,9 @@ export default function ProfileScreen() {
             <View style={styles.journeyBottom}>
               <View style={styles.journeyLeft}>
                 <View style={styles.journeyLevelRow}>
-                  <Text style={styles.journeyLevel}>{sec.label} Level</Text>
+                  <Text style={styles.journeyLevel}>
+                    {memberLevelName(tier)}
+                  </Text>
                   <Image
                     source={LEVEL_BADGES[tier]}
                     style={styles.journeyBadge}
@@ -208,7 +219,7 @@ export default function ProfileScreen() {
               <View style={styles.journeyRight}>
                 <TouchableOpacity
                   style={styles.benefitsBtn}
-                  onPress={() => setComingSoon(true)}
+                  onPress={() => setMemberSheet(true)}
                   activeOpacity={0.85}
                 >
                   <LinearGradient
@@ -269,6 +280,11 @@ export default function ProfileScreen() {
       <ComingSoonSheet
         visible={comingSoon}
         onClose={() => setComingSoon(false)}
+      />
+      <MembershipSheet
+        visible={memberSheet}
+        tier={tier}
+        onClose={() => setMemberSheet(false)}
       />
     </SafeAreaView>
   );
