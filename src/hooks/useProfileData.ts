@@ -16,25 +16,39 @@ export interface ProfileData {
 }
 
 // Cache di memori — antar screen dapat data sinkron, tanpa flash.
-// AsyncStorage hanya untuk cold start.
+// Hydrate dari AsyncStorage langsung saat module dievaluasi (pre-mount),
+// jadi screen manapun yang render pertama sudah punya data.
 let memUser: UserProfile | null = null;
+
+const hydratePromise = AsyncStorage.getItem("userData")
+  .then((raw) => {
+    if (raw) memUser = JSON.parse(raw);
+  })
+  .catch(() => {});
+
+export function getCachedProfile(): UserProfile | null {
+  return memUser;
+}
+
+export function setCachedProfile(profile: UserProfile | null) {
+  memUser = profile;
+  if (profile) {
+    AsyncStorage.setItem("userData", JSON.stringify(profile)).catch(() => {});
+  }
+}
 
 export function useProfileData(): ProfileData {
   const [user, setUser] = useState<UserProfile | null>(memUser);
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [passkeys, setPasskeys] = useState<PasskeyInfo[]>([]);
 
-  // Hydrate dari cache supaya tidak ada flash data kosong/avatar default.
+  // Kalau module-level hydrate belum selesai saat mount (kasus langka),
+  // isi ulang setelah AsyncStorage selesai dibaca.
   useEffect(() => {
     let alive = true;
-    AsyncStorage.getItem("userData")
-      .then((raw) => {
-        if (alive && raw) {
-          memUser = JSON.parse(raw);
-          setUser((cur) => cur ?? memUser);
-        }
-      })
-      .catch(() => {});
+    hydratePromise.then(() => {
+      if (alive) setUser((cur) => cur ?? memUser);
+    });
     return () => {
       alive = false;
     };
@@ -49,9 +63,8 @@ export function useProfileData(): ProfileData {
       }
 
       const profile = await getUserProfileApi(coreId);
-      memUser = profile;
+      setCachedProfile(profile);
       setUser(profile);
-      await AsyncStorage.setItem("userData", JSON.stringify(profile));
 
       const token = await getAuthToken();
       if (!token) return;
