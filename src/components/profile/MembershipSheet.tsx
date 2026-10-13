@@ -215,12 +215,18 @@ function OverviewView({
           {MEMBER_LEVELS.map((l, i) => (
             <View key={l.name} style={styles.trackItem}>
               <View style={styles.trackBadgeWrap}>
+                {i + 1 === tier && (
+                  <Image
+                    source={GLOW}
+                    style={styles.trackGlow}
+                    resizeMode="contain"
+                  />
+                )}
                 <Image
                   source={LEVEL_BADGES[i + 1]}
-                  style={styles.trackBadge}
+                  style={[styles.trackBadge, i + 1 > tier && { opacity: 0.65 }]}
                   resizeMode="contain"
                 />
-                {i + 1 === tier && <View style={styles.trackBadgeHalo} />}
               </View>
               {i + 1 <= tier ? (
                 <View style={styles.checkDot}>
@@ -418,13 +424,11 @@ const styles = StyleSheet.create({
   trackItem: { alignItems: "center", width: "22%", gap: 8 },
   trackBadgeWrap: { alignItems: "center", justifyContent: "center" },
   trackBadge: { width: 56, height: 56 },
-  trackBadgeHalo: {
+  trackGlow: {
     position: "absolute",
-    width: 66,
-    height: 66,
-    borderRadius: 33,
-    borderWidth: 1.5,
-    borderColor: "#F5D13E",
+    width: 115,
+    height: 85,
+    opacity: 0.95,
   },
   checkDot: {
     width: 19,
