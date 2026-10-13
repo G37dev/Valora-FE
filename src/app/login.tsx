@@ -17,10 +17,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { showAlert } from "../components/AppAlert";
-import Text from "../components/CustomText";
 import TwoFactorSetup from "../components/app/otp/TwoFactorSetup";
 import TwoFactorVerif from "../components/app/otp/TwoFactorVerif";
+import { showAlert } from "../components/AppAlert";
+import Text from "../components/CustomText";
 import {
   loginWithPasswordApi,
   setupAuthenticatorApi,
@@ -34,6 +34,7 @@ import {
   isPasskeySupported,
 } from "../services/passkeyService";
 import { supabase } from "../services/supabase";
+import { useProfileStore } from "../stores/profileStore";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -72,6 +73,7 @@ export default function LoginScreen() {
 
       if (userData) {
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
+        useProfileStore.getState().setUser(userData);
       }
 
       setShowTwoFactorSetup(false);
@@ -271,6 +273,7 @@ export default function LoginScreen() {
       }
       if (res.user) {
         await AsyncStorage.setItem("userData", JSON.stringify(res.user));
+        useProfileStore.getState().setUser(res.user);
       }
       return true;
     } catch (error: any) {
@@ -295,6 +298,7 @@ export default function LoginScreen() {
       }
       if (res.user) {
         await AsyncStorage.setItem("userData", JSON.stringify(res.user));
+        useProfileStore.getState().setUser(res.user);
       }
       return true;
     } catch (error: any) {

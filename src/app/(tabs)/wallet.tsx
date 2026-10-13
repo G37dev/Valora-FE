@@ -18,16 +18,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { showAlert } from "../../components/AppAlert";
 import SkeletonBox from "../../components/SkeletonBox";
 import { TransactionContext } from "../../context/TransactionContext";
-import { getCachedProfile, setCachedProfile } from "../../hooks/useProfileData";
 import { apiClient } from "../../services/apiClient";
 import { notifyApp } from "../../services/notificationService";
-import { getUserProfileApi, UserProfile } from "../../services/userService";
+import { getUserProfileApi } from "../../services/userService";
 import { activateWalletApi } from "../../services/walletService";
+import { useProfileStore } from "../../stores/profileStore";
 
 export default function WalletScreen() {
-  const [userData, setUserData] = useState<UserProfile | null>(
-    getCachedProfile(),
-  );
+  const userData = useProfileStore((s) => s.user);
+  const setUserData = useProfileStore((s) => s.setUser);
   const [balances, setBalances] = useState({
     internal: {
       idr: { balance: 0, idrValue: 0 },
@@ -66,7 +65,6 @@ export default function WalletScreen() {
         // 1. Ambil Profil User
         const profile = await getUserProfileApi(coreId);
         setUserData(profile);
-        setCachedProfile(profile);
 
         // 2. Cek apakah wallet sudah aktif sebelum mengambil saldo
         if (profile?.isWalletActive) {

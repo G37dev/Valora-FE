@@ -20,8 +20,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import Text from "../../components/CustomText";
-import { getCachedProfile, setCachedProfile } from "../../hooks/useProfileData";
-import { getUserProfileApi, UserProfile } from "../../services/userService";
+import { getUserProfileApi } from "../../services/userService";
+import { useProfileStore } from "../../stores/profileStore";
 
 // ======================================================
 // DAILY NEWS DATA
@@ -59,9 +59,8 @@ const DAILY_NEWS = [
 // ======================================================
 
 export default function HomeScreen() {
-  const [userData, setUserData] = useState<UserProfile | null>(
-    getCachedProfile(),
-  );
+  const userData = useProfileStore((s) => s.user);
+  const setUserData = useProfileStore((s) => s.setUser);
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
@@ -87,8 +86,6 @@ export default function HomeScreen() {
         const profile = await getUserProfileApi(coreId);
 
         setUserData(profile);
-
-        setCachedProfile(profile);
       } else {
         setIsLoggedIn(false);
         setUserData(null);

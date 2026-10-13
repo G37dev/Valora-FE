@@ -1,7 +1,7 @@
-import ComingSoonSheet from "@/components/ComingSoonSheet";
 import TwoFactorSetup from "@/components/app/otp/TwoFactorSetup";
 import TwoFactorVerif from "@/components/app/otp/TwoFactorVerif";
 import { showAlert } from "@/components/AppAlert";
+import ComingSoonSheet from "@/components/ComingSoonSheet";
 import {
   GOLD,
   maskEmail,
@@ -28,6 +28,7 @@ import {
   registerPasskey,
 } from "@/services/passkeyService";
 import { supabase } from "@/services/supabase";
+import { useProfileStore } from "@/stores/profileStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -74,7 +75,10 @@ export default function SecurityScreen() {
       setOtpauth(res.otpauth);
       setShowAuthenticatorInput(true);
     } catch (error: any) {
-      showAlert("Setup Failed", error?.message || "Failed to setup authenticator.");
+      showAlert(
+        "Setup Failed",
+        error?.message || "Failed to setup authenticator.",
+      );
     } finally {
       setSetupLoading(false);
     }
@@ -96,6 +100,7 @@ export default function SecurityScreen() {
       if (res.token) await setAuthToken(res.token);
       if (res.user) {
         await AsyncStorage.setItem("userData", JSON.stringify(res.user));
+        useProfileStore.getState().setUser(res.user);
       }
       return true;
     } catch (error: any) {
@@ -192,6 +197,7 @@ export default function SecurityScreen() {
               await supabase.auth.signOut();
               await clearAuthToken();
               await AsyncStorage.clear();
+              useProfileStore.getState().setUser(null);
               router.replace("/login");
             } catch (error) {
               console.error("Gagal logout:", error);
@@ -414,7 +420,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   pillOn: { backgroundColor: GOLD },
-  pillOff: { backgroundColor: "#2A2A2A", borderWidth: 1, borderColor: "#3A3A3A" },
+  pillOff: {
+    backgroundColor: "#2A2A2A",
+    borderWidth: 1,
+    borderColor: "#3A3A3A",
+  },
   pillText: { fontSize: 12, fontFamily: "Poppins_600SemiBold" },
   pillTextOn: { color: "#000" },
   pillTextOff: { color: "#8A8A8A" },

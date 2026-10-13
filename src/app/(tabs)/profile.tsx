@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   recentIcon: { width: 24, height: 24 },
   userName: {
     color: "#FFF",
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: "Poppins_600SemiBold",
   },
   vidRow: {
