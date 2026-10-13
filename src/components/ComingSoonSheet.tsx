@@ -1,12 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import {
-  Image,
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import { useEffect, useRef } from "react";
+import { Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ComingSoonSheetProps {
@@ -19,22 +18,33 @@ export default function ComingSoonSheet({
   onClose,
 }: ComingSoonSheetProps) {
   const insets = useSafeAreaInsets();
+  const sheetRef = useRef<BottomSheetModal>(null);
+
+  useEffect(() => {
+    if (visible) sheetRef.current?.present();
+    else sheetRef.current?.dismiss();
+  }, [visible]);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-      statusBarTranslucent
+    <BottomSheetModal
+      ref={sheetRef}
+      onDismiss={onClose}
+      enableDynamicSizing
+      enablePanDownToClose
+      handleComponent={null}
+      backgroundStyle={styles.sheetBg}
+      backdropComponent={(props) => (
+        <BottomSheetBackdrop
+          {...props}
+          appearsOnIndex={0}
+          disappearsOnIndex={-1}
+          opacity={0.65}
+          pressBehavior="close"
+        />
+      )}
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdrop} />
-      </TouchableWithoutFeedback>
-
-      <View
-        style={[styles.sheet, { paddingBottom: insets.bottom }]}
-        pointerEvents="box-none"
+      <BottomSheetView
+        style={[styles.content, { paddingBottom: insets.bottom + 40 }]}
       >
         <Image
           source={require("@/assets/images/cs.png")}
@@ -44,43 +54,33 @@ export default function ComingSoonSheet({
 
         <TouchableOpacity
           style={styles.closeBtn}
-          onPress={onClose}
+          onPress={() => sheetRef.current?.dismiss()}
           hitSlop={12}
           activeOpacity={0.7}
         >
           <Ionicons name="close" size={14} color="#999" />
         </TouchableOpacity>
-      </View>
-    </Modal>
+      </BottomSheetView>
+    </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.65)",
-  },
-
-  sheet: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
+  sheetBg: {
     backgroundColor: "#0A0A0A",
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
     borderTopWidth: 1,
     borderColor: "#1f1f1f",
-    overflow: "hidden",
+  },
+  content: {
     padding: 40,
   },
-
   image: {
     width: "100%",
     height: 200,
     marginBottom: 24,
   },
-
   closeBtn: {
     position: "absolute",
     top: 16,

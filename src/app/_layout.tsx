@@ -5,6 +5,7 @@ import {
   Poppins_700Bold,
   useFonts,
 } from "@expo-google-fonts/poppins";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -79,29 +80,30 @@ export default function RootLayout() {
         }}
       >
         <TransactionProvider>
-          <StatusBar style="light" />
+          <BottomSheetModalProvider>
+            <StatusBar style="light" />
 
-          <Stack
-            screenOptions={{
-              headerShown: false,
+            <Stack
+              screenOptions={{
+                headerShown: false,
 
-              // Smooth native fade transition between screens.
-              // Intro screens opt out — FadeScreen handles their fade.
-              animation: "fade",
+                // Smooth native fade transition between screens.
+                // Intro screens opt out — FadeScreen handles their fade.
+                animation: "fade",
 
-              contentStyle: {
-                backgroundColor: "#0B0B0B",
-              },
-            }}
-          >
-            <Stack.Screen name="index" options={{ animation: "none" }} />
-            <Stack.Screen name="intro1" options={{ animation: "none" }} />
-            <Stack.Screen name="intro2" options={{ animation: "none" }} />
-            <Stack.Screen name="intro3" options={{ animation: "none" }} />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-
+                contentStyle: {
+                  backgroundColor: "#0B0B0B",
+                },
+              }}
+            >
+              <Stack.Screen name="index" options={{ animation: "none" }} />
+              <Stack.Screen name="intro1" options={{ animation: "none" }} />
+              <Stack.Screen name="intro2" options={{ animation: "none" }} />
+              <Stack.Screen name="intro3" options={{ animation: "none" }} />
+              <Stack.Screen name="login" />
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+          </BottomSheetModalProvider>
           <AppAlertHost />
         </TransactionProvider>
       </GestureHandlerRootView>

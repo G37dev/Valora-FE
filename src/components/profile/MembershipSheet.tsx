@@ -1,13 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import { useEffect, useRef, useState } from "react";
 import {
   Image,
-  Modal,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -60,51 +64,70 @@ export default function MembershipSheet({
   onClose,
 }: MembershipSheetProps) {
   const insets = useSafeAreaInsets();
+  const { height: screenH } = useWindowDimensions();
+  const sheetRef = useRef<BottomSheetModal>(null);
   const [details, setDetails] = useState(false);
 
-  const level = MEMBER_LEVELS[tier - 1] || MEMBER_LEVELS[0];
-
-  const close = () => {
-    setDetails(false);
-    onClose();
-  };
+  useEffect(() => {
+    if (visible) {
+      setDetails(false);
+      sheetRef.current?.present();
+    } else {
+      sheetRef.current?.dismiss();
+    }
+  }, [visible]);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={close}
-      statusBarTranslucent
+    <BottomSheetModal
+      ref={sheetRef}
+      onDismiss={onClose}
+      enableDynamicSizing
+      maxDynamicContentSize={screenH * 0.9}
+      enablePanDownToClose
+      handleComponent={null}
+      backgroundStyle={styles.sheetBg}
+      backdropComponent={(props) => (
+        <BottomSheetBackdrop
+          {...props}
+          appearsOnIndex={0}
+          disappearsOnIndex={-1}
+          opacity={0.65}
+          pressBehavior="close"
+        />
+      )}
     >
-      <TouchableWithoutFeedback onPress={close}>
-        <View style={styles.backdrop} />
-      </TouchableWithoutFeedback>
-
-      <View
-        style={[
-          styles.sheet,
-          { paddingBottom: insets.bottom + 20 },
-          details && { maxHeight: "88%" },
-        ]}
-        pointerEvents="box-none"
-      >
-        {details ? (
+      {details ? (
+        <BottomSheetScrollView
+          style={styles.scroll}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 18,
+            paddingBottom: insets.bottom + 20,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
           <DetailsView
             tier={tier}
             onBack={() => setDetails(false)}
-            onClose={close}
+            onClose={() => sheetRef.current?.dismiss()}
           />
-        ) : (
+        </BottomSheetScrollView>
+      ) : (
+        <BottomSheetView
+          style={{
+            paddingHorizontal: 20,
+            paddingTop: 18,
+            paddingBottom: insets.bottom + 20,
+          }}
+        >
           <OverviewView
             tier={tier}
-            level={level}
-            onClose={close}
+            onClose={() => sheetRef.current?.dismiss()}
             onDetails={() => setDetails(true)}
           />
-        )}
-      </View>
-    </Modal>
+        </BottomSheetView>
+      )}
+    </BottomSheetModal>
   );
 }
 
@@ -123,15 +146,14 @@ function CloseBtn({ onPress }: { onPress: () => void }) {
 
 function OverviewView({
   tier,
-  level,
   onClose,
   onDetails,
 }: {
   tier: number;
-  level: LevelDef;
   onClose: () => void;
   onDetails: () => void;
 }) {
+  const level = MEMBER_LEVELS[tier - 1] || MEMBER_LEVELS[0];
   return (
     <View>
       <View style={styles.headRow}>
@@ -230,10 +252,7 @@ function DetailsView({
         benefits.
       </Text>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={{ marginTop: 18 }}
-      >
+      <View style={{ marginTop: 18 }}>
         {items.map((l, i) => {
           const lv = MEMBER_LEVELS.length - i;
           const active = lv === tier;
@@ -252,7 +271,10 @@ function DetailsView({
                 )}
                 <Image
                   source={LEVEL_BADGES[lv]}
-                  style={[styles.detailBadge, active && { width: 72, height: 72 }]}
+                  style={[
+                    styles.detailBadge,
+                    active && { width: 72, height: 72 },
+                  ]}
                   resizeMode="contain"
                 />
                 {i < items.length - 1 && <View style={styles.detailLine} />}
@@ -272,27 +294,20 @@ function DetailsView({
             </View>
           );
         })}
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.65)" },
-  sheet: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
+  sheetBg: {
     backgroundColor: "#0A0A0A",
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
     borderTopWidth: 1,
     borderColor: "#1f1f1f",
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    overflow: "hidden",
   },
+  scroll: { flexGrow: 0 },
   headRow: {
     flexDirection: "row",
     alignItems: "center",
