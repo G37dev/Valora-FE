@@ -55,6 +55,9 @@ export default function ChangeMobileSheet({
   const [countryCode, setCountryCode] = useState<CountryCode>("ID");
   const [callingCode, setCallingCode] = useState("+62");
   const [countryPickerVisible, setCountryPickerVisible] = useState(false);
+  const [verifStatus, setVerifStatus] = useState<
+    "idle" | "verifying" | "success" | "error"
+  >("idle");
 
   useEffect(() => {
     if (visible) {
@@ -65,6 +68,7 @@ export default function ChangeMobileSheet({
       setCountryCode("ID");
       setCallingCode("+62");
       setCountryPickerVisible(false);
+      setVerifStatus("idle");
       setOtpKey((k) => k + 1);
     }
   }, [visible, hasPhone]);
@@ -74,9 +78,23 @@ export default function ChangeMobileSheet({
   const boxSize = Math.min(52, Math.floor((winW - 40 - gap * 5) / 6));
 
   const resend = () => {
+    setVerifStatus("idle");
     setOtpKey((k) => k + 1);
     if (step === "old") setOldCode("");
     if (step === "new") setNewCode("");
+  };
+
+  const verify = (next: Step) => {
+    setVerifStatus("verifying");
+    // Placeholder for real OTP API call — UI-only flow for now.
+    setTimeout(() => {
+      setVerifStatus("success");
+      setTimeout(() => {
+        setVerifStatus("idle");
+        setStep(next);
+        setOtpKey((k) => k + 1);
+      }, 1200);
+    }, 900);
   };
 
   const handleCountrySelect = (country: Country) => {
@@ -139,6 +157,7 @@ export default function ChangeMobileSheet({
             boxSize={boxSize}
             gap={gap}
             showPaste={false}
+            verificationStatus={verifStatus}
             onComplete={setOldCode}
           />
 
@@ -146,17 +165,15 @@ export default function ChangeMobileSheet({
             <TouchableOpacity
               style={styles.ghostBtn}
               onPress={resend}
+              disabled={verifStatus !== "idle"}
               activeOpacity={0.8}
             >
               <Text style={styles.ghostText}>Resend Code</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.goldBtnWrap}
-              disabled={oldCode.length !== 6}
-              onPress={() => {
-                setStep("new");
-                setOtpKey((k) => k + 1);
-              }}
+              disabled={oldCode.length !== 6 || verifStatus !== "idle"}
+              onPress={() => verify("new")}
               activeOpacity={0.85}
             >
               <LinearGradient
@@ -215,6 +232,7 @@ export default function ChangeMobileSheet({
             boxSize={boxSize}
             gap={gap}
             showPaste={false}
+            verificationStatus={verifStatus}
             onComplete={setNewCode}
           />
 
@@ -222,14 +240,19 @@ export default function ChangeMobileSheet({
             <TouchableOpacity
               style={styles.ghostBtn}
               onPress={resend}
+              disabled={verifStatus !== "idle"}
               activeOpacity={0.8}
             >
               <Text style={styles.ghostText}>Resend Code</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.goldBtnWrap}
-              disabled={newCode.length !== 6 || phone.trim().length < 8}
-              onPress={() => setStep("done")}
+              disabled={
+                newCode.length !== 6 ||
+                phone.trim().length < 8 ||
+                verifStatus !== "idle"
+              }
+              onPress={() => verify("done")}
               activeOpacity={0.85}
             >
               <LinearGradient
