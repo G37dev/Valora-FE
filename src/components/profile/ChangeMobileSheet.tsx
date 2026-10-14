@@ -12,8 +12,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import CountryPicker, {
+  Country,
+  CountryCode,
+} from "react-native-country-picker-modal";
 
 const GOLD = "#F5D13E";
+
+const getCountryFlag = (cca2: string) => {
+  if (!cca2 || cca2.length !== 2) {
+    return "🌐";
+  }
+  return cca2
+    .toUpperCase()
+    .split("")
+    .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))
+    .join("");
+};
 
 type Step = "old" | "new" | "done";
 
@@ -37,6 +52,9 @@ export default function ChangeMobileSheet({
   const [newCode, setNewCode] = useState("");
   const [phone, setPhone] = useState("");
   const [otpKey, setOtpKey] = useState(0);
+  const [countryCode, setCountryCode] = useState<CountryCode>("ID");
+  const [callingCode, setCallingCode] = useState("+62");
+  const [countryPickerVisible, setCountryPickerVisible] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -44,6 +62,9 @@ export default function ChangeMobileSheet({
       setOldCode("");
       setNewCode("");
       setPhone("");
+      setCountryCode("ID");
+      setCallingCode("+62");
+      setCountryPickerVisible(false);
       setOtpKey((k) => k + 1);
     }
   }, [visible, hasPhone]);
@@ -56,6 +77,14 @@ export default function ChangeMobileSheet({
     setOtpKey((k) => k + 1);
     if (step === "old") setOldCode("");
     if (step === "new") setNewCode("");
+  };
+
+  const handleCountrySelect = (country: Country) => {
+    setCountryCode(country.cca2);
+    if (country.callingCode?.length > 0) {
+      setCallingCode(`+${country.callingCode[0]}`);
+    }
+    setCountryPickerVisible(false);
   };
 
   const title =
@@ -159,11 +188,17 @@ export default function ChangeMobileSheet({
           </View>
 
           <View style={styles.phoneRow}>
-            <View style={styles.countryBox}>
-              <Text style={styles.countryFlag}>🇮🇩</Text>
-              <Text style={styles.countryCode}>+62</Text>
+            <TouchableOpacity
+              style={styles.countryBox}
+              onPress={() => setCountryPickerVisible(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.countryFlag}>
+                {getCountryFlag(countryCode)}
+              </Text>
+              <Text style={styles.countryCode}>{callingCode}</Text>
               <Ionicons name="chevron-down" size={14} color="#8A8A8A" />
-            </View>
+            </TouchableOpacity>
             <TextInput
               style={styles.phoneInput}
               placeholder="8xx xxxx xxxx"
@@ -244,7 +279,9 @@ export default function ChangeMobileSheet({
             )}
             <View style={styles.doneCardRow}>
               <Text style={styles.doneCardLabel}>New Number</Text>
-              <Text style={styles.doneCardValue}>+62 {phone}</Text>
+              <Text style={styles.doneCardValue}>
+                {callingCode} {phone}
+              </Text>
             </View>
           </View>
 
@@ -264,6 +301,28 @@ export default function ChangeMobileSheet({
           </TouchableOpacity>
         </View>
       )}
+
+      <CountryPicker
+        countryCode={countryCode}
+        visible={countryPickerVisible}
+        withFilter
+        withFlag
+        withEmoji
+        withCallingCode
+        withAlphaFilter
+        withCallingCodeButton={false}
+        withCountryNameButton={false}
+        withFlagButton={false}
+        theme={{
+          backgroundColor: "#111111",
+          onBackgroundTextColor: "#FFFFFF",
+          filterPlaceholderTextColor: "#777777",
+          activeOpacity: 0.7,
+          fontSize: 14,
+        }}
+        onSelect={handleCountrySelect}
+        onClose={() => setCountryPickerVisible(false)}
+      />
     </ValoraSheet>
   );
 }
