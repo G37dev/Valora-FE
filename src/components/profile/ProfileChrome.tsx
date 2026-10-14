@@ -1,8 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import type { UserProfile } from "../../services/userService";
 import ValoraSheet from "../ValoraSheet";
 
@@ -33,15 +41,26 @@ export const AVATARS: Record<string, number> = {
   a8: require("../../../assets/images/profile/a8.png"),
 };
 
-// avatarUrl bisa berisi key preset ("a1"-"a8") atau URL remote.
-// User lama tanpa avatar dapat preset deterministik dari coreId (a1-a6).
+// avatarUrl bisa berisi key preset ("a1"-"a8"), URL remote, atau URI
+// lokal — plus suffix "|tN" untuk border badge pilihan user (t1-t4).
+export function splitAvatarUrl(avatarUrl?: string | null): {
+  avatar: string | null;
+  border?: number;
+} {
+  if (!avatarUrl) return { avatar: null };
+  const m = avatarUrl.match(/^(.*)\|t([1-4])$/);
+  if (m) return { avatar: m[1], border: Number(m[2]) };
+  return { avatar: avatarUrl };
+}
+
 export function avatarSource(
   avatarUrl?: string | null,
   coreId?: string | null,
 ): any {
-  if (avatarUrl) {
-    if (AVATARS[avatarUrl]) return AVATARS[avatarUrl];
-    if (/^https?:\/\//.test(avatarUrl)) return { uri: avatarUrl };
+  const { avatar } = splitAvatarUrl(avatarUrl);
+  if (avatar) {
+    if (AVATARS[avatar]) return AVATARS[avatar];
+    if (/^(https?|file|content|data):/.test(avatar)) return { uri: avatar };
   }
   if (coreId) {
     let h = 0;
@@ -91,6 +110,8 @@ export function LevelAvatar({
   tier?: number;
   size?: number;
 }) {
+  const { border } = splitAvatarUrl(uri);
+  const frame = border ?? tier;
   const inner = size * 0.74;
   const offset = (size - inner) / 2;
   return (
@@ -107,7 +128,7 @@ export function LevelAvatar({
         }}
       />
       <Image
-        source={LEVEL_FRAMES[tier] || LEVEL_FRAMES[1]}
+        source={LEVEL_FRAMES[frame] || LEVEL_FRAMES[1]}
         style={{ width: size, height: size }}
         resizeMode="contain"
       />
@@ -369,89 +390,369 @@ export function SettingRow({
   return content;
 }
 
+const AVATAR_ITEMS: { key: string; label: string }[] = [
+  { key: "a1", label: "M. Captain" },
+  { key: "a2", label: "F. Captain" },
+  { key: "a5", label: "First Officer" },
+  { key: "a3", label: "Flight Attendant" },
+  { key: "a8", label: "F. Cabin Crew" },
+  { key: "a4", label: "M. Cabin Crew" },
+  { key: "a7", label: "Aircraft Engineer" },
+  { key: "a6", label: "Aircraft Marshall" },
+];
+
+const BORDER_ITEMS = [
+  { tier: 1, label: "Cadet" },
+  { tier: 2, label: "Junior" },
+  { tier: 3, label: "Senior" },
+  { tier: 4, label: "Commander" },
+];
+
 export function AvatarPicker({
   visible,
   current,
-  onSelect,
+  coreId,
+  tier = 1,
+  onSave,
   onClose,
 }: {
   visible: boolean;
   current?: string | null;
-  onSelect: (key: string) => void;
+  coreId?: string | null;
+  tier?: number;
+  onSave: (avatarUrl: string) => void | Promise<void>;
   onClose: () => void;
 }) {
-  const [saving, setSaving] = useState<string | null>(null);
+  const [avatarSel, setAvatarSel] = useState<string>("a1");
+  const [customUri, setCustomUri] = useState<string | null>(null);
+  const [borderSel, setBorderSel] = useState<number>(tier);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!visible) return;
+    const { avatar, border } = splitAvatarUrl(current);
+    if (avatar && AVATARS[avatar]) {
+      setAvatarSel(avatar);
+      setCustomUri(null);
+    } else if (avatar && /^(https?|file|content|data):/.test(avatar)) {
+      setAvatarSel("custom");
+      setCustomUri(avatar);
+    } else {
+      setAvatarSel("a1");
+      setCustomUri(null);
+    }
+    setBorderSel(border ?? tier);
+    setSaving(false);
+  }, [visible, current, tier]);
+
+  const pickImage = async () => {
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+    });
+    const uri = res.assets?.[0]?.uri;
+    if (res.canceled || !uri) return;
+    setCustomUri(uri);
+    setAvatarSel("custom");
+  };
+
+  const previewUri =
+    avatarSel === "custom" && customUri ? customUri : avatarSel;
+
+  const save = async () => {
+    const part = avatarSel === "custom" ? customUri : avatarSel;
+    if (!part) return;
+    setSaving(true);
+    try {
+      await onSave(`${part}|t${borderSel}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const gridItems: { key: string; label: string; source: any }[] =
+    AVATAR_ITEMS.map((item) => ({
+      ...item,
+      source: AVATARS[item.key],
+    }));
+  if (customUri) {
+    gridItems.push({
+      key: "custom",
+      label: "Uploaded",
+      source: { uri: customUri },
+    });
+  }
+
   return (
-    <ValoraSheet visible={visible} onClose={onClose} snapPoints={["42%"]}>
-      <Text style={styles.pickerTitle}>Choose Your Avatar</Text>
-      <View style={styles.pickerGrid}>
-        {Object.keys(AVATARS).map((key) => (
+    <ValoraSheet
+      visible={visible}
+      onClose={onClose}
+      snapPoints={["92%"]}
+      scrollable
+    >
+      <View style={styles.setupHead}>
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity style={styles.setupClose} onPress={onClose}>
+          <Ionicons name="close" size={16} color="#8A8A8A" />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.setupPreview}>
+        <LevelAvatar
+          uri={previewUri}
+          coreId={coreId}
+          tier={borderSel}
+          size={108}
+        />
+      </View>
+      <Text style={styles.setupTitle}>Set Up Profile</Text>
+      <Text style={styles.setupSub}>
+        Personalize your profile{"\n"}with an avatar and membership border.
+      </Text>
+
+      <View style={styles.setupCard}>
+        <View style={styles.setupCardHead}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.setupCardTitle}>Avatar</Text>
+            <Text style={styles.setupCardSub}>
+              Choose an avatar that represents you
+            </Text>
+          </View>
           <TouchableOpacity
-            key={key}
-            style={[
-              styles.pickerItem,
-              current === key && styles.pickerItemActive,
-            ]}
-            disabled={saving !== null}
-            onPress={async () => {
-              setSaving(key);
-              try {
-                await onSelect(key);
-              } finally {
-                setSaving(null);
-              }
-            }}
+            style={styles.uploadBtn}
+            onPress={pickImage}
             activeOpacity={0.8}
           >
-            <Image source={AVATARS[key]} style={styles.pickerAvatar} />
+            <Ionicons name="cloud-upload-outline" size={14} color={GOLD} />
+            <Text style={styles.uploadText}>Upload</Text>
           </TouchableOpacity>
-        ))}
+        </View>
+        <View style={styles.setupDivider} />
+
+        <View style={styles.setupGrid}>
+          {gridItems.map((item) => {
+            const active =
+              item.key === "custom"
+                ? avatarSel === "custom"
+                : avatarSel === item.key;
+            return (
+              <TouchableOpacity
+                key={item.key}
+                style={styles.setupGridItem}
+                onPress={() => setAvatarSel(item.key)}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.setupCircle,
+                    active && styles.setupCircleActive,
+                  ]}
+                >
+                  <Image source={item.source} style={styles.setupCircleImg} />
+                </View>
+                <Text
+                  style={[styles.setupItemLabel, active && { color: GOLD }]}
+                  numberOfLines={1}
+                >
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
+
+      <View style={styles.setupCard}>
+        <View style={styles.setupCardHead}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.setupCardTitle}>Border Badge</Text>
+            <Text style={styles.setupCardSub}>
+              Choose a border to personalize your profile
+            </Text>
+          </View>
+        </View>
+        <View style={styles.setupDivider} />
+
+        <View style={styles.setupGrid}>
+          {BORDER_ITEMS.map((item) => {
+            const active = borderSel === item.tier;
+            return (
+              <TouchableOpacity
+                key={item.tier}
+                style={styles.setupGridItem}
+                onPress={() => setBorderSel(item.tier)}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.setupCircle,
+                    active && styles.setupCircleActive,
+                  ]}
+                >
+                  <Image
+                    source={LEVEL_FRAMES[item.tier]}
+                    style={styles.setupCircleImg}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text
+                  style={[styles.setupItemLabel, active && { color: GOLD }]}
+                  numberOfLines={1}
+                >
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      <TouchableOpacity
+        style={styles.saveBtn}
+        disabled={saving || (avatarSel === "custom" && !customUri)}
+        onPress={save}
+        activeOpacity={0.85}
+      >
+        <LinearGradient
+          colors={["#FBE678", "#F0C94A"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.saveBtnInner}
+        >
+          {saving ? (
+            <ActivityIndicator color="#141414" size="small" />
+          ) : (
+            <Text style={styles.saveBtnText}>Save Changes</Text>
+          )}
+        </LinearGradient>
+      </TouchableOpacity>
     </ValoraSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  pickerBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)" },
-  pickerSheet: {
-    backgroundColor: "#141414",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 24,
-    paddingBottom: 36,
-    borderTopWidth: 1,
-    borderColor: BORDER,
+  setupHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
-  pickerHandle: {
-    alignSelf: "center",
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#3A3A3A",
-    marginTop: 10,
-    marginBottom: 16,
+  setupClose: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#2A2A2A",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  pickerTitle: {
+  setupPreview: {
+    alignItems: "center",
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  setupTitle: {
     color: "#FFF",
-    fontSize: 16,
-    fontFamily: "Poppins_600SemiBold",
+    fontSize: 18,
+    fontFamily: "Poppins_700Bold",
     textAlign: "center",
-    marginBottom: 20,
   },
-  pickerGrid: {
+  setupSub: {
+    color: "#8A8A8A",
+    fontSize: 11,
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    lineHeight: 17,
+    marginTop: 8,
+  },
+  setupCard: {
+    borderWidth: 1,
+    borderColor: "#2A2A2A",
+    borderRadius: 16,
+    backgroundColor: "#101010",
+    padding: 16,
+    marginTop: 18,
+  },
+  setupCardHead: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  setupCardTitle: {
+    color: "#FFF",
+    fontSize: 13,
+    fontFamily: "Poppins_600SemiBold",
+  },
+  setupCardSub: {
+    color: "#8A8A8A",
+    fontSize: 10,
+    fontFamily: "Poppins_400Regular",
+    marginTop: 3,
+  },
+  uploadBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#3A3A3A",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  uploadText: {
+    color: GOLD,
+    fontSize: 11,
+    fontFamily: "Poppins_500Medium",
+  },
+  setupDivider: {
+    height: 1,
+    backgroundColor: "#1E1E1E",
+    marginTop: 14,
+  },
+  setupGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 18,
+    marginTop: 16,
   },
-  pickerItem: {
-    borderRadius: 44,
+  setupGridItem: {
+    width: "25%",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  setupCircle: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
     borderWidth: 2,
     borderColor: "transparent",
-    padding: 3,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
   },
-  pickerItemActive: { borderColor: GOLD },
-  pickerAvatar: { width: 72, height: 72, borderRadius: 36 },
+  setupCircleActive: { borderColor: GOLD },
+  setupCircleImg: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+  },
+  setupItemLabel: {
+    color: "#8A8A8A",
+    fontSize: 9,
+    fontFamily: "Poppins_400Regular",
+    marginTop: 7,
+    textAlign: "center",
+  },
+  saveBtn: {
+    marginTop: 6,
+    marginBottom: 8,
+  },
+  saveBtnInner: {
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: "center",
+  },
+  saveBtnText: {
+    color: "#141414",
+    fontSize: 13,
+    fontFamily: "Poppins_600SemiBold",
+  },
   topBar: {
     flexDirection: "row",
     alignItems: "center",

@@ -184,10 +184,12 @@ export default function MyInfoScreen() {
       <AvatarPicker
         visible={avatarPicker}
         current={user?.avatarUrl}
+        coreId={user?.coreId}
+        tier={tier}
         onClose={() => setAvatarPicker(false)}
-        onSelect={async (key) => {
+        onSave={async (avatarUrl) => {
           if (!user?.coreId) return;
-          await updateUserProfileApi(user.coreId, { avatarUrl: key });
+          await updateUserProfileApi(user.coreId, { avatarUrl });
           await data.reload(true);
           setAvatarPicker(false);
         }}
