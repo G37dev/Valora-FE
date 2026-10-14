@@ -2,6 +2,7 @@ import TwoFactorSetup from "@/components/app/otp/TwoFactorSetup";
 import TwoFactorVerif from "@/components/app/otp/TwoFactorVerif";
 import { showAlert } from "@/components/AppAlert";
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import AccountManagementSheet from "@/components/profile/AccountManagementSheet";
 import ChangeMobileSheet from "@/components/profile/ChangeMobileSheet";
 import ChangePasswordSheet from "@/components/profile/ChangePasswordSheet";
 import {
@@ -13,6 +14,7 @@ import {
   SettingRow,
   SubPageShell,
 } from "@/components/profile/ProfileChrome";
+import TrustedDevicesSheet from "@/components/profile/TrustedDevicesSheet";
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import {
   disableAuthenticatorApi,
@@ -69,6 +71,8 @@ export default function SecurityScreen() {
   const [comingSoon, setComingSoon] = useState(false);
   const [mobileSheet, setMobileSheet] = useState(false);
   const [passwordSheet, setPasswordSheet] = useState(false);
+  const [devicesSheet, setDevicesSheet] = useState(false);
+  const [accountSheet, setAccountSheet] = useState(false);
   const [passkeyOpen, setPasskeyOpen] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
 
@@ -341,12 +345,12 @@ export default function SecurityScreen() {
             <SettingRow
               icon="phone-portrait-outline"
               label="Trusted Devices"
-              onPress={() => setComingSoon(true)}
+              onPress={() => setDevicesSheet(true)}
             />
             <SettingRow
               icon="people-outline"
               label="Account Management"
-              onPress={() => setComingSoon(true)}
+              onPress={() => setAccountSheet(true)}
             />
             <SettingRow
               icon="scan-outline"
@@ -385,6 +389,16 @@ export default function SecurityScreen() {
       <ChangePasswordSheet
         visible={passwordSheet}
         onClose={() => setPasswordSheet(false)}
+      />
+
+      <TrustedDevicesSheet
+        visible={devicesSheet}
+        onClose={() => setDevicesSheet(false)}
+      />
+
+      <AccountManagementSheet
+        visible={accountSheet}
+        onClose={() => setAccountSheet(false)}
       />
 
       <TwoFactorSetup
