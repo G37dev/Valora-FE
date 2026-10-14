@@ -265,7 +265,7 @@ export default function SecurityScreen() {
               label="Mobile"
               right={
                 <Text style={styles.rowValue}>
-                  {maskPhone(user?.phoneNumber)}
+                  {user?.phoneNumber ? maskPhone(user.phoneNumber) : "Not set"}
                 </Text>
               }
               onPress={() => setMobileSheet(true)}
@@ -378,7 +378,8 @@ export default function SecurityScreen() {
       <ChangeMobileSheet
         visible={mobileSheet}
         onClose={() => setMobileSheet(false)}
-        currentMasked={maskPhone(user?.phoneNumber) || "+62 819***444"}
+        currentMasked={maskPhone(user?.phoneNumber)}
+        hasPhone={!!user?.phoneNumber}
       />
 
       <ChangePasswordSheet

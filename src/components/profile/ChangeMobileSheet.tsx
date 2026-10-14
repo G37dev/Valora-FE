@@ -22,12 +22,15 @@ interface ChangeMobileSheetProps {
   onClose: () => void;
   /** Masked current number, e.g. "+62 819***444" */
   currentMasked: string;
+  /** False when the user has no number yet — skips old-number OTP step. */
+  hasPhone: boolean;
 }
 
 export default function ChangeMobileSheet({
   visible,
   onClose,
   currentMasked,
+  hasPhone,
 }: ChangeMobileSheetProps) {
   const [step, setStep] = useState<Step>("old");
   const [oldCode, setOldCode] = useState("");
@@ -37,13 +40,13 @@ export default function ChangeMobileSheet({
 
   useEffect(() => {
     if (visible) {
-      setStep("old");
+      setStep(hasPhone ? "old" : "new");
       setOldCode("");
       setNewCode("");
       setPhone("");
       setOtpKey((k) => k + 1);
     }
-  }, [visible]);
+  }, [visible, hasPhone]);
 
   const winW = Dimensions.get("window").width;
   const gap = 8;
@@ -59,8 +62,12 @@ export default function ChangeMobileSheet({
     step === "old"
       ? "Change Mobile Number"
       : step === "new"
-        ? "New Mobile Number"
-        : "Mobile Number Updated";
+        ? hasPhone
+          ? "New Mobile Number"
+          : "Add Mobile Number"
+        : hasPhone
+          ? "Mobile Number Updated"
+          : "Mobile Number Added";
 
   return (
     <ValoraSheet
@@ -142,7 +149,9 @@ export default function ChangeMobileSheet({
       {step === "new" && (
         <>
           <View style={styles.stepRow}>
-            <Text style={styles.stepText}>Step 2 of 2</Text>
+            <Text style={styles.stepText}>
+              {hasPhone ? "Step 2 of 2" : "Step 1 of 1"}
+            </Text>
             <View style={styles.stepDot} />
             <Text style={styles.stepText}>
               Enter and verify your new number
@@ -214,17 +223,25 @@ export default function ChangeMobileSheet({
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.doneTitle}>Mobile Number Updated</Text>
+          <Text style={styles.doneTitle}>
+            {hasPhone ? "Mobile Number Updated" : "Mobile Number Added"}
+          </Text>
           <Text style={styles.doneSub}>
-            Your mobile number has been updated succesfully
+            {hasPhone
+              ? "Your mobile number has been updated succesfully"
+              : "Your mobile number has been added succesfully"}
           </Text>
 
           <View style={styles.doneCard}>
-            <View style={styles.doneCardRow}>
-              <Text style={styles.doneCardLabel}>Old Mobile Number</Text>
-              <Text style={styles.doneCardValue}>{currentMasked}</Text>
-            </View>
-            <View style={styles.doneCardDivider} />
+            {hasPhone && (
+              <>
+                <View style={styles.doneCardRow}>
+                  <Text style={styles.doneCardLabel}>Old Mobile Number</Text>
+                  <Text style={styles.doneCardValue}>{currentMasked}</Text>
+                </View>
+                <View style={styles.doneCardDivider} />
+              </>
+            )}
             <View style={styles.doneCardRow}>
               <Text style={styles.doneCardLabel}>New Number</Text>
               <Text style={styles.doneCardValue}>+62 {phone}</Text>
