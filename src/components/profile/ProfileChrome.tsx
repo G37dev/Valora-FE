@@ -670,6 +670,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#101010",
     padding: 16,
     marginTop: 18,
+    marginBottom: 20,
   },
   setupCardHead: {
     flexDirection: "row",

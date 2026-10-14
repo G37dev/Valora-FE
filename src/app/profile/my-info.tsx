@@ -1,4 +1,8 @@
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import {
+  NicknameSheet,
+  VivaloraIdSheet,
+} from "@/components/profile/InfoSheets";
 import MembershipSheet, {
   memberLevelName,
 } from "@/components/profile/MembershipSheet";
@@ -16,7 +20,6 @@ import {
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import { updateUserProfileApi } from "@/services/userService";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -29,6 +32,8 @@ export default function MyInfoScreen() {
   const [comingSoon, setComingSoon] = useState(false);
   const [avatarPicker, setAvatarPicker] = useState(false);
   const [memberSheet, setMemberSheet] = useState(false);
+  const [nicknameSheet, setNicknameSheet] = useState(false);
+  const [vidSheet, setVidSheet] = useState(false);
   const { user, kycStatus } = data;
   const tier = securityTier({
     kycVerified: kycStatus === "VERIFIED",
@@ -75,14 +80,12 @@ export default function MyInfoScreen() {
             <SettingRow
               label="Display Name"
               right={<Text style={styles.rowValue}>{name}</Text>}
-              onPress={() => setComingSoon(true)}
+              onPress={() => setNicknameSheet(true)}
             />
             <SettingRow
               label="Vivalora ID (VID)"
               right={<Text style={styles.rowValue}>{user?.coreId || "-"}</Text>}
-              onPress={() =>
-                user?.coreId && Clipboard.setStringAsync(user.coreId)
-              }
+              onPress={() => setVidSheet(true)}
             />
             <SettingRow
               label="Membership Level"
@@ -179,6 +182,27 @@ export default function MyInfoScreen() {
       <ComingSoonSheet
         visible={comingSoon}
         onClose={() => setComingSoon(false)}
+      />
+
+      <NicknameSheet
+        visible={nicknameSheet}
+        initial={name}
+        onClose={() => setNicknameSheet(false)}
+        onSave={async (newName) => {
+          if (!user?.coreId) return;
+          await updateUserProfileApi(user.coreId, {
+            firstName: newName,
+            lastName: "",
+          });
+          await data.reload(true);
+          setNicknameSheet(false);
+        }}
+      />
+
+      <VivaloraIdSheet
+        visible={vidSheet}
+        vid={user?.coreId || ""}
+        onClose={() => setVidSheet(false)}
       />
 
       <AvatarPicker
