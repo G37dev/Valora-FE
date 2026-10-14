@@ -315,7 +315,7 @@ export default function SecurityScreen() {
                     </TouchableOpacity>
                   </View>
                 ))}
-                {isPasskeySupported() && (
+                {isPasskeySupported() && passkeys.length === 0 && (
                   <TouchableOpacity
                     style={styles.addPasskeyBtn}
                     onPress={handleAddPasskey}
