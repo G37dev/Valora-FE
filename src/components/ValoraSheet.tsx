@@ -11,6 +11,7 @@ import {
   Platform,
   Pressable,
   StyleSheet,
+  View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,16 +22,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
  * nembus di bawah nav bar — jadi tinggi nav bar dihitung dari
  * selisih screen vs window height sebagai fallback.
  */
-export function useSheetBottomPad(extra = 20) {
+export function useNavOverlay() {
   const insets = useSafeAreaInsets();
-  if (Platform.OS !== "android") return insets.bottom + extra;
+  if (Platform.OS !== "android") return insets.bottom;
   const navBar = Math.max(
     0,
     Dimensions.get("screen").height -
       Dimensions.get("window").height -
       insets.top,
   );
-  return Math.max(insets.bottom, navBar, 16) + extra;
+  return Math.max(insets.bottom, navBar, 16);
+}
+
+export function useSheetBottomPad(extra = 20) {
+  return useNavOverlay() + extra;
 }
 
 interface ValoraSheetProps {
@@ -57,6 +62,7 @@ export default function ValoraSheet({
   children,
 }: ValoraSheetProps) {
   const bottomPad = useSheetBottomPad(20);
+  const navBlock = useNavOverlay() + 12;
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
     damping: 14,
@@ -121,6 +127,10 @@ export default function ValoraSheet({
             {children}
           </BottomSheetView>
         )}
+        <View
+          pointerEvents="none"
+          style={[styles.navBlocker, { height: navBlock }]}
+        />
       </BottomSheet>
     </>
   );
@@ -141,6 +151,13 @@ export default function ValoraSheet({
 }
 
 const styles = StyleSheet.create({
+  navBlocker: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#0A0A0A",
+  },
   sheetBg: {
     backgroundColor: "#0A0A0A",
     borderTopLeftRadius: 26,

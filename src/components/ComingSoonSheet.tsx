@@ -11,9 +11,10 @@ import {
   Pressable,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useSheetBottomPad } from "./ValoraSheet";
+import { useNavOverlay, useSheetBottomPad } from "./ValoraSheet";
 
 interface ComingSoonSheetProps {
   visible: boolean;
@@ -25,6 +26,7 @@ export default function ComingSoonSheet({
   onClose,
 }: ComingSoonSheetProps) {
   const bottomPad = useSheetBottomPad(40);
+  const navBlock = useNavOverlay() + 12;
   const sheetRef = useRef<BottomSheet>(null);
   const springConfig = useBottomSheetSpringConfigs({
     damping: 14,
@@ -92,6 +94,10 @@ export default function ComingSoonSheet({
               <Ionicons name="close" size={14} color="#999" />
             </TouchableOpacity>
           </BottomSheetView>
+          <View
+            pointerEvents="none"
+            style={[styles.navBlocker, { height: navBlock }]}
+          />
         </BottomSheet>
       </GestureHandlerRootView>
     </Modal>
@@ -99,6 +105,13 @@ export default function ComingSoonSheet({
 }
 
 const styles = StyleSheet.create({
+  navBlocker: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#0A0A0A",
+  },
   sheetBg: {
     backgroundColor: "#0A0A0A",
     borderTopLeftRadius: 26,
