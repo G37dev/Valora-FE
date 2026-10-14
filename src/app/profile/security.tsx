@@ -41,7 +41,9 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -240,7 +242,18 @@ export default function SecurityScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop:
+            Platform.OS === "android"
+              ? (StatusBar.currentHeight ?? insets.top)
+              : insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
+    >
       <SubPageShell
         title={t("tab.security")}
         activeTab="security"

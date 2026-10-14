@@ -23,7 +23,15 @@ import { useT } from "@/stores/languageStore";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyInfoScreen() {
@@ -54,7 +62,18 @@ export default function MyInfoScreen() {
         : "#FF5252";
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop:
+            Platform.OS === "android"
+              ? (StatusBar.currentHeight ?? insets.top)
+              : insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
+    >
       <SubPageShell
         title={t("tab.myInfo")}
         activeTab="my-info"

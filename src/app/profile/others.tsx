@@ -24,6 +24,7 @@ import { useState } from "react";
 import {
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -75,7 +76,18 @@ export default function OthersScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop:
+            Platform.OS === "android"
+              ? (StatusBar.currentHeight ?? insets.top)
+              : insets.top,
+          paddingBottom: insets.bottom,
+        },
+      ]}
+    >
       <SubPageShell
         title={t("tab.others")}
         activeTab="others"

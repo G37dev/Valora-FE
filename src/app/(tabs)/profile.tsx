@@ -19,7 +19,9 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Image,
+  Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -114,7 +116,17 @@ export default function ProfileScreen() {
       : { width: "100%" as const, height: "100%" as const };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop:
+            Platform.OS === "android"
+              ? (StatusBar.currentHeight ?? insets.top)
+              : insets.top,
+        },
+      ]}
+    >
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.topLeft}
