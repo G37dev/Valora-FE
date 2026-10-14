@@ -1,5 +1,6 @@
 import BottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetFooter,
   BottomSheetScrollView,
   BottomSheetView,
   useBottomSheetSpringConfigs,
@@ -103,6 +104,14 @@ export default function ValoraSheet({
             onPress={closeSheet}
           />
         )}
+        footerComponent={(props) => (
+          <BottomSheetFooter {...props} bottomInset={0}>
+            <View
+              pointerEvents="none"
+              style={[styles.navBlocker, { height: navBlock }]}
+            />
+          </BottomSheetFooter>
+        )}
       >
         {scrollable ? (
           <BottomSheetScrollView
@@ -127,10 +136,6 @@ export default function ValoraSheet({
             {children}
           </BottomSheetView>
         )}
-        <View
-          pointerEvents="none"
-          style={[styles.navBlocker, { height: navBlock }]}
-        />
       </BottomSheet>
     </>
   );

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetFooter,
   BottomSheetScrollView,
   BottomSheetView,
   useBottomSheetSpringConfigs,
@@ -128,6 +129,14 @@ export default function MembershipSheet({
               onPress={() => closeSheet()}
             />
           )}
+          footerComponent={(props) => (
+            <BottomSheetFooter {...props} bottomInset={0}>
+              <View
+                pointerEvents="none"
+                style={[styles.navBlocker, { height: navBlock }]}
+              />
+            </BottomSheetFooter>
+          )}
         >
           {details ? (
             <BottomSheetScrollView
@@ -160,10 +169,6 @@ export default function MembershipSheet({
               />
             </BottomSheetView>
           )}
-          <View
-            pointerEvents="none"
-            style={[styles.navBlocker, { height: navBlock }]}
-          />
         </BottomSheet>
       </GestureHandlerRootView>
     </Modal>

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetFooter,
   BottomSheetView,
   useBottomSheetSpringConfigs,
 } from "@gorhom/bottom-sheet";
@@ -75,6 +76,14 @@ export default function ComingSoonSheet({
               onPress={() => closeSheet()}
             />
           )}
+          footerComponent={(props) => (
+            <BottomSheetFooter {...props} bottomInset={0}>
+              <View
+                pointerEvents="none"
+                style={[styles.navBlocker, { height: navBlock }]}
+              />
+            </BottomSheetFooter>
+          )}
         >
           <BottomSheetView
             style={[styles.content, { paddingBottom: bottomPad }]}
@@ -94,10 +103,6 @@ export default function ComingSoonSheet({
               <Ionicons name="close" size={14} color="#999" />
             </TouchableOpacity>
           </BottomSheetView>
-          <View
-            pointerEvents="none"
-            style={[styles.navBlocker, { height: navBlock }]}
-          />
         </BottomSheet>
       </GestureHandlerRootView>
     </Modal>
