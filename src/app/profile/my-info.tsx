@@ -105,7 +105,7 @@ export default function MyInfoScreen() {
             />
             <SettingRow
               label={t("row.vid")}
-              right={<Text style={styles.rowValue}>{user?.coreId || "-"}</Text>}
+              right={<Text style={styles.rowValue}>{user?.uuid || "-"}</Text>}
               onPress={() => setVidSheet(true)}
             />
             <SettingRow
@@ -224,7 +224,7 @@ export default function MyInfoScreen() {
 
       <VivaloraIdSheet
         visible={vidSheet}
-        vid={user?.coreId || ""}
+        vid={user?.uuid || ""}
         onClose={() => setVidSheet(false)}
       />
 

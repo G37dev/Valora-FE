@@ -5,6 +5,7 @@ import { apiClient } from "./apiClient";
 
 export interface UserProfile {
   coreId: string; // Sesuaikan dengan penamaan di database-mu (coreId atau core_id)
+  uuid?: string; // ID publik pendek untuk ditampilkan sebagai VID
   firstName?: string;
   lastName?: string;
   email?: string;

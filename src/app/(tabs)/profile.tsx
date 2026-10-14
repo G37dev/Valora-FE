@@ -166,10 +166,10 @@ export default function ProfileScreen() {
               {name}
             </Text>
             <View style={styles.vidRow}>
-              <Text style={styles.vidText}>VID : {user?.coreId || "-"}</Text>
+              <Text style={styles.vidText}>VID : {user?.uuid || "-"}</Text>
               <TouchableOpacity
                 onPress={() =>
-                  user?.coreId && Clipboard.setStringAsync(user.coreId)
+                  user?.uuid && Clipboard.setStringAsync(user.uuid)
                 }
                 hitSlop={8}
               >
