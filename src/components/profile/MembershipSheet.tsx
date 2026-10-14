@@ -108,7 +108,7 @@ export default function MembershipSheet({
         <BottomSheet
           ref={sheetRef}
           index={0}
-          snapPoints={["75%", "92%"]}
+          snapPoints={["92%"]}
           animationConfigs={springConfig}
           enablePanDownToClose
           onChange={(i) => {
@@ -140,10 +140,7 @@ export default function MembershipSheet({
             >
               <DetailsView
                 tier={tier}
-                onBack={() => {
-                  setDetails(false);
-                  sheetRef.current?.snapToIndex(0);
-                }}
+                onBack={() => setDetails(false)}
                 onClose={() => closeSheet()}
               />
             </BottomSheetScrollView>
@@ -158,10 +155,7 @@ export default function MembershipSheet({
               <OverviewView
                 tier={tier}
                 onClose={() => closeSheet()}
-                onDetails={() => {
-                  setDetails(true);
-                  sheetRef.current?.snapToIndex(1);
-                }}
+                onDetails={() => setDetails(true)}
               />
             </BottomSheetView>
           )}
