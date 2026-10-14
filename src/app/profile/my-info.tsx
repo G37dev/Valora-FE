@@ -24,10 +24,11 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MyInfoScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const data = useProfileData();
   const sec = useSecurityLevel(data);
   const [comingSoon, setComingSoon] = useState(false);
@@ -53,7 +54,7 @@ export default function MyInfoScreen() {
         : "#FF5252";
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <SubPageShell
         title={t("tab.myInfo")}
         activeTab="my-info"
@@ -221,7 +222,7 @@ export default function MyInfoScreen() {
           setAvatarPicker(false);
         }}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

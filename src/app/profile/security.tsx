@@ -47,7 +47,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TogglePill({ on }: { on: boolean }) {
   const t = useT();
@@ -66,6 +66,7 @@ function TogglePill({ on }: { on: boolean }) {
 
 export default function SecurityScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const data = useProfileData();
   const sec = useSecurityLevel(data);
   const t = useT();
@@ -239,7 +240,7 @@ export default function SecurityScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <SubPageShell
         title={t("tab.security")}
         activeTab="security"
@@ -450,7 +451,7 @@ export default function SecurityScreen() {
           );
         }}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

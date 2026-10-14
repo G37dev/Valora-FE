@@ -22,10 +22,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function PreferenceScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const data = useProfileData();
   const sec = useSecurityLevel(data);
   const [comingSoon, setComingSoon] = useState(false);
@@ -57,7 +58,7 @@ export default function PreferenceScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <SubPageShell
         title={t("tab.preference")}
         activeTab="preference"
@@ -131,7 +132,7 @@ export default function PreferenceScreen() {
         visible={comingSoon}
         onClose={() => setComingSoon(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

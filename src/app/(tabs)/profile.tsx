@@ -25,7 +25,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const QUICK = [
   {
@@ -84,6 +84,7 @@ const RECENT = [
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, kycStatus, twoFAEnabled, passkeys } = useProfileData();
   const [comingSoon, setComingSoon] = useState(false);
   const [memberSheet, setMemberSheet] = useState(false);
@@ -113,7 +114,7 @@ export default function ProfileScreen() {
       : { width: "100%" as const, height: "100%" as const };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.topLeft}
@@ -322,7 +323,7 @@ export default function ProfileScreen() {
         tier={tier}
         onClose={() => setMemberSheet(false)}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

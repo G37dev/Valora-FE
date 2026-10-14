@@ -29,10 +29,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function OthersScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const data = useProfileData();
   const sec = useSecurityLevel(data);
   const [comingSoon, setComingSoon] = useState(false);
@@ -74,7 +75,7 @@ export default function OthersScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <SubPageShell
         title={t("tab.others")}
         activeTab="others"
@@ -166,7 +167,7 @@ export default function OthersScreen() {
       />
 
       <LanguageSheet visible={langSheet} onClose={() => setLangSheet(false)} />
-    </SafeAreaView>
+    </View>
   );
 }
 
