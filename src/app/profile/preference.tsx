@@ -1,5 +1,6 @@
 import { showAlert } from "@/components/AppAlert";
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import LanguageSheet from "@/components/profile/LanguageSheet";
 import {
   SectionCard,
   securityTier,
@@ -9,6 +10,7 @@ import {
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import { clearAuthToken } from "@/services/authStorage";
 import { supabase } from "@/services/supabase";
+import { LANGUAGE_LABELS, useLanguageStore } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -28,6 +30,8 @@ export default function PreferenceScreen() {
   const data = useProfileData();
   const sec = useSecurityLevel(data);
   const [comingSoon, setComingSoon] = useState(false);
+  const [langSheet, setLangSheet] = useState(false);
+  const language = useLanguageStore((s) => s.language);
 
   const handleSignOut = () => {
     showAlert(
@@ -104,6 +108,15 @@ export default function PreferenceScreen() {
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
+              icon="language-outline"
+              label="Language"
+              desc="Choose your app language"
+              right={
+                <Text style={styles.rowValue}>{LANGUAGE_LABELS[language]}</Text>
+              }
+              onPress={() => setLangSheet(true)}
+            />
+            <SettingRow
               icon="notifications-outline"
               label="Notification Settings"
               desc="Manage in-app and push notifications"
@@ -130,6 +143,8 @@ export default function PreferenceScreen() {
         visible={comingSoon}
         onClose={() => setComingSoon(false)}
       />
+
+      <LanguageSheet visible={langSheet} onClose={() => setLangSheet(false)} />
     </SafeAreaView>
   );
 }
