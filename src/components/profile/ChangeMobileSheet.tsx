@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import {
   Dimensions,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -81,9 +82,7 @@ export default function ChangeMobileSheet({
           <View style={styles.stepRow}>
             <Text style={styles.stepText}>Step 1 of 2</Text>
             <View style={styles.stepDot} />
-            <Text style={styles.stepText}>
-              Verify your current number
-            </Text>
+            <Text style={styles.stepText}>Verify your current number</Text>
           </View>
 
           <View style={styles.numberCard}>
@@ -209,10 +208,10 @@ export default function ChangeMobileSheet({
       {step === "done" && (
         <View style={styles.doneWrap}>
           <View style={styles.doneIconWrap}>
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={64}
-              color={GOLD}
+            <Image
+              source={require("../../../assets/images/changPhone.png")}
+              style={styles.doneIcon}
+              resizeMode="contain"
             />
           </View>
           <Text style={styles.doneTitle}>Mobile Number Updated</Text>
@@ -402,6 +401,10 @@ const styles = StyleSheet.create({
     height: 110,
     alignItems: "center",
     justifyContent: "center",
+  },
+  doneIcon: {
+    width: 100,
+    height: 100,
   },
   doneTitle: {
     color: "#FFF",

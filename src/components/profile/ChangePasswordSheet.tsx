@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import {
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -86,10 +87,7 @@ export default function ChangePasswordSheet({
       return;
     }
     if (newPass !== confirmPass) {
-      showAlert(
-        "Mismatch",
-        "New password and confirmation do not match.",
-      );
+      showAlert("Mismatch", "New password and confirmation do not match.");
       return;
     }
     setStep("done");
@@ -148,7 +146,11 @@ export default function ChangePasswordSheet({
       ) : (
         <View style={styles.doneWrap}>
           <View style={styles.doneIconWrap}>
-            <Ionicons name="lock-closed-outline" size={64} color={GOLD} />
+            <Image
+              source={require("../../../assets/images/changPasswordIcon.png")}
+              style={styles.doneIcon}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.doneTitle}>Change Password Successful</Text>
           <Text style={styles.doneSub}>
@@ -242,6 +244,10 @@ const styles = StyleSheet.create({
     height: 110,
     alignItems: "center",
     justifyContent: "center",
+  },
+  doneIcon: {
+    width: 100,
+    height: 100,
   },
   doneTitle: {
     color: "#FFF",
