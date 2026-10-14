@@ -2,6 +2,8 @@ import TwoFactorSetup from "@/components/app/otp/TwoFactorSetup";
 import TwoFactorVerif from "@/components/app/otp/TwoFactorVerif";
 import { showAlert } from "@/components/AppAlert";
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import ChangeMobileSheet from "@/components/profile/ChangeMobileSheet";
+import ChangePasswordSheet from "@/components/profile/ChangePasswordSheet";
 import {
   GOLD,
   maskEmail,
@@ -65,6 +67,8 @@ export default function SecurityScreen() {
   const { user, twoFAEnabled, passkeys, reload } = data;
 
   const [comingSoon, setComingSoon] = useState(false);
+  const [mobileSheet, setMobileSheet] = useState(false);
+  const [passwordSheet, setPasswordSheet] = useState(false);
   const [passkeyOpen, setPasskeyOpen] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
 
@@ -264,7 +268,7 @@ export default function SecurityScreen() {
                   {maskPhone(user?.phoneNumber)}
                 </Text>
               }
-              onPress={() => setComingSoon(true)}
+              onPress={() => setMobileSheet(true)}
             />
             <SettingRow
               icon="shield-checkmark-outline"
@@ -332,7 +336,7 @@ export default function SecurityScreen() {
             <SettingRow
               icon="ellipsis-horizontal"
               label="Change Password"
-              onPress={() => setComingSoon(true)}
+              onPress={() => setPasswordSheet(true)}
             />
             <SettingRow
               icon="phone-portrait-outline"
@@ -369,6 +373,17 @@ export default function SecurityScreen() {
       <ComingSoonSheet
         visible={comingSoon}
         onClose={() => setComingSoon(false)}
+      />
+
+      <ChangeMobileSheet
+        visible={mobileSheet}
+        onClose={() => setMobileSheet(false)}
+        currentMasked={maskPhone(user?.phoneNumber) || "+62 819***444"}
+      />
+
+      <ChangePasswordSheet
+        visible={passwordSheet}
+        onClose={() => setPasswordSheet(false)}
       />
 
       <TwoFactorSetup

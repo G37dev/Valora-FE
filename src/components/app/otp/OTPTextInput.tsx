@@ -20,6 +20,8 @@ interface OTPTextInputProps extends Omit<TextInputProps, "onKeyPress"> {
   verificationComplete?: boolean;
   verificationError?: boolean;
   inputIndex?: number;
+  size?: number;
+  pitch?: number;
 }
 
 const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
@@ -31,6 +33,8 @@ const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
       verificationComplete = false,
       verificationError = false,
       inputIndex,
+      size = SIZE,
+      pitch,
       ...props
     },
     ref,
@@ -59,13 +63,13 @@ const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
 
     const handleFocus = () => {
       isFocused.value = withTiming(1, {
-        duration: 250,
+        duration: 320,
       });
     };
 
     const handleBlur = () => {
       isFocused.value = withTiming(0, {
-        duration: 250,
+        duration: 320,
       });
     };
 
@@ -88,25 +92,25 @@ const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
       if (verificationError) {
         shakeX.value = withSequence(
           withTiming(-6, {
-            duration: 50,
+            duration: 70,
           }),
           withTiming(6, {
-            duration: 50,
+            duration: 70,
           }),
           withTiming(-5, {
-            duration: 50,
+            duration: 70,
           }),
           withTiming(5, {
-            duration: 50,
+            duration: 70,
           }),
           withTiming(-3, {
-            duration: 50,
+            duration: 70,
           }),
           withTiming(3, {
-            duration: 50,
+            duration: 70,
           }),
           withTiming(0, {
-            duration: 50,
+            duration: 80,
           }),
         );
       } else {
@@ -140,13 +144,15 @@ const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
         };
       }
 
+      const cell = pitch ?? size;
+
       const mergePositions = [
-        SIZE * 2.5,
-        SIZE * 1.5,
-        SIZE * 0.5,
-        -SIZE * 0.5,
-        -SIZE * 1.5,
-        -SIZE * 2.5,
+        cell * 2.5,
+        cell * 1.5,
+        cell * 0.5,
+        -cell * 0.5,
+        -cell * 1.5,
+        -cell * 2.5,
       ];
 
       const translateX = mergePositions[inputIndex] ?? 0;
@@ -157,16 +163,16 @@ const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
         transform: [
           {
             translateX: withTiming(translateX, {
-              duration: 450,
+              duration: 520,
             }),
           },
           {
             rotate: withSequence(
               withTiming(`${rotate}deg`, {
-                duration: 220,
+                duration: 260,
               }),
               withTiming("0deg", {
-                duration: 220,
+                duration: 260,
               }),
             ),
           },
@@ -194,11 +200,11 @@ const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
     const animatedCheckmarkPath = useDerivedValue(() => {
       const path = Skia.Path.Make();
 
-      const centerX = (SIZE - 8) / 2;
+      const centerX = (size - 8) / 2;
 
-      const centerY = (SIZE - 8) / 2;
+      const centerY = (size - 8) / 2;
 
-      const checkSize = (SIZE - 8) * 0.5;
+      const checkSize = (size - 8) * 0.5;
 
       const startX = centerX - checkSize * 0.3;
 
@@ -224,12 +230,15 @@ const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
     });
 
     return (
-      <Animated.View style={[styles.wrapper, transformStyle]}>
+      <Animated.View
+        style={[styles.wrapper, { width: size, height: size }, transformStyle]}
+      >
         <OTPTextInputGlow
           key={redrawKey}
           isFocused={isFocused}
           startGlowAnimation={startGlowAnimation}
           isError={verificationError}
+          size={size}
         />
 
         <Animated.View style={[styles.inputContainer, opacityStyle]}>
@@ -284,8 +293,6 @@ const OTPTextInput = forwardRef<TextInput, OTPTextInputProps>(
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: SIZE,
-    height: SIZE,
     margin: 0,
     padding: 0,
   },

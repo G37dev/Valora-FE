@@ -16,12 +16,18 @@ interface OTPInputProps {
   length?: number;
   onComplete?: (otp: string) => void;
   verificationStatus?: "idle" | "verifying" | "success" | "error";
+  boxSize?: number;
+  gap?: number;
+  showPaste?: boolean;
 }
 
 const OTPInput: React.FC<OTPInputProps> = ({
   length = 6,
   onComplete,
   verificationStatus = "idle",
+  boxSize = 40,
+  gap = 0,
+  showPaste = true,
 }) => {
   const [otp, setOtp] = useState<string[]>(new Array(length).fill(""));
 
@@ -251,7 +257,7 @@ const OTPInput: React.FC<OTPInputProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.otpRow}>
+      <View style={[styles.otpRow, { gap }]}>
         {Array.from({ length }, (_, index) => (
           <OTPTextInput
             key={index}
@@ -268,6 +274,8 @@ const OTPInput: React.FC<OTPInputProps> = ({
             verificationComplete={verificationStatus === "success"}
             verificationError={errorActive}
             inputIndex={index}
+            size={boxSize}
+            pitch={boxSize + gap}
             editable={
               verificationStatus !== "verifying" &&
               verificationStatus !== "success"
@@ -276,16 +284,19 @@ const OTPInput: React.FC<OTPInputProps> = ({
         ))}
       </View>
 
-      <TouchableOpacity
-        style={styles.pasteButton}
-        onPress={handlePaste}
-        disabled={
-          verificationStatus === "verifying" || verificationStatus === "success"
-        }
-        activeOpacity={0.7}
-      >
-        <Text style={styles.pasteText}>Paste code</Text>
-      </TouchableOpacity>
+      {showPaste ? (
+        <TouchableOpacity
+          style={styles.pasteButton}
+          onPress={handlePaste}
+          disabled={
+            verificationStatus === "verifying" ||
+            verificationStatus === "success"
+          }
+          activeOpacity={0.7}
+        >
+          <Text style={styles.pasteText}>Paste code</Text>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 };

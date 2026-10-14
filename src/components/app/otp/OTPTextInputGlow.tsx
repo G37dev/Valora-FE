@@ -29,6 +29,7 @@ const ERROR_BORDER_COLOR = "#FF4D4F";
 
 const GlowBorder = ({
   size = SIZE,
+  boxSize = SIZE,
   strokeWidth = BORDER_WIDTH,
   sizeOffset = 0,
   x: xOffset = 0,
@@ -39,6 +40,7 @@ const GlowBorder = ({
   isError = false,
 }: {
   size?: number;
+  boxSize?: number;
   strokeWidth?: number;
   sizeOffset?: number;
   x?: number;
@@ -56,7 +58,7 @@ const GlowBorder = ({
 
       progress.value = withRepeat(
         withTiming(1, {
-          duration: 1200,
+          duration: 1400,
         }),
         -1,
         false,
@@ -102,7 +104,7 @@ const GlowBorder = ({
     const width = innerSize;
     const height = innerSize;
 
-    const radius = (BORDER_RADIUS * currentSize) / SIZE;
+    const radius = (BORDER_RADIUS * currentSize) / boxSize;
 
     path.moveTo(x + radius, y);
 
@@ -154,6 +156,7 @@ const GlowBorder = ({
   }, [
     progress,
     size,
+    boxSize,
     strokeWidth,
     sizeOffset,
     xOffset,
@@ -187,25 +190,27 @@ const OTPTextInputGlow = ({
   isFocused,
   startGlowAnimation = false,
   isError = false,
+  size = SIZE,
 }: {
   isFocused?: SharedValue<number>;
   startGlowAnimation?: boolean;
   isError?: boolean;
+  size?: number;
 }) => {
-  const baseSize = SIZE - 4;
-  const glowSize = SIZE - 6;
+  const baseSize = size - 4;
+  const glowSize = size - 6;
 
-  const baseOffset = (SIZE - baseSize) / 2;
+  const baseOffset = (size - baseSize) / 2;
 
-  const glowOffset = (SIZE - glowSize) / 2;
+  const glowOffset = (size - glowSize) / 2;
 
   return (
     <Canvas
       style={[
         StyleSheet.absoluteFill,
         {
-          height: SIZE + 8,
-          width: SIZE + 8,
+          height: size + 8,
+          width: size + 8,
           top: -4,
           left: -4,
         },
@@ -213,6 +218,7 @@ const OTPTextInputGlow = ({
     >
       <GlowBorder
         size={baseSize}
+        boxSize={size}
         strokeWidth={2}
         x={baseOffset + 4}
         y={baseOffset + 4}
@@ -225,6 +231,7 @@ const OTPTextInputGlow = ({
       {startGlowAnimation && !isError && (
         <GlowBorder
           size={glowSize}
+          boxSize={size}
           strokeWidth={2}
           x={glowOffset + 4}
           y={glowOffset + 4}
