@@ -1,5 +1,6 @@
 import OTPInput from "@/components/app/otp/OTPInput";
 import ValoraSheet from "@/components/ValoraSheet";
+import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
@@ -47,6 +48,7 @@ export default function ChangeMobileSheet({
   currentMasked,
   hasPhone,
 }: ChangeMobileSheetProps) {
+  const t = useT();
   const [step, setStep] = useState<Step>("old");
   const [oldCode, setOldCode] = useState("");
   const [newCode, setNewCode] = useState("");
@@ -107,14 +109,14 @@ export default function ChangeMobileSheet({
 
   const title =
     step === "old"
-      ? "Change Mobile Number"
+      ? t("mobile.old.title")
       : step === "new"
         ? hasPhone
-          ? "New Mobile Number"
-          : "Add Mobile Number"
+          ? t("mobile.new.title")
+          : t("mobile.add.title")
         : hasPhone
-          ? "Mobile Number Updated"
-          : "Mobile Number Added";
+          ? t("mobile.updated.title")
+          : t("mobile.added.title");
 
   return (
     <ValoraSheet
@@ -134,24 +136,22 @@ export default function ChangeMobileSheet({
       {step === "old" && (
         <>
           <View style={styles.stepRow}>
-            <Text style={styles.stepText}>Step 1 of 2</Text>
+            <Text style={styles.stepText}>{t("mobile.step1of2")}</Text>
             <View style={styles.stepDot} />
-            <Text style={styles.stepText}>Verify your current number</Text>
+            <Text style={styles.stepText}>{t("mobile.verifyCurrent")}</Text>
           </View>
 
           <View style={styles.numberCard}>
             <View style={styles.numberLeft}>
               <Ionicons name="call-outline" size={18} color={GOLD} />
-              <Text style={styles.numberLabel}>Old Mobile Number</Text>
+              <Text style={styles.numberLabel}>{t("mobile.oldLabel")}</Text>
             </View>
             <Text style={styles.numberValue}>{currentMasked}</Text>
           </View>
 
-          <Text style={styles.hint}>
-            We sent a 6-digit code to your current number
-          </Text>
+          <Text style={styles.hint}>{t("mobile.hint")}</Text>
 
-          <Text style={styles.otpLabel}>Verification Code</Text>
+          <Text style={styles.otpLabel}>{t("mobile.codeLabel")}</Text>
           <OTPInput
             key={`old-${otpKey}`}
             boxSize={boxSize}
@@ -168,7 +168,7 @@ export default function ChangeMobileSheet({
               disabled={verifStatus !== "idle"}
               activeOpacity={0.8}
             >
-              <Text style={styles.ghostText}>Resend Code</Text>
+              <Text style={styles.ghostText}>{t("common.resendCode")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.goldBtnWrap}
@@ -185,7 +185,7 @@ export default function ChangeMobileSheet({
                   oldCode.length !== 6 && styles.goldBtnDisabled,
                 ]}
               >
-                <Text style={styles.goldText}>Continue</Text>
+                <Text style={styles.goldText}>{t("common.continue")}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -196,12 +196,10 @@ export default function ChangeMobileSheet({
         <>
           <View style={styles.stepRow}>
             <Text style={styles.stepText}>
-              {hasPhone ? "Step 2 of 2" : "Step 1 of 1"}
+              {hasPhone ? t("mobile.step2of2") : t("mobile.step1of1")}
             </Text>
             <View style={styles.stepDot} />
-            <Text style={styles.stepText}>
-              Enter and verify your new number
-            </Text>
+            <Text style={styles.stepText}>{t("mobile.enterNew")}</Text>
           </View>
 
           <View style={styles.phoneRow}>
@@ -226,7 +224,7 @@ export default function ChangeMobileSheet({
             />
           </View>
 
-          <Text style={styles.otpLabel}>Verification Code</Text>
+          <Text style={styles.otpLabel}>{t("mobile.codeLabel")}</Text>
           <OTPInput
             key={`new-${otpKey}`}
             boxSize={boxSize}
@@ -243,7 +241,7 @@ export default function ChangeMobileSheet({
               disabled={verifStatus !== "idle"}
               activeOpacity={0.8}
             >
-              <Text style={styles.ghostText}>Resend Code</Text>
+              <Text style={styles.ghostText}>{t("common.resendCode")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.goldBtnWrap}
@@ -265,7 +263,7 @@ export default function ChangeMobileSheet({
                     styles.goldBtnDisabled,
                 ]}
               >
-                <Text style={styles.goldText}>Verify &amp; Update</Text>
+                <Text style={styles.goldText}>{t("mobile.verifyUpdate")}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -282,26 +280,26 @@ export default function ChangeMobileSheet({
             />
           </View>
           <Text style={styles.doneTitle}>
-            {hasPhone ? "Mobile Number Updated" : "Mobile Number Added"}
+            {hasPhone ? t("mobile.updated.title") : t("mobile.added.title")}
           </Text>
           <Text style={styles.doneSub}>
-            {hasPhone
-              ? "Your mobile number has been updated succesfully"
-              : "Your mobile number has been added succesfully"}
+            {hasPhone ? t("mobile.updated.sub") : t("mobile.added.sub")}
           </Text>
 
           <View style={styles.doneCard}>
             {hasPhone && (
               <>
                 <View style={styles.doneCardRow}>
-                  <Text style={styles.doneCardLabel}>Old Mobile Number</Text>
+                  <Text style={styles.doneCardLabel}>
+                    {t("mobile.oldLabel")}
+                  </Text>
                   <Text style={styles.doneCardValue}>{currentMasked}</Text>
                 </View>
                 <View style={styles.doneCardDivider} />
               </>
             )}
             <View style={styles.doneCardRow}>
-              <Text style={styles.doneCardLabel}>New Number</Text>
+              <Text style={styles.doneCardLabel}>{t("mobile.newLabel")}</Text>
               <Text style={styles.doneCardValue}>
                 {callingCode} {phone}
               </Text>
@@ -319,7 +317,7 @@ export default function ChangeMobileSheet({
               end={{ x: 0, y: 1 }}
               style={styles.goldBtn}
             >
-              <Text style={styles.goldText}>Done</Text>
+              <Text style={styles.goldText}>{t("common.done")}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

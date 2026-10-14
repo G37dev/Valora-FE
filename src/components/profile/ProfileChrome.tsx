@@ -11,7 +11,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import type { StringKey } from "../../i18n/strings";
 import type { UserProfile } from "../../services/userService";
+import { useT } from "../../stores/languageStore";
 import ValoraSheet from "../ValoraSheet";
 
 export const GOLD = "#DEC236";
@@ -179,17 +181,18 @@ export function securityLevel(opts: {
 
 export function ProfileHead({
   user,
-  secLabel,
   secLevel,
   tier = 1,
 }: {
   user: UserProfile | null;
-  secLabel: string;
   secLevel: SecLevel;
   tier?: number;
 }) {
+  const t = useT();
   const name =
-    [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
+    t("common.user");
+  const secLabel = t(`sec.${secLevel}` as StringKey);
   const barColor =
     secLevel === "high" ? GREEN : secLevel === "medium" ? GOLD : "#FF5252";
   const bars = secLevel === "high" ? 3 : secLevel === "medium" ? 2 : 1;
@@ -206,7 +209,7 @@ export function ProfileHead({
         <Text style={styles.headName} numberOfLines={1}>
           {name}
         </Text>
-        <Text style={styles.headSub}>Security Level</Text>
+        <Text style={styles.headSub}>{t("head.securityLevel")}</Text>
         <View style={styles.secRow}>
           <Text style={[styles.secLabel, { color: barColor }]}>{secLabel}</Text>
           {[0, 1, 2].map((i) => (
@@ -226,17 +229,16 @@ export function ProfileHead({
 }
 
 const TABS = [
-  { key: "my-info", label: "My Info" },
-  { key: "security", label: "Security" },
-  { key: "preference", label: "Preference" },
-  { key: "others", label: "Others" },
+  { key: "my-info", label: "tab.myInfo" },
+  { key: "security", label: "tab.security" },
+  { key: "preference", label: "tab.preference" },
+  { key: "others", label: "tab.others" },
 ] as const;
 
 export function SubPageShell({
   title,
   activeTab,
   user,
-  secLabel,
   secLevel,
   tier,
   onThemePress,
@@ -245,7 +247,6 @@ export function SubPageShell({
   title: string;
   activeTab: string;
   user: UserProfile | null;
-  secLabel: string;
   secLevel: SecLevel;
   tier?: number;
   onThemePress?: () => void;
@@ -263,12 +264,7 @@ export function SubPageShell({
           <Ionicons name="moon-outline" size={22} color="#FFF" />
         </TouchableOpacity>
       </View>
-      <ProfileHead
-        user={user}
-        secLabel={secLabel}
-        secLevel={secLevel}
-        tier={tier}
-      />
+      <ProfileHead user={user} secLevel={secLevel} tier={tier} />
       <ProfileTabs active={activeTab} />
       {children}
     </View>
@@ -277,22 +273,27 @@ export function SubPageShell({
 
 export function ProfileTabs({ active }: { active: string }) {
   const router = useRouter();
+  const t = useT();
   return (
     <View style={styles.tabsRow}>
-      {TABS.map((t) => (
+      {TABS.map((tab) => (
         <TouchableOpacity
-          key={t.key}
+          key={tab.key}
           style={styles.tabItem}
           onPress={() => {
-            if (t.key !== active) router.replace(`/profile/${t.key}` as never);
+            if (tab.key !== active)
+              router.replace(`/profile/${tab.key}` as never);
           }}
         >
           <Text
-            style={[styles.tabLabel, t.key === active && styles.tabLabelActive]}
+            style={[
+              styles.tabLabel,
+              tab.key === active && styles.tabLabelActive,
+            ]}
           >
-            {t.label}
+            {t(tab.label as StringKey)}
           </Text>
-          {t.key === active && <View style={styles.tabUnderline} />}
+          {tab.key === active && <View style={styles.tabUnderline} />}
         </TouchableOpacity>
       ))}
     </View>
@@ -423,10 +424,12 @@ export function AvatarPicker({
   onSave: (avatarUrl: string) => void | Promise<void>;
   onClose: () => void;
 }) {
+  const t = useT();
   const [avatarSel, setAvatarSel] = useState<string>("a1");
   const [customUri, setCustomUri] = useState<string | null>(null);
   const [borderSel, setBorderSel] = useState<number>(tier);
   const [saving, setSaving] = useState(false);
+  const uploadedLabel = t("avatar.uploaded");
 
   useEffect(() => {
     if (!visible) return;
@@ -478,7 +481,7 @@ export function AvatarPicker({
   if (customUri) {
     gridItems.push({
       key: "custom",
-      label: "Uploaded",
+      label: uploadedLabel,
       source: { uri: customUri },
     });
   }
@@ -505,18 +508,14 @@ export function AvatarPicker({
           size={108}
         />
       </View>
-      <Text style={styles.setupTitle}>Set Up Profile</Text>
-      <Text style={styles.setupSub}>
-        Personalize your profile{"\n"}with an avatar and membership border.
-      </Text>
+      <Text style={styles.setupTitle}>{t("avatar.title")}</Text>
+      <Text style={styles.setupSub}>{t("avatar.sub")}</Text>
 
       <View style={styles.setupCard}>
         <View style={styles.setupCardHead}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.setupCardTitle}>Avatar</Text>
-            <Text style={styles.setupCardSub}>
-              Choose an avatar that represents you
-            </Text>
+            <Text style={styles.setupCardTitle}>{t("avatar.section")}</Text>
+            <Text style={styles.setupCardSub}>{t("avatar.section.sub")}</Text>
           </View>
           <TouchableOpacity
             style={styles.uploadBtn}
@@ -524,7 +523,7 @@ export function AvatarPicker({
             activeOpacity={0.8}
           >
             <Ionicons name="cloud-upload-outline" size={14} color={GOLD} />
-            <Text style={styles.uploadText}>Upload</Text>
+            <Text style={styles.uploadText}>{t("avatar.upload")}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.setupDivider} />
@@ -565,10 +564,10 @@ export function AvatarPicker({
       <View style={styles.setupCard}>
         <View style={styles.setupCardHead}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.setupCardTitle}>Border Badge</Text>
-            <Text style={styles.setupCardSub}>
-              Choose a border to personalize your profile
+            <Text style={styles.setupCardTitle}>
+              {t("avatar.border.title")}
             </Text>
+            <Text style={styles.setupCardSub}>{t("avatar.border.sub")}</Text>
           </View>
         </View>
         <View style={styles.setupDivider} />
@@ -622,7 +621,7 @@ export function AvatarPicker({
           {saving ? (
             <ActivityIndicator color="#141414" size="small" />
           ) : (
-            <Text style={styles.saveBtnText}>Save Changes</Text>
+            <Text style={styles.saveBtnText}>{t("common.saveChanges")}</Text>
           )}
         </LinearGradient>
       </TouchableOpacity>

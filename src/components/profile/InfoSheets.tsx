@@ -1,4 +1,5 @@
 import ValoraSheet from "@/components/ValoraSheet";
+import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,13 +15,7 @@ import {
 
 const GOLD = "#F5D13E";
 
-function SheetHead({
-  title,
-  onClose,
-}: {
-  title: string;
-  onClose: () => void;
-}) {
+function SheetHead({ title, onClose }: { title: string; onClose: () => void }) {
   return (
     <>
       <View style={styles.headRow}>
@@ -45,6 +40,7 @@ export function NicknameSheet({
   onClose: () => void;
   onSave: (name: string) => void | Promise<void>;
 }) {
+  const t = useT();
   const [name, setName] = useState(initial);
   const [saving, setSaving] = useState(false);
 
@@ -67,14 +63,14 @@ export function NicknameSheet({
 
   return (
     <ValoraSheet visible={visible} onClose={onClose} snapPoints={["36%"]}>
-      <SheetHead title="Nickname" onClose={onClose} />
+      <SheetHead title={t("sheet.nickname.title")} onClose={onClose} />
 
       <View style={styles.fieldCard}>
         <TextInput
           style={styles.fieldInput}
           value={name}
           onChangeText={setName}
-          placeholder="Enter your nickname"
+          placeholder={t("sheet.nickname.placeholder")}
           placeholderTextColor="#5A5A5A"
           autoCapitalize="words"
           maxLength={50}
@@ -92,15 +88,12 @@ export function NicknameSheet({
           colors={["#FBE678", "#F0C94A"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
-          style={[
-            styles.saveBtnInner,
-            !name.trim() && { opacity: 0.4 },
-          ]}
+          style={[styles.saveBtnInner, !name.trim() && { opacity: 0.4 }]}
         >
           {saving ? (
             <ActivityIndicator color="#141414" size="small" />
           ) : (
-            <Text style={styles.saveBtnText}>Save Changes</Text>
+            <Text style={styles.saveBtnText}>{t("common.saveChanges")}</Text>
           )}
         </LinearGradient>
       </TouchableOpacity>
@@ -117,6 +110,7 @@ export function VivaloraIdSheet({
   vid: string;
   onClose: () => void;
 }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -132,7 +126,7 @@ export function VivaloraIdSheet({
 
   return (
     <ValoraSheet visible={visible} onClose={onClose} snapPoints={["28%"]}>
-      <SheetHead title="Vivalora ID" onClose={onClose} />
+      <SheetHead title={t("sheet.vid.title")} onClose={onClose} />
 
       <TouchableOpacity
         style={styles.fieldCard}

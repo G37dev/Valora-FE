@@ -19,6 +19,7 @@ import {
 } from "@/components/profile/ProfileChrome";
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import { updateUserProfileApi } from "@/services/userService";
+import { useT } from "@/stores/languageStore";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -35,6 +36,7 @@ export default function MyInfoScreen() {
   const [nicknameSheet, setNicknameSheet] = useState(false);
   const [vidSheet, setVidSheet] = useState(false);
   const { user, kycStatus } = data;
+  const t = useT();
   const tier = securityTier({
     kycVerified: kycStatus === "VERIFIED",
     twoFA: data.twoFAEnabled,
@@ -53,10 +55,9 @@ export default function MyInfoScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <SubPageShell
-        title="My Info"
+        title={t("tab.myInfo")}
         activeTab="my-info"
         user={user}
-        secLabel={sec.label}
         secLevel={sec.level}
         tier={tier}
         onThemePress={() => setComingSoon(true)}
@@ -64,11 +65,11 @@ export default function MyInfoScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <SectionCard
             icon={require("../../../assets/images/profile/vivaloraIdentity.png")}
-            title="Vivalora Identity"
-            subtitle="Manage your profile and membership"
+            title={t("myinfo.identity.title")}
+            subtitle={t("myinfo.identity.sub")}
           >
             <SettingRow
-              label="Profile Picture"
+              label={t("row.profilePicture")}
               right={
                 <Image
                   source={avatarSource(user?.avatarUrl, user?.coreId)}
@@ -78,17 +79,17 @@ export default function MyInfoScreen() {
               onPress={() => setAvatarPicker(true)}
             />
             <SettingRow
-              label="Display Name"
+              label={t("row.displayName")}
               right={<Text style={styles.rowValue}>{name}</Text>}
               onPress={() => setNicknameSheet(true)}
             />
             <SettingRow
-              label="Vivalora ID (VID)"
+              label={t("row.vid")}
               right={<Text style={styles.rowValue}>{user?.coreId || "-"}</Text>}
               onPress={() => setVidSheet(true)}
             />
             <SettingRow
-              label="Membership Level"
+              label={t("row.membershipLevel")}
               right={
                 <View style={styles.memberValueRow}>
                   <MaterialCommunityIcons
@@ -108,27 +109,29 @@ export default function MyInfoScreen() {
 
           <SectionCard
             icon={require("../../../assets/images/profile/myIdentity.png")}
-            title="My Identity"
-            subtitle="Your identity and verification status"
+            title={t("myinfo.identity2.title")}
+            subtitle={t("myinfo.identity2.sub")}
           >
             <SettingRow
-              label="Identity Verification"
+              label={t("row.identityVerification")}
               right={
                 <Text style={styles.rowValue}>
-                  {kycStatus === "VERIFIED" ? "Lv.1 Verified" : "Not Verified"}
+                  {kycStatus === "VERIFIED"
+                    ? t("value.lv1Verified")
+                    : t("value.notVerified")}
                 </Text>
               }
               onPress={() => router.push("/kyc-screen")}
             />
             <SettingRow
-              label="KYC Status"
+              label={t("row.kycStatus")}
               right={
                 <Text style={[styles.rowValue, { color: kycColor }]}>
                   {kycStatus === "VERIFIED"
-                    ? "Verified"
+                    ? t("profile.badge.verified")
                     : kycStatus === "PENDING"
-                      ? "Pending"
-                      : "Unverified"}
+                      ? t("profile.badge.pending")
+                      : t("profile.badge.unverified")}
                 </Text>
               }
               onPress={() => router.push("/kyc-screen")}
@@ -138,18 +141,18 @@ export default function MyInfoScreen() {
 
           <SectionCard
             icon={require("../../../assets/images/profile/connection.png")}
-            title="Connection"
-            subtitle="View your linked accounts"
+            title={t("myinfo.connection.title")}
+            subtitle={t("myinfo.connection.sub")}
           >
             <SettingRow
-              label="Linked Email"
+              label={t("row.linkedEmail")}
               right={
                 <Text style={styles.rowValue}>{maskEmail(user?.email)}</Text>
               }
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
-              label="Linked Mobile"
+              label={t("row.linkedMobile")}
               right={
                 <Text style={styles.rowValue}>
                   {maskPhone(user?.phoneNumber)}
@@ -158,7 +161,7 @@ export default function MyInfoScreen() {
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
-              label="Linked Accounts"
+              label={t("row.linkedAccounts")}
               right={
                 <View style={styles.linkedIcons}>
                   <Ionicons name="logo-google" size={18} color="#FFF" />

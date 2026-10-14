@@ -25,6 +25,8 @@ import Svg, {
   Rect,
   Stop,
 } from "react-native-svg";
+import type { StringKey } from "../../i18n/strings";
+import { useT } from "../../stores/languageStore";
 import { useNavOverlay, useSheetBottomPad } from "../ValoraSheet";
 import { LEVEL_BADGES } from "./ProfileChrome";
 
@@ -33,29 +35,29 @@ const GLOW = require("../../../assets/images/profile/bgMembershiplvl.png");
 interface LevelDef {
   name: string;
   stripes: number;
-  desc: string;
+  descKey: StringKey;
 }
 
 export const MEMBER_LEVELS: LevelDef[] = [
   {
     name: "Cadet",
     stripes: 1,
-    desc: "Start your journey with basic benefits and community access",
+    descKey: "member.lv1.desc",
   },
   {
     name: "Junior Level",
     stripes: 2,
-    desc: "Early access to selected features and growing rewards.",
+    descKey: "member.lv2.desc",
   },
   {
     name: "Senior Level",
     stripes: 3,
-    desc: "Enjoy enhanced benefits and wider access to Vivalora features.",
+    descKey: "member.lv3.desc",
   },
   {
     name: "Commander",
     stripes: 4,
-    desc: "Highest level with exclusive privileges and special rewards",
+    descKey: "member.lv4.desc",
   },
 ];
 
@@ -198,10 +200,11 @@ function OverviewView({
   onDetails: () => void;
 }) {
   const level = MEMBER_LEVELS[tier - 1] || MEMBER_LEVELS[0];
+  const t = useT();
   return (
     <View>
       <View style={styles.headRow}>
-        <Text style={styles.title}>Membership Levels</Text>
+        <Text style={styles.title}>{t("member.title")}</Text>
         <CloseBtn onPress={onClose} />
       </View>
       <View style={styles.divider} />
@@ -217,8 +220,7 @@ function OverviewView({
 
       <Text style={styles.levelName}>{level.name}</Text>
       <Text style={styles.levelSub}>
-        You are currently at {level.name}. Keep engaging with Vivalora to reach
-        the next level.
+        {t("member.levelSub", { name: level.name })}
       </Text>
 
       <View style={styles.trackCard}>
@@ -285,7 +287,7 @@ function OverviewView({
       >
         <View style={styles.detailsBtnLeft}>
           <Ionicons name="bar-chart" size={16} color="#FFF" />
-          <Text style={styles.detailsBtnText}>View Leveling Details</Text>
+          <Text style={styles.detailsBtnText}>{t("member.viewDetails")}</Text>
         </View>
         <Ionicons
           name="chevron-forward"
@@ -308,6 +310,7 @@ function DetailsView({
   onClose: () => void;
 }) {
   const items = [...MEMBER_LEVELS].reverse();
+  const t = useT();
   return (
     <View>
       <View style={styles.headRowDetail}>
@@ -318,11 +321,8 @@ function DetailsView({
       </View>
       <View style={styles.divider} />
 
-      <Text style={styles.titleCenter}>Membership Levels</Text>
-      <Text style={styles.detailSub}>
-        Complete activities and achieve higher levels{"\n"}to unlock more
-        benefits.
-      </Text>
+      <Text style={styles.titleCenter}>{t("member.title")}</Text>
+      <Text style={styles.detailSub}>{t("member.subtitle")}</Text>
 
       <View style={styles.detailCard}>
         {items.map((l, i) => {
@@ -391,12 +391,16 @@ function DetailsView({
                   <Text style={styles.detailName}>{l.name}</Text>
                   {active && (
                     <View style={styles.currentPill}>
-                      <Text style={styles.currentPillText}>Current Level</Text>
+                      <Text style={styles.currentPillText}>
+                        {t("member.currentLevel")}
+                      </Text>
                     </View>
                   )}
                 </View>
-                <Text style={styles.detailStripes}>{l.stripes} Stripes</Text>
-                <Text style={styles.detailDesc}>{l.desc}</Text>
+                <Text style={styles.detailStripes}>
+                  {l.stripes} {t("member.stripes")}
+                </Text>
+                <Text style={styles.detailDesc}>{t(l.descKey)}</Text>
               </View>
             </View>
           );

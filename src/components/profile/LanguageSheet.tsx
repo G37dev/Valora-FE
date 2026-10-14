@@ -1,17 +1,19 @@
 import ValoraSheet from "@/components/ValoraSheet";
+import type { StringKey } from "@/i18n/strings";
 import {
   AppLanguage,
   LANGUAGE_LABELS,
   useLanguageStore,
+  useT,
 } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const GOLD = "#F5D13E";
 
-const LANGUAGES: { code: AppLanguage; flag: string; desc: string }[] = [
-  { code: "en", flag: "🇬🇧", desc: "Default app language" },
-  { code: "id", flag: "🇮🇩", desc: "Bahasa untuk aplikasi" },
+const LANGUAGES: { code: AppLanguage; flag: string; descKey: StringKey }[] = [
+  { code: "en", flag: "🇬🇧", descKey: "sheet.language.enDesc" },
+  { code: "id", flag: "🇮🇩", descKey: "sheet.language.idDesc" },
 ];
 
 export default function LanguageSheet({
@@ -22,11 +24,12 @@ export default function LanguageSheet({
   onClose: () => void;
 }) {
   const { language, setLanguage } = useLanguageStore();
+  const t = useT();
 
   return (
     <ValoraSheet visible={visible} onClose={onClose} snapPoints={["36%"]}>
       <View style={styles.headRow}>
-        <Text style={styles.title}>Language</Text>
+        <Text style={styles.title}>{t("sheet.language.title")}</Text>
         <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
           <Ionicons name="close" size={16} color="#8A8A8A" />
         </TouchableOpacity>
@@ -47,10 +50,8 @@ export default function LanguageSheet({
           >
             <Text style={styles.flag}>{item.flag}</Text>
             <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>
-                {LANGUAGE_LABELS[item.code]}
-              </Text>
-              <Text style={styles.cardSub}>{item.desc}</Text>
+              <Text style={styles.cardTitle}>{LANGUAGE_LABELS[item.code]}</Text>
+              <Text style={styles.cardSub}>{t(item.descKey)}</Text>
             </View>
             <View style={[styles.radio, active && styles.radioActive]}>
               {active && <View style={styles.radioDot} />}

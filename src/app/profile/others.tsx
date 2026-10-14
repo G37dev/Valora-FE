@@ -10,7 +10,11 @@ import {
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import { clearAuthToken } from "@/services/authStorage";
 import { supabase } from "@/services/supabase";
-import { LANGUAGE_LABELS, useLanguageStore } from "@/stores/languageStore";
+import {
+  LANGUAGE_LABELS,
+  useLanguageStore,
+  useT,
+} from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
@@ -34,6 +38,7 @@ export default function OthersScreen() {
   const [comingSoon, setComingSoon] = useState(false);
   const [langSheet, setLangSheet] = useState(false);
   const language = useLanguageStore((s) => s.language);
+  const t = useT();
 
   const appVersion = Constants.expoConfig?.version || "-";
   const platformLabel =
@@ -45,12 +50,12 @@ export default function OthersScreen() {
 
   const handleSignOut = () => {
     showAlert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
+      t("btn.signOut"),
+      t("alert.signOut.msg"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Sign Out",
+          text: t("btn.signOut"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -71,10 +76,9 @@ export default function OthersScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <SubPageShell
-        title="Others"
+        title={t("tab.others")}
         activeTab="others"
         user={data.user}
-        secLabel={sec.label}
         secLevel={sec.level}
         tier={securityTier({
           kycVerified: data.kycStatus === "VERIFIED",
@@ -86,13 +90,13 @@ export default function OthersScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <SectionCard
             icon={require("../../../assets/images/profile/myIdentity.png")}
-            title="General"
-            subtitle="Manage your app and support preferences."
+            title={t("others.general.title")}
+            subtitle={t("others.general.sub")}
           >
             <SettingRow
               icon="language-outline"
-              label="Language"
-              desc="Set your app language"
+              label={t("row.language")}
+              desc={t("row.language.desc")}
               right={
                 <Text style={styles.rowValue}>{LANGUAGE_LABELS[language]}</Text>
               }
@@ -100,45 +104,45 @@ export default function OthersScreen() {
             />
             <SettingRow
               icon="cash-outline"
-              label="Currency Display"
-              desc="Choose your preferred currency"
+              label={t("row.currency")}
+              desc={t("row.currency.desc")}
               right={<Text style={styles.rowValue}>IDR</Text>}
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
               icon="phone-portrait-outline"
-              label="Always on (no screen lock)"
-              desc="Keep VIVALORA active while using"
-              right={<Text style={styles.rowValue}>Off</Text>}
+              label={t("row.alwaysOn")}
+              desc={t("row.alwaysOn.desc")}
+              right={<Text style={styles.rowValue}>{t("common.off")}</Text>}
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
               icon="help-circle-outline"
-              label="Help Center"
-              desc="Get help and find answers"
+              label={t("row.helpCenter")}
+              desc={t("row.helpCenter.desc")}
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
               icon="chatbubble-ellipses-outline"
-              label="Contact Support"
-              desc="Chat with our support team"
+              label={t("row.contactSupport")}
+              desc={t("row.contactSupport.desc")}
               onPress={() => setComingSoon(true)}
               last
             />
           </SectionCard>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Apps Information</Text>
+            <Text style={styles.infoTitle}>{t("others.info.title")}</Text>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Version</Text>
+              <Text style={styles.infoLabel}>{t("info.version")}</Text>
               <Text style={styles.infoValue}>{appVersion}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Platform</Text>
+              <Text style={styles.infoLabel}>{t("info.platform")}</Text>
               <Text style={styles.infoValue}>{platformLabel}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Device</Text>
+              <Text style={styles.infoLabel}>{t("info.device")}</Text>
               <Text style={styles.infoValue}>{Device.modelName || "-"}</Text>
             </View>
           </View>
@@ -149,7 +153,7 @@ export default function OthersScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="log-out-outline" size={18} color="#FFF" />
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Text style={styles.signOutText}>{t("btn.signOut")}</Text>
           </TouchableOpacity>
 
           <View style={{ height: 24 }} />

@@ -33,6 +33,7 @@ import {
   registerPasskey,
 } from "@/services/passkeyService";
 import { supabase } from "@/services/supabase";
+import { useT } from "@/stores/languageStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -49,13 +50,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function TogglePill({ on }: { on: boolean }) {
+  const t = useT();
   return (
     <View style={[styles.pill, on ? styles.pillOn : styles.pillOff]}>
       {on && <View style={styles.pillKnobLight} />}
       <Text
         style={[styles.pillText, on ? styles.pillTextOn : styles.pillTextOff]}
       >
-        {on ? "Disable" : "Enable"}
+        {on ? t("common.disable") : t("common.enable")}
       </Text>
       {!on && <View style={styles.pillKnobDark} />}
     </View>
@@ -66,6 +68,7 @@ export default function SecurityScreen() {
   const router = useRouter();
   const data = useProfileData();
   const sec = useSecurityLevel(data);
+  const t = useT();
   const { user, twoFAEnabled, passkeys, reload } = data;
 
   const [comingSoon, setComingSoon] = useState(false);
@@ -90,7 +93,7 @@ export default function SecurityScreen() {
       setSetupLoading(true);
       const token = await getAuthToken();
       if (!token) {
-        showAlert("Session not found. Please log in again.");
+        showAlert(t("alert.sessionNotFound"));
         return;
       }
       const res = await setupAuthenticatorApi(token);
@@ -99,8 +102,8 @@ export default function SecurityScreen() {
       setShowAuthenticatorInput(true);
     } catch (error: any) {
       showAlert(
-        "Setup Failed",
-        error?.message || "Failed to setup authenticator.",
+        t("alert.setupFailed"),
+        error?.message || t("alert.setupTotp.msg"),
       );
     } finally {
       setSetupLoading(false);
@@ -109,14 +112,14 @@ export default function SecurityScreen() {
 
   const handleVerifyTotpCode = async (totpCode: string): Promise<boolean> => {
     if (!totpCode || totpCode.length !== 6) {
-      showAlert("Warning", "Enter the 6-digit OTP code correctly.");
+      showAlert(t("alert.warning"), t("alert.otpInvalid"));
       return false;
     }
     try {
       setSetupLoading(true);
       const token = await getAuthToken();
       if (!token) {
-        showAlert("Session not found. Please log in again.");
+        showAlert(t("alert.sessionNotFound"));
         return false;
       }
       const res = await verifyAuthenticatorApi(token, totpCode);
@@ -136,14 +139,14 @@ export default function SecurityScreen() {
 
   const handleDisableTotpCode = async (totpCode: string): Promise<boolean> => {
     if (!totpCode || totpCode.length !== 6) {
-      showAlert("Warning", "Enter the 6-digit OTP code correctly.");
+      showAlert(t("alert.warning"), t("alert.otpInvalid"));
       return false;
     }
     try {
       setDisableLoading(true);
       const token = await getAuthToken();
       if (!token) {
-        showAlert("Session not found. Please log in again.");
+        showAlert(t("alert.sessionNotFound"));
         return false;
       }
       const res = await disableAuthenticatorApi(token, totpCode);
@@ -164,8 +167,8 @@ export default function SecurityScreen() {
       await registerPasskey(token);
       await reload(true);
       showAlert(
-        "Passkey Registered",
-        "Passkey added to your account.",
+        t("alert.passkeyRegistered.title"),
+        t("alert.passkeyRegistered.msg"),
         [{ text: "OK" }],
         "success",
       );
@@ -173,8 +176,8 @@ export default function SecurityScreen() {
       if (error?.name === "UserCancelled" || error?.code === "USER_CANCELED")
         return;
       showAlert(
-        "Setup Failed",
-        error?.message || "Failed to register passkey. Try again.",
+        t("alert.setupFailed"),
+        error?.message || t("alert.passkeyRegisterFail.msg"),
       );
     } finally {
       setPasskeyLoading(false);
@@ -183,12 +186,12 @@ export default function SecurityScreen() {
 
   const handleDeletePasskey = (pk: PasskeyInfo) => {
     showAlert(
-      "Remove Passkey",
-      `Remove passkey "${pk.friendlyName}"?`,
+      t("alert.removePasskey.title"),
+      t("alert.removePasskey.msg", { name: pk.friendlyName }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Remove",
+          text: t("common.remove"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -198,8 +201,8 @@ export default function SecurityScreen() {
               await reload(true);
             } catch (error: any) {
               showAlert(
-                "Failed",
-                error?.message || "Failed to remove passkey.",
+                t("alert.failed"),
+                error?.message || t("alert.removePasskeyFail.msg"),
               );
             }
           },
@@ -211,12 +214,12 @@ export default function SecurityScreen() {
 
   const handleSignOut = () => {
     showAlert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
+      t("btn.signOut"),
+      t("alert.signOut.msg"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Sign Out",
+          text: t("btn.signOut"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -238,10 +241,9 @@ export default function SecurityScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <SubPageShell
-        title="Security"
+        title={t("tab.security")}
         activeTab="security"
         user={user}
-        secLabel={sec.label}
         secLevel={sec.level}
         tier={securityTier({
           kycVerified: data.kycStatus === "VERIFIED",
@@ -253,12 +255,12 @@ export default function SecurityScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <SectionCard
             icon={require("../../../assets/images/profile/basicProtect.png")}
-            title="Basic Protection"
-            subtitle="Essential protection for everyday account activity."
+            title={t("sec.basic.title")}
+            subtitle={t("sec.basic.sub")}
           >
             <SettingRow
               icon="mail-outline"
-              label="Email"
+              label={t("row.email")}
               right={
                 <Text style={styles.rowValue}>{maskEmail(user?.email)}</Text>
               }
@@ -266,17 +268,19 @@ export default function SecurityScreen() {
             />
             <SettingRow
               icon="call-outline"
-              label="Mobile"
+              label={t("row.mobile")}
               right={
                 <Text style={styles.rowValue}>
-                  {user?.phoneNumber ? maskPhone(user.phoneNumber) : "Not set"}
+                  {user?.phoneNumber
+                    ? maskPhone(user.phoneNumber)
+                    : t("common.notSet")}
                 </Text>
               }
               onPress={() => setMobileSheet(true)}
             />
             <SettingRow
               icon="shield-checkmark-outline"
-              label="Google 2FA Authentication"
+              label={t("row.2fa")}
               right={<TogglePill on={twoFAEnabled} />}
               onPress={() => {
                 if (twoFAEnabled) {
@@ -292,12 +296,16 @@ export default function SecurityScreen() {
               label="Passkey"
               badge={
                 <View style={styles.recBadge}>
-                  <Text style={styles.recBadgeText}>Recommended</Text>
+                  <Text style={styles.recBadgeText}>
+                    {t("badge.recommended")}
+                  </Text>
                 </View>
               }
               right={
                 <Text style={styles.rowValue}>
-                  {passkeys.length > 0 ? "Enabled" : "Not set"}
+                  {passkeys.length > 0
+                    ? t("common.enabled")
+                    : t("common.notSet")}
                 </Text>
               }
               onPress={() => setPasskeyOpen((v) => !v)}
@@ -311,7 +319,9 @@ export default function SecurityScreen() {
                     <Ionicons name="key" size={14} color={GOLD} />
                     <Text style={styles.passkeyName}>{pk.friendlyName}</Text>
                     <TouchableOpacity onPress={() => handleDeletePasskey(pk)}>
-                      <Text style={styles.passkeyDelete}>Remove</Text>
+                      <Text style={styles.passkeyDelete}>
+                        {t("common.remove")}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -324,7 +334,9 @@ export default function SecurityScreen() {
                     {passkeyLoading ? (
                       <ActivityIndicator color="#000" size="small" />
                     ) : (
-                      <Text style={styles.addPasskeyText}>+ Add Passkey</Text>
+                      <Text style={styles.addPasskeyText}>
+                        {t("btn.addPasskey")}
+                      </Text>
                     )}
                   </TouchableOpacity>
                 )}
@@ -334,27 +346,27 @@ export default function SecurityScreen() {
 
           <SectionCard
             icon={require("../../../assets/images/profile/aam.png")}
-            title="Account Access & Management"
-            subtitle="Manage your account and device security."
+            title={t("sec.aam.title")}
+            subtitle={t("sec.aam.sub")}
           >
             <SettingRow
               icon="ellipsis-horizontal"
-              label="Change Password"
+              label={t("row.changePassword")}
               onPress={() => setPasswordSheet(true)}
             />
             <SettingRow
               icon="phone-portrait-outline"
-              label="Trusted Devices"
+              label={t("row.trustedDevices")}
               onPress={() => setDevicesSheet(true)}
             />
             <SettingRow
               icon="people-outline"
-              label="Account Management"
+              label={t("row.accountManagement")}
               onPress={() => setAccountSheet(true)}
             />
             <SettingRow
               icon="scan-outline"
-              label="App Lock"
+              label={t("row.appLock")}
               right={<TogglePill on={false} />}
               onPress={() => setComingSoon(true)}
               last
@@ -367,7 +379,7 @@ export default function SecurityScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="log-out-outline" size={18} color="#FFF" />
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Text style={styles.signOutText}>{t("btn.signOut")}</Text>
           </TouchableOpacity>
 
           <View style={{ height: 24 }} />
@@ -414,8 +426,8 @@ export default function SecurityScreen() {
           setShowTwoFactorSetup(false);
           reload(true);
           showAlert(
-            "Authenticator Enabled",
-            "Two-factor authentication has been enabled for your account.",
+            t("alert.authEnabled.title"),
+            t("alert.authEnabled.msg"),
             [{ text: "OK" }],
             "success",
           );
@@ -431,8 +443,8 @@ export default function SecurityScreen() {
           setShowTwoFactorDisable(false);
           reload(true);
           showAlert(
-            "Authenticator Disabled",
-            "Two-factor authentication has been disabled. You can enable it again anytime.",
+            t("alert.authDisabled.title"),
+            t("alert.authDisabled.msg"),
             [{ text: "OK" }],
             "success",
           );

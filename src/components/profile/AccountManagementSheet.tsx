@@ -1,5 +1,6 @@
 import { showAlert } from "@/components/AppAlert";
 import ValoraSheet from "@/components/ValoraSheet";
+import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -13,13 +14,14 @@ export default function AccountManagementSheet({
   visible: boolean;
   onClose: () => void;
 }) {
+  const t = useT();
   const deactivate = () => {
     showAlert(
-      "Deactivate Account",
-      "Temporarily disable your account? You can reactivate it by signing back in.",
+      t("acct.deactivate"),
+      t("acct.deactivate.msg"),
       [
-        { text: "Cancel", style: "cancel" },
-        { text: "Deactivate", style: "destructive" },
+        { text: t("common.cancel"), style: "cancel" },
+        { text: t("acct.deactivate.btn"), style: "destructive" },
       ],
       "warning",
     );
@@ -27,11 +29,11 @@ export default function AccountManagementSheet({
 
   const deleteAccount = () => {
     showAlert(
-      "Delete Account",
-      "Permanently remove your account and data? This action cannot be undone.",
+      t("acct.delete"),
+      t("acct.delete.msg"),
       [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive" },
+        { text: t("common.cancel"), style: "cancel" },
+        { text: t("acct.delete.btn"), style: "destructive" },
       ],
       "warning",
     );
@@ -40,7 +42,7 @@ export default function AccountManagementSheet({
   return (
     <ValoraSheet visible={visible} onClose={onClose} snapPoints={["42%"]}>
       <View style={styles.headRow}>
-        <Text style={styles.title}>Account Management</Text>
+        <Text style={styles.title}>{t("acct.title")}</Text>
         <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
           <Ionicons name="close" size={16} color="#8A8A8A" />
         </TouchableOpacity>
@@ -55,10 +57,8 @@ export default function AccountManagementSheet({
         <View style={styles.cardLeft}>
           <Ionicons name="pause-circle-outline" size={26} color={GOLD} />
           <View style={styles.cardText}>
-            <Text style={styles.cardTitle}>Deactivate Account</Text>
-            <Text style={styles.cardSub}>
-              Temporarily disable your account
-            </Text>
+            <Text style={styles.cardTitle}>{t("acct.deactivate")}</Text>
+            <Text style={styles.cardSub}>{t("acct.deactivate.sub")}</Text>
           </View>
         </View>
         <Ionicons name="arrow-forward" size={18} color="#E8E8E8" />
@@ -73,11 +73,9 @@ export default function AccountManagementSheet({
           <Ionicons name="trash-outline" size={24} color={RED} />
           <View style={styles.cardText}>
             <Text style={[styles.cardTitle, { color: RED }]}>
-              Delete Account
+              {t("acct.delete")}
             </Text>
-            <Text style={styles.cardSub}>
-              Permanently remove your account and data
-            </Text>
+            <Text style={styles.cardSub}>{t("acct.delete.sub")}</Text>
           </View>
         </View>
         <Ionicons name="arrow-forward" size={18} color="#E8E8E8" />

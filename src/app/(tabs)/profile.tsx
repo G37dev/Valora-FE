@@ -11,6 +11,7 @@ import {
   securityTier,
 } from "@/components/profile/ProfileChrome";
 import { useProfileData } from "@/hooks/useProfileData";
+import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { LinearGradient } from "expo-linear-gradient";
@@ -29,20 +30,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const QUICK = [
   {
     icon: require("../../../assets/images/profile/rewardsHub.png"),
-    title: "Rewards Hub",
-    desc: "Explore rewards",
+    title: "quick.rewards.title",
+    desc: "quick.rewards.desc",
   },
   {
     icon: require("../../../assets/images/profile/inviteFriends.png"),
-    title: "Invite Friends",
-    desc: "Earn together",
+    title: "quick.invite.title",
+    desc: "quick.invite.desc",
   },
   {
     icon: require("../../../assets/images/profile/helpCenter.png"),
-    title: "Help Center",
-    desc: "Get support",
+    title: "quick.help.title",
+    desc: "quick.help.desc",
   },
-];
+] as const;
 
 const LEVEL_CARDS: Record<number, number> = {
   1: require("../../../assets/images/profile/cardProfile1.png"),
@@ -61,25 +62,25 @@ const CARD_ASPECT: Record<number, number> = Object.fromEntries(
 const RECENT = [
   {
     icon: require("../../../assets/images/icon/vaulting.png"),
-    label: "Earn",
+    label: "recent.earn",
     route: "/screen/earning-screen",
   },
   {
     icon: require("../../../assets/images/icon/goldInstallment.png"),
-    label: "Installment",
+    label: "recent.installment",
     route: "/installment/installment-screen",
   },
   {
     icon: require("../../../assets/images/icon/portofolio.png"),
-    label: "Swap",
+    label: "recent.swap",
     route: "/swap/swap-screen",
   },
   {
     icon: require("../../../assets/images/icon/deposit.png"),
-    label: "Deposit",
+    label: "recent.deposit",
     route: "/deposit/IdrTopUp",
   },
-];
+] as const;
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -88,8 +89,10 @@ export default function ProfileScreen() {
   const [memberSheet, setMemberSheet] = useState(false);
   const [cardSize, setCardSize] = useState({ w: 0, h: 0 });
 
+  const t = useT();
   const name =
-    [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
+    t("common.user");
   const sec = securityLevel({
     kycVerified: kycStatus === "VERIFIED",
     twoFA: twoFAEnabled,
@@ -119,7 +122,7 @@ export default function ProfileScreen() {
         >
           <Ionicons name="moon-outline" size={21} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.topTitle}>Profile</Text>
+        <Text style={styles.topTitle}>{t("tab.profile")}</Text>
         <View style={styles.topIcons}>
           <TouchableOpacity
             onPress={() => router.push("/profile/my-info")}
@@ -164,7 +167,9 @@ export default function ProfileScreen() {
               {verified ? (
                 <View style={[styles.badge, styles.badgeVerified]}>
                   <Ionicons name="shield-checkmark" size={12} color="#4ADE80" />
-                  <Text style={styles.badgeVerifiedText}>Verified</Text>
+                  <Text style={styles.badgeVerifiedText}>
+                    {t("profile.badge.verified")}
+                  </Text>
                 </View>
               ) : (
                 <TouchableOpacity
@@ -173,7 +178,9 @@ export default function ProfileScreen() {
                 >
                   <Ionicons name="alert-circle" size={12} color={GOLD} />
                   <Text style={styles.badgeDimText}>
-                    {kycStatus === "PENDING" ? "Pending" : "Unverified"}
+                    {kycStatus === "PENDING"
+                      ? t("profile.badge.pending")
+                      : t("profile.badge.unverified")}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -208,11 +215,9 @@ export default function ProfileScreen() {
               style={[styles.journeyCardBg, cardImgDims]}
               resizeMode="cover"
             />
-            <Text style={styles.journeyEyebrow}>YOUR JOURNEY</Text>
-            <Text style={styles.journeyTitle}>Grow with VIVALORA</Text>
-            <Text style={styles.journeySub}>
-              Growth, save and explore{"\n"}exclusive benefits as you level up.
-            </Text>
+            <Text style={styles.journeyEyebrow}>{t("journey.eyebrow")}</Text>
+            <Text style={styles.journeyTitle}>{t("journey.title")}</Text>
+            <Text style={styles.journeySub}>{t("journey.sub")}</Text>
 
             <View style={styles.journeyBottom}>
               <View style={styles.journeyLeft}>
@@ -239,9 +244,7 @@ export default function ProfileScreen() {
                     ]}
                   />
                 </View>
-                <Text style={styles.journeyPoints}>
-                  Complete KYC to level up
-                </Text>
+                <Text style={styles.journeyPoints}>{t("journey.points")}</Text>
               </View>
               <View style={styles.journeyRight}>
                 <TouchableOpacity
@@ -255,7 +258,9 @@ export default function ProfileScreen() {
                     end={{ x: 1, y: 0.5 }}
                     style={styles.benefitsGradient}
                   >
-                    <Text style={styles.benefitsBtnText}>View Benefits</Text>
+                    <Text style={styles.benefitsBtnText}>
+                      {t("journey.benefits")}
+                    </Text>
                     <Ionicons name="arrow-forward" size={14} color="#000" />
                   </LinearGradient>
                 </TouchableOpacity>
@@ -280,13 +285,13 @@ export default function ProfileScreen() {
                 />
                 <Ionicons name="chevron-forward" size={14} color="#555" />
               </View>
-              <Text style={styles.quickTitle}>{q.title}</Text>
-              <Text style={styles.quickDesc}>{q.desc}</Text>
+              <Text style={styles.quickTitle}>{t(q.title)}</Text>
+              <Text style={styles.quickDesc}>{t(q.desc)}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text style={styles.sectionTitle}>Recently Used</Text>
+        <Text style={styles.sectionTitle}>{t("profile.recentlyUsed")}</Text>
         <View style={styles.recentRow}>
           {RECENT.map((r) => (
             <TouchableOpacity
@@ -300,7 +305,7 @@ export default function ProfileScreen() {
                 style={styles.recentIcon}
                 resizeMode="contain"
               />
-              <Text style={styles.recentLabel}>{r.label}</Text>
+              <Text style={styles.recentLabel}>{t(r.label)}</Text>
             </TouchableOpacity>
           ))}
         </View>

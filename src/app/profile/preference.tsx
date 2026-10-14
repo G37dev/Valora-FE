@@ -9,6 +9,7 @@ import {
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import { clearAuthToken } from "@/services/authStorage";
 import { supabase } from "@/services/supabase";
+import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -28,15 +29,16 @@ export default function PreferenceScreen() {
   const data = useProfileData();
   const sec = useSecurityLevel(data);
   const [comingSoon, setComingSoon] = useState(false);
+  const t = useT();
 
   const handleSignOut = () => {
     showAlert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
+      t("btn.signOut"),
+      t("alert.signOut.msg"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Sign Out",
+          text: t("btn.signOut"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -57,10 +59,9 @@ export default function PreferenceScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <SubPageShell
-        title="Preference"
+        title={t("tab.preference")}
         activeTab="preference"
         user={data.user}
-        secLabel={sec.label}
         secLevel={sec.level}
         tier={securityTier({
           kycVerified: data.kycStatus === "VERIFIED",
@@ -72,42 +73,42 @@ export default function PreferenceScreen() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <SectionCard
             icon={require("../../../assets/images/profile/myIdentity.png")}
-            title="Preferences"
-            subtitle="Set your app and account preferences."
+            title={t("pref.title")}
+            subtitle={t("pref.sub")}
           >
             <SettingRow
               icon="time-outline"
-              label="Time Zone"
-              desc="Set your benchmark time zone"
+              label={t("row.timezone")}
+              desc={t("row.timezone.desc")}
               right={<Text style={styles.rowValue}>UTC+7</Text>}
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
               icon="business-outline"
-              label="Withdrawal Account"
-              desc="Set your default bank for withdrawal"
+              label={t("row.withdrawalAccount")}
+              desc={t("row.withdrawalAccount.desc")}
               right={<Text style={styles.rowValue}>-</Text>}
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
               icon="bookmark-outline"
-              label="Saved Withdrawal Address"
-              desc="Manage crypto withdrawal address"
+              label={t("row.savedAddress")}
+              desc={t("row.savedAddress.desc")}
               right={<Text style={styles.rowValue}>-</Text>}
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
               icon="speedometer-outline"
-              label="Manage Withdrawal Limit"
-              desc="Set and manage your daily limits"
-              right={<Text style={styles.rowValue}>Default</Text>}
+              label={t("row.withdrawalLimit")}
+              desc={t("row.withdrawalLimit.desc")}
+              right={<Text style={styles.rowValue}>{t("common.default")}</Text>}
               onPress={() => setComingSoon(true)}
             />
             <SettingRow
               icon="notifications-outline"
-              label="Notification Settings"
-              desc="Manage in-app and push notifications"
-              right={<Text style={styles.rowValue}>Default</Text>}
+              label={t("row.notification")}
+              desc={t("row.notification.desc")}
+              right={<Text style={styles.rowValue}>{t("common.default")}</Text>}
               onPress={() => Linking.openSettings()}
               last
             />
@@ -119,7 +120,7 @@ export default function PreferenceScreen() {
             activeOpacity={0.8}
           >
             <Ionicons name="log-out-outline" size={18} color="#FFF" />
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Text style={styles.signOutText}>{t("btn.signOut")}</Text>
           </TouchableOpacity>
 
           <View style={{ height: 24 }} />

@@ -1,5 +1,6 @@
 import { showAlert } from "@/components/AppAlert";
 import ValoraSheet from "@/components/ValoraSheet";
+import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -30,6 +31,7 @@ export default function TrustedDevicesSheet({
   visible: boolean;
   onClose: () => void;
 }) {
+  const t = useT();
   const [devices, setDevices] = useState<TrustedDevice[]>(INITIAL_DEVICES);
 
   useEffect(() => {
@@ -38,12 +40,12 @@ export default function TrustedDevicesSheet({
 
   const remove = (device: TrustedDevice) => {
     showAlert(
-      "Remove Device",
-      `Remove "${device.name}" from trusted devices?`,
+      t("devices.remove.title"),
+      t("devices.remove.msg", { name: device.name }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Remove",
+          text: t("common.remove"),
           style: "destructive",
           onPress: () =>
             setDevices((list) => list.filter((d) => d.id !== device.id)),
@@ -56,7 +58,7 @@ export default function TrustedDevicesSheet({
   return (
     <ValoraSheet visible={visible} onClose={onClose} snapPoints={["48%"]}>
       <View style={styles.headRow}>
-        <Text style={styles.title}>Trusted Device</Text>
+        <Text style={styles.title}>{t("devices.title")}</Text>
         <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
           <Ionicons name="close" size={16} color="#8A8A8A" />
         </TouchableOpacity>
@@ -74,7 +76,7 @@ export default function TrustedDevicesSheet({
             <View style={styles.cardText}>
               <Text style={styles.deviceName}>{device.name}</Text>
               <Text style={styles.deviceMeta}>
-                Last active : {device.lastActive}
+                {t("devices.lastActive")} : {device.lastActive}
               </Text>
             </View>
           </View>
@@ -83,13 +85,13 @@ export default function TrustedDevicesSheet({
             onPress={() => remove(device)}
             activeOpacity={0.8}
           >
-            <Text style={styles.removeText}>Remove</Text>
+            <Text style={styles.removeText}>{t("common.remove")}</Text>
           </TouchableOpacity>
         </View>
       ))}
 
       {devices.length === 0 && (
-        <Text style={styles.empty}>No trusted devices</Text>
+        <Text style={styles.empty}>{t("devices.empty")}</Text>
       )}
     </ValoraSheet>
   );

@@ -1,5 +1,6 @@
 import { showAlert } from "@/components/AppAlert";
 import ValoraSheet from "@/components/ValoraSheet";
+import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
@@ -67,6 +68,7 @@ export default function ChangePasswordSheet({
   visible,
   onClose,
 }: ChangePasswordSheetProps) {
+  const t = useT();
   const [step, setStep] = useState<Step>("form");
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -83,11 +85,11 @@ export default function ChangePasswordSheet({
 
   const confirm = () => {
     if (!oldPass || !newPass || !confirmPass) {
-      showAlert("Incomplete", "Please fill in all password fields.");
+      showAlert(t("pwd.incomplete.title"), t("pwd.incomplete.msg"));
       return;
     }
     if (newPass !== confirmPass) {
-      showAlert("Mismatch", "New password and confirmation do not match.");
+      showAlert(t("pwd.mismatch.title"), t("pwd.mismatch.msg"));
       return;
     }
     setStep("done");
@@ -102,7 +104,7 @@ export default function ChangePasswordSheet({
     >
       <View style={styles.headRow}>
         <Text style={styles.title}>
-          {step === "form" ? "Change Password" : "Change Password Successful"}
+          {step === "form" ? t("pwd.title") : t("pwd.success.title")}
         </Text>
         <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
           <Ionicons name="close" size={16} color="#8A8A8A" />
@@ -113,17 +115,17 @@ export default function ChangePasswordSheet({
       {step === "form" ? (
         <>
           <PasswordField
-            label="Old Password"
+            label={t("pwd.old")}
             value={oldPass}
             onChange={setOldPass}
           />
           <PasswordField
-            label="New Password"
+            label={t("pwd.new")}
             value={newPass}
             onChange={setNewPass}
           />
           <PasswordField
-            label="Confirm Password"
+            label={t("pwd.confirm")}
             value={confirmPass}
             onChange={setConfirmPass}
           />
@@ -139,7 +141,7 @@ export default function ChangePasswordSheet({
               end={{ x: 0, y: 1 }}
               style={styles.confirmInner}
             >
-              <Text style={styles.confirmText}>Confirm Change</Text>
+              <Text style={styles.confirmText}>{t("pwd.btn")}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </>
@@ -152,10 +154,8 @@ export default function ChangePasswordSheet({
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.doneTitle}>Change Password Successful</Text>
-          <Text style={styles.doneSub}>
-            Your sign in password has been changed successfully
-          </Text>
+          <Text style={styles.doneTitle}>{t("pwd.success.title")}</Text>
+          <Text style={styles.doneSub}>{t("pwd.success.sub")}</Text>
 
           <TouchableOpacity
             style={styles.confirmBtn}
@@ -168,7 +168,7 @@ export default function ChangePasswordSheet({
               end={{ x: 0, y: 1 }}
               style={styles.confirmInner}
             >
-              <Text style={styles.confirmText}>Done</Text>
+              <Text style={styles.confirmText}>{t("common.done")}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
