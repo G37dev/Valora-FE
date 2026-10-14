@@ -290,6 +290,12 @@ export default function ProfileScreen() {
               onPress={() => setComingSoon(true)}
               activeOpacity={0.8}
             >
+              <LinearGradient
+                colors={["#242424", "#131313"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
               <View style={styles.quickHead}>
                 <Image
                   source={q.icon}
@@ -313,6 +319,12 @@ export default function ProfileScreen() {
               onPress={() => router.push(r.route as never)}
               activeOpacity={0.8}
             >
+              <LinearGradient
+                colors={["#242424", "#131313"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
               <Image
                 source={r.icon}
                 style={styles.recentIcon}
@@ -508,11 +520,11 @@ const styles = StyleSheet.create({
   },
   quickCard: {
     flex: 1,
-    backgroundColor: "#141414",
     borderWidth: 1,
     borderColor: "#262626",
     borderRadius: 16,
     padding: 14,
+    overflow: "hidden",
   },
   quickHead: {
     flexDirection: "row",
@@ -541,13 +553,13 @@ const styles = StyleSheet.create({
   },
   recentCard: {
     flex: 1,
-    backgroundColor: "#141414",
     borderWidth: 1,
     borderColor: "#262626",
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: "center",
     gap: 10,
+    overflow: "hidden",
   },
   recentLabel: {
     color: "#FFF",
