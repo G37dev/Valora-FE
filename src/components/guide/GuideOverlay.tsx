@@ -63,11 +63,11 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
         useNativeDriver: true,
       }),
     ]).start();
-    // Scale pulse ke dalem — 1 ↔ 0.96, nggak pernah keluar bounds.
+    // Scale pulse halus ke luar — 1 ↔ 1.05, tipis jadi nggak jomplang.
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, {
-          toValue: 0.96,
+          toValue: 1.05,
           duration: 900,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   frame: {
     position: "absolute",
     borderWidth: DIM_BORDER,
-    borderColor: "rgba(0,0,0,0.72)",
+    borderColor: "rgba(0,0,0,0.8)",
     backgroundColor: "transparent",
   },
   holeWrap: {
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   hole: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "rgba(251,230,120,0.1)",
   },
   tooltip: {
     position: "absolute",
