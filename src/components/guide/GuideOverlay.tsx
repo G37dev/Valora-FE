@@ -80,16 +80,11 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
   };
 
   /*
-   * Dim pekat dipakai instead of BlurView — experimental blur Android
-   * sering gagal render / flicker, sedangkan dim solid selalu
-   * konsisten dan justru bikin target lebih kontras.
+   * Frame border tebal yang nge-dim layar; panel-panel ini transparan
+   * dan cuma berfungsi menelan sentuhan di area di luar hole.
    */
   const dimPanel = (style: object, key: string) => (
-    <View
-      key={key}
-      style={[styles.panelWrap, styles.panelTint, style]}
-      pointerEvents="auto"
-    />
+    <View key={key} style={[styles.panelWrap, style]} pointerEvents="auto" />
   );
 
   return (
@@ -184,12 +179,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   panelTint: {
-    backgroundColor: "rgba(0,0,0,0.82)",
+    backgroundColor: "rgba(0,0,0,0.72)",
   },
   frame: {
     position: "absolute",
     borderWidth: DIM_BORDER,
-    borderColor: "rgba(0,0,0,0.82)",
+    borderColor: "rgba(0,0,0,0.72)",
     backgroundColor: "transparent",
   },
   hole: {
