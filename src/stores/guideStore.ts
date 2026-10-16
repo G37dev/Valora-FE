@@ -13,9 +13,11 @@ interface GuideState {
   active: boolean;
   step: GuideStep;
   rects: Partial<Record<GuideStep, GuideRect>>;
+  actions: Partial<Record<GuideStep, () => void>>;
   setActive: (active: boolean) => void;
   setStep: (step: GuideStep) => void;
   registerRect: (step: GuideStep, rect: GuideRect) => void;
+  registerAction: (step: GuideStep, action: () => void) => void;
 }
 
 /*
@@ -28,8 +30,11 @@ export const useGuideStore = create<GuideState>((set) => ({
   active: false,
   step: "profileTab",
   rects: {},
+  actions: {},
   setActive: (active) => set({ active }),
   setStep: (step) => set({ step }),
   registerRect: (step, rect) =>
     set((s) => ({ rects: { ...s.rects, [step]: rect } })),
+  registerAction: (step, action) =>
+    set((s) => ({ actions: { ...s.actions, [step]: action } })),
 }));

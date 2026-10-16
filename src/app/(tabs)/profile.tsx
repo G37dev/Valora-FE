@@ -13,12 +13,13 @@ import {
 } from "@/components/profile/ProfileChrome";
 import { useGuideMeasure, useGuideStep } from "@/hooks/useGuide";
 import { useProfileData } from "@/hooks/useProfileData";
+import { useGuideStore } from "@/stores/guideStore";
 import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   Platform,
@@ -92,6 +93,12 @@ export default function ProfileScreen() {
   const { user, kycStatus, twoFAEnabled, passkeys } = useProfileData();
   useGuideStep("myInfo");
   const myInfoRef = useGuideMeasure<View>("myInfo");
+  const guideActive = useGuideStore((s) => s.active);
+  const registerAction = useGuideStore((s) => s.registerAction);
+  useEffect(() => {
+    if (guideActive)
+      registerAction("myInfo", () => router.push("/profile/my-info"));
+  }, [guideActive, registerAction, router]);
   const [comingSoon, setComingSoon] = useState(false);
   const [memberSheet, setMemberSheet] = useState(false);
   const [cardSize, setCardSize] = useState({ w: 0, h: 0 });

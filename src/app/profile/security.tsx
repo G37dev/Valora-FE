@@ -35,12 +35,13 @@ import {
   registerPasskey,
 } from "@/services/passkeyService";
 import { supabase } from "@/services/supabase";
+import { useGuideStore } from "@/stores/guideStore";
 import { useT } from "@/stores/languageStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -77,9 +78,15 @@ export default function SecurityScreen() {
   const { user, twoFAEnabled, passkeys, reload } = data;
   useGuideStep("mobile");
   const mobileRowRef = useGuideMeasure<View>("mobile");
+  const guideActive = useGuideStore((s) => s.active);
+  const registerAction = useGuideStore((s) => s.registerAction);
 
   const [comingSoon, setComingSoon] = useState(false);
   const [mobileSheet, setMobileSheet] = useState(false);
+
+  useEffect(() => {
+    if (guideActive) registerAction("mobile", () => setMobileSheet(true));
+  }, [guideActive, registerAction]);
   const [passwordSheet, setPasswordSheet] = useState(false);
   const [devicesSheet, setDevicesSheet] = useState(false);
   const [accountSheet, setAccountSheet] = useState(false);

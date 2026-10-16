@@ -61,6 +61,7 @@ export default function TabLayout() {
   const user = useProfileStore((s) => s.user);
   const guideActive = useGuideStore((s) => s.active);
   const setGuideActive = useGuideStore((s) => s.setActive);
+  const registerAction = useGuideStore((s) => s.registerAction);
 
   /*
    * Guide wajib verifikasi nomor — aktif selama user login tapi belum
@@ -70,10 +71,13 @@ export default function TabLayout() {
   useEffect(() => {
     const needsGuide = !!user && !user.phoneNumber;
     if (needsGuide !== guideActive) setGuideActive(needsGuide);
-    if (needsGuide && !GUIDE_ALLOWED_PATHS.has(pathname)) {
-      router.replace("/");
+    if (needsGuide) {
+      registerAction("profileTab", () => router.push("/profile" as never));
+      if (!GUIDE_ALLOWED_PATHS.has(pathname)) {
+        router.replace("/");
+      }
     }
-  }, [user, pathname, guideActive, setGuideActive]);
+  }, [user, pathname, guideActive, setGuideActive, registerAction]);
 
   const TAB_BAR_HEIGHT = 80;
   const bottomSpace = Math.max(insets.bottom, 0);

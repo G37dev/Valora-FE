@@ -7,6 +7,7 @@ import {
   Animated,
   Easing,
   StyleSheet,
+  TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -53,14 +54,14 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
       Animated.sequence([
         Animated.timing(pulse, {
           toValue: 1,
-          duration: 900,
-          easing: Easing.inOut(Easing.ease),
+          duration: 800,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
         Animated.timing(pulse, {
           toValue: 0,
-          duration: 900,
-          easing: Easing.inOut(Easing.ease),
+          duration: 800,
+          easing: Easing.in(Easing.quad),
           useNativeDriver: true,
         }),
       ]),
@@ -100,18 +101,24 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
   const tooltipBelow = ry + rh + 170 < H;
   const arrowUp = tooltipBelow; // arrow points up ke hole saat tooltip di bawah
 
-  const ringScale = pulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.05],
-  });
+  /*
+   * Ring pakai opacity saja (bukan scale) — scale transform bikin
+   * border keluar layar saat target di tepi + jitter sub-pixel.
+   */
   const ringOpacity = pulse.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 0.55],
+    outputRange: [1, 0.45],
   });
   const bobY = bob.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, arrowUp ? -8 : 8],
+    outputRange: [0, arrowUp ? -7 : 7],
   });
+
+  // Tap di area highlight = jalankan aksi step (lebih robust daripada
+  // meneruskan sentuhan — sekaligus memblok scroll yang lewat hole).
+  const onHolePress = () => {
+    useGuideStore.getState().actions[step]?.();
+  };
 
   return (
     <Animated.View
@@ -139,21 +146,14 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
         pointerEvents="auto"
       />
 
-      {/* HOLE frame + pulsing ring — tembus sentuhan ke target */}
-      <View
+      {/* HOLE — touchable, jalankan aksi step + blokir scroll */}
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={onHolePress}
         style={[styles.hole, { top: ry, left: rx, width: rw, height: rh }]}
-        pointerEvents="none"
       >
-        <Animated.View
-          style={[
-            styles.ring,
-            {
-              transform: [{ scale: ringScale }],
-              opacity: ringOpacity,
-            },
-          ]}
-        />
-      </View>
+        <Animated.View style={[styles.ring, { opacity: ringOpacity }]} />
+      </TouchableOpacity>
 
       {/* Arrow */}
       <Animated.View

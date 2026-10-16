@@ -277,19 +277,23 @@ export function ProfileTabs({ active }: { active: string }) {
   const t = useT();
   const guideActive = useGuideStore((s) => s.active);
   const registerRect = useGuideStore((s) => s.registerRect);
+  const registerAction = useGuideStore((s) => s.registerAction);
   const secTabRef = useRef<View>(null);
 
   // Ukuran tab "Security" dipakai spotlight guide — posisi sama di
   // semua screen, jadi aman diukur dari screen manapun.
   useEffect(() => {
     if (!guideActive) return;
+    registerAction("security", () =>
+      router.replace("/profile/security" as never),
+    );
     const timer = setTimeout(() => {
       secTabRef.current?.measureInWindow((x, y, width, height) => {
         registerRect("security", { x, y, width, height });
       });
     }, 450);
     return () => clearTimeout(timer);
-  }, [guideActive, registerRect]);
+  }, [guideActive, registerRect, registerAction, router]);
 
   return (
     <View style={styles.tabsRow}>
