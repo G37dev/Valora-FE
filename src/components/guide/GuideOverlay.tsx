@@ -21,9 +21,9 @@ const PAD_X: Record<GuideStep, number> = {
 };
 const PAD_Y: Record<GuideStep, number> = {
   profileTab: 4,
-  myInfo: 20,
-  security: 20,
-  mobile: 20,
+  myInfo: 16,
+  security: 12,
+  mobile: 12,
 };
 const DIM_BORDER = 2000;
 const STEP_INDEX: Record<GuideStep, number> = {
