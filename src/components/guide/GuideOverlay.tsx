@@ -63,11 +63,16 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
         useNativeDriver: true,
       }),
     ]).start();
-    // Scale pulse halus ke luar — 1 ↔ 1.05, tipis jadi nggak jomplang.
+    /*
+     * Pulse per-step: tab boleh keluar (hole kecil di tengah layar),
+     * rows harus ke dalem — hole-nya hampir full-width, scale keluar
+     * pasti kepotong pinggir layar.
+     */
+    const pulseTo = step === "profileTab" ? 1.05 : 0.98;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, {
-          toValue: 1.05,
+          toValue: pulseTo,
           duration: 900,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
@@ -82,7 +87,7 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
     );
     loop.start();
     return () => loop.stop();
-  }, [visible, fade, pop, pulse]);
+  }, [visible, fade, pop, pulse, step]);
 
   if (!visible || !rect) return null;
 
@@ -230,7 +235,7 @@ const styles = StyleSheet.create({
   hole: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "rgba(251,230,120,0.1)",
+    borderColor: "rgba(251,230,120,0.2)",
   },
   tooltip: {
     position: "absolute",
