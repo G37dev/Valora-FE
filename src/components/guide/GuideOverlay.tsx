@@ -48,6 +48,7 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
   const fade = useRef(new Animated.Value(0)).current;
   const pop = useRef(new Animated.Value(0.85)).current;
   const pulse = useRef(new Animated.Value(1)).current;
+  const [tipH, setTipH] = useState(150);
 
   const visible = active && curStep === step && !!rect;
 
@@ -113,7 +114,6 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
    * clamp supaya nggak pernah keluar layar. Max-width 460 biar
    * tetep proporsional di tablet.
    */
-  const [tipH, setTipH] = useState(150);
   const tailSize = 10;
   const gap = tailSize + 8;
   const tipW = Math.min(W - 40, 460);
