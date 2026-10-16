@@ -66,6 +66,9 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
   const rw = Math.min(rect.width + PAD * 2, W - rx);
   const rh = Math.min(rect.height + PAD * 2, H - ry);
 
+  // Radius sudut hole — pill penuh untuk tab, rounded untuk rows.
+  const R = step === "profileTab" ? Math.min(rw, rh) / 2 : 16;
+
   // Tooltip di bawah hole kalau ada ruang, kalau tidak di atas.
   const tooltipBelow = ry + rh + 170 < H;
   const tailSize = 10;
@@ -100,11 +103,51 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
       {dimPanel({ top: ry, left: 0, width: rx, height: rh }, "left")}
       {dimPanel({ top: ry, left: rx + rw, right: 0, height: rh }, "right")}
 
-      {/* HOLE — rounded cutout, tap = aksi step */}
+      {/*
+       * Sudut hole dibulatkan lewat 4 patch dim — panel-panelnya sendiri
+       * kotak, jadi radius hole harus "diukir" dari sisi gelapnya.
+       */}
+      <View
+        pointerEvents="auto"
+        style={[
+          styles.corner,
+          { top: ry, left: rx, width: R, height: R },
+          { borderBottomRightRadius: R },
+        ]}
+      />
+      <View
+        pointerEvents="auto"
+        style={[
+          styles.corner,
+          { top: ry, left: rx + rw - R, width: R, height: R },
+          { borderBottomLeftRadius: R },
+        ]}
+      />
+      <View
+        pointerEvents="auto"
+        style={[
+          styles.corner,
+          { top: ry + rh - R, left: rx, width: R, height: R },
+          { borderTopRightRadius: R },
+        ]}
+      />
+      <View
+        pointerEvents="auto"
+        style={[
+          styles.corner,
+          { top: ry + rh - R, left: rx + rw - R, width: R, height: R },
+          { borderTopLeftRadius: R },
+        ]}
+      />
+
+      {/* HOLE — tap = aksi step */}
       <TouchableOpacity
         activeOpacity={1}
         onPress={onHolePress}
-        style={[styles.hole, { top: ry, left: rx, width: rw, height: rh }]}
+        style={[
+          styles.hole,
+          { top: ry, left: rx, width: rw, height: rh, borderRadius: R },
+        ]}
       />
 
       {/* Tooltip bubble */}
@@ -161,9 +204,12 @@ const styles = StyleSheet.create({
   panelTint: {
     backgroundColor: "rgba(0,0,0,0.82)",
   },
+  corner: {
+    position: "absolute",
+    backgroundColor: "rgba(0,0,0,0.82)",
+  },
   hole: {
     position: "absolute",
-    borderRadius: 14,
   },
   tooltip: {
     position: "absolute",
