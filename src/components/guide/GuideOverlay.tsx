@@ -1,6 +1,6 @@
 import { GuideStep, useGuideStore } from "@/stores/guideStore";
 import { useT } from "@/stores/languageStore";
-import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef } from "react";
 import {
@@ -14,7 +14,7 @@ import {
 import Text from "../CustomText";
 
 const GOLD = "#F5D13E";
-const PAD = 10;
+const PAD = 4;
 const STEP_INDEX: Record<GuideStep, number> = {
   profileTab: 1,
   myInfo: 2,
@@ -23,10 +23,9 @@ const STEP_INDEX: Record<GuideStep, number> = {
 };
 
 /**
- * Coach-mark overlay — pasang sekali per screen dengan prop `step`.
- * Render hanya saat guide aktif, step cocok, dan rect target sudah
- * terukur (lihat registerRect). Area di luar "hole" menelan semua
- * sentuhan sehingga user hanya bisa tap elemen target — tidak bisa skip.
+ * Coach-mark overlay ala Duolingo — latar belakang blur, target muncul
+ * lewat "hole" rounded yang pas, tooltip bubble dengan pointer.
+ * Area di luar hole menelan sentuhan; hole menjalankan aksi step.
  */
 export default function GuideOverlay({ step }: { step: GuideStep }) {
   const t = useT();
@@ -36,64 +35,33 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
   const { width: W, height: H } = useWindowDimensions();
 
   const fade = useRef(new Animated.Value(0)).current;
-  const pulse = useRef(new Animated.Value(0)).current;
-  const bob = useRef(new Animated.Value(0)).current;
+  const pop = useRef(new Animated.Value(0.85)).current;
 
   const visible = active && curStep === step && !!rect;
 
   useEffect(() => {
     if (!visible) return;
     fade.setValue(0);
-    Animated.timing(fade, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-
-    const pulseAnim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, {
-          toValue: 1,
-          duration: 800,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulse, {
-          toValue: 0,
-          duration: 800,
-          easing: Easing.in(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    const bobAnim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(bob, {
-          toValue: 1,
-          duration: 550,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(bob, {
-          toValue: 0,
-          duration: 550,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    pulseAnim.start();
-    bobAnim.start();
-    return () => {
-      pulseAnim.stop();
-      bobAnim.stop();
-    };
-  }, [visible, fade, pulse, bob]);
+    pop.setValue(0.85);
+    Animated.parallel([
+      Animated.timing(fade, {
+        toValue: 1,
+        duration: 250,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.spring(pop, {
+        toValue: 1,
+        friction: 6,
+        tension: 90,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [visible, fade, pop]);
 
   if (!visible || !rect) return null;
 
-  // Clamp hole ke dalam layar — target di tepi (tab bar) tidak boleh
-  // bikin ring terpotong/melebihi layar.
+  // Clamp hole ke dalam layar.
   const rx = Math.max(rect.x - PAD, 0);
   const ry = Math.max(rect.y - PAD, 0);
   const rw = Math.min(rect.width + PAD * 2, W - rx);
@@ -101,97 +69,73 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
 
   // Tooltip di bawah hole kalau ada ruang, kalau tidak di atas.
   const tooltipBelow = ry + rh + 170 < H;
-  const arrowUp = tooltipBelow; // arrow points up ke hole saat tooltip di bawah
+  const tailSize = 10;
+  // Posisi horizontal pointer — segaris dengan tengah hole.
+  const holeCenter = rx + rw / 2;
 
-  /*
-   * Ring pakai opacity saja (bukan scale) — scale transform bikin
-   * border keluar layar saat target di tepi + jitter sub-pixel.
-   */
-  const ringOpacity = pulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 0.45],
-  });
-  const bobY = bob.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, arrowUp ? -7 : 7],
-  });
-
-  // Tap di area highlight = jalankan aksi step (lebih robust daripada
-  // meneruskan sentuhan — sekaligus memblok scroll yang lewat hole).
   const onHolePress = () => {
     useGuideStore.getState().actions[step]?.();
   };
+
+  const blurPanel = (style: object, key: string) => (
+    <View key={key} style={[styles.panelWrap, style]} pointerEvents="auto">
+      <BlurView
+        intensity={40}
+        tint="dark"
+        experimentalBlurMethod="dimezisBlurView"
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={[StyleSheet.absoluteFill, styles.panelTint]} />
+    </View>
+  );
 
   return (
     <Animated.View
       style={[StyleSheet.absoluteFill, { opacity: fade, zIndex: 999 }]}
       pointerEvents="box-none"
     >
-      {/* DIM — 4 panel menelan sentuhan di sekitar hole */}
-      <View
-        style={[styles.dim, { top: 0, left: 0, right: 0, height: ry }]}
-        pointerEvents="auto"
-      />
-      <View
-        style={[
-          styles.dim,
-          { top: ry + rh, left: 0, right: 0, bottom: 0, height: undefined },
-        ]}
-        pointerEvents="auto"
-      />
-      <View
-        style={[styles.dim, { top: ry, left: 0, width: rx, height: rh }]}
-        pointerEvents="auto"
-      />
-      <View
-        style={[styles.dim, { top: ry, left: rx + rw, right: 0, height: rh }]}
-        pointerEvents="auto"
-      />
+      {/* BLUR panels di sekitar hole */}
+      {blurPanel({ top: 0, left: 0, right: 0, height: ry }, "top")}
+      {blurPanel({ top: ry + rh, left: 0, right: 0, bottom: 0 }, "bottom")}
+      {blurPanel({ top: ry, left: 0, width: rx, height: rh }, "left")}
+      {blurPanel({ top: ry, left: rx + rw, right: 0, height: rh }, "right")}
 
-      {/* HOLE — touchable, jalankan aksi step + blokir scroll */}
+      {/* HOLE — rounded cutout, tap = aksi step */}
       <TouchableOpacity
         activeOpacity={1}
         onPress={onHolePress}
         style={[styles.hole, { top: ry, left: rx, width: rw, height: rh }]}
-      >
-        {/* ring statis + ring berdenyut — murni opacity, tanpa
-            transform/shadow supaya tidak overflow & tidak flicker */}
-        <View style={styles.ringStatic} />
-        <Animated.View style={[styles.ringPulse, { opacity: ringOpacity }]} />
-      </TouchableOpacity>
+      />
 
-      {/* Arrow */}
+      {/* Tooltip bubble */}
       <Animated.View
-        pointerEvents="none"
-        style={[
-          styles.arrow,
-          {
-            left: rx + rw / 2 - 14,
-            top: tooltipBelow ? ry + rh + 6 : ry - 34,
-            transform: [{ translateY: bobY }],
-          },
-        ]}
-      >
-        <Ionicons
-          name={arrowUp ? "arrow-up" : "arrow-down"}
-          size={28}
-          color={GOLD}
-        />
-      </Animated.View>
-
-      {/* Tooltip card */}
-      <View
         pointerEvents="none"
         style={[
           styles.tooltip,
           {
             left: 20,
             right: 20,
-            top: tooltipBelow ? ry + rh + 48 : undefined,
-            bottom: tooltipBelow ? undefined : H - ry + 48,
+            top: tooltipBelow ? ry + rh + tailSize + 8 : undefined,
+            bottom: tooltipBelow ? undefined : H - ry + tailSize + 8,
+            transform: [{ scale: pop }],
           },
         ]}
       >
+        {/* pointer triangle */}
+        <View
+          style={[
+            styles.tail,
+            {
+              left: Math.min(
+                Math.max(holeCenter - 20 - tailSize / 2, 16),
+                W - 40 - 16 - tailSize,
+              ),
+              ...(tooltipBelow
+                ? { top: -tailSize / 2 }
+                : { bottom: -tailSize / 2 }),
+            },
+          ]}
+        />
         <LinearGradient
           colors={["#FBE678", "#C9B543"]}
           start={{ x: 0, y: 0 }}
@@ -204,54 +148,37 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
         </LinearGradient>
         <Text style={styles.tipTitle}>{t(`guide.${step}.title` as any)}</Text>
         <Text style={styles.tipBody}>{t(`guide.${step}.body` as any)}</Text>
-      </View>
+      </Animated.View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  dim: {
+  panelWrap: {
     position: "absolute",
-    backgroundColor: "rgba(0,0,0,0.82)",
+    overflow: "hidden",
+  },
+  panelTint: {
+    backgroundColor: "rgba(0,0,0,0.45)",
   },
   hole: {
     position: "absolute",
-    borderRadius: 16,
-  },
-  ringStatic: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: "rgba(245,209,62,0.5)",
-  },
-  ringPulse: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 16,
-    borderWidth: 2.5,
-    borderColor: GOLD,
-  },
-  arrow: {
-    position: "absolute",
-    width: 28,
-    height: 28,
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 14,
   },
   tooltip: {
     position: "absolute",
-    backgroundColor: "#1C1C1C",
+    backgroundColor: "#1E1E1E",
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#2E2E2E",
     padding: 16,
+  },
+  tail: {
+    position: "absolute",
+    width: 14,
+    height: 14,
+    backgroundColor: "#1E1E1E",
+    transform: [{ rotate: "45deg" }],
   },
   tagWrap: {
     alignSelf: "flex-start",

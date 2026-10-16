@@ -42,11 +42,13 @@ export default function TabLayout() {
        * tinggi bar 80 + insets.bottom, nempel di bawah layar.
        */
       const slotW = (winW - 40) / 5;
+      // Tab bar: bottom -10, tinggi 80+insets.bottom, konten
+      // icon+label kira-kira di 62px teratas dari sisi bawah layar.
       registerRect("profileTab", {
         x: 20 + slotW * 4,
-        y: winH - 90,
+        y: winH - 70 - insets.bottom + 8,
         width: slotW,
-        height: 90,
+        height: 54,
       });
       if (!GUIDE_ALLOWED_PATHS.has(pathname)) {
         router.replace("/");
