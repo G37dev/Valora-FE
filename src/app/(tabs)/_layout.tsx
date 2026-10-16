@@ -59,7 +59,7 @@ export default function TabLayout() {
          */
         registerRect("profileTab", {
           x: x + slotW * 4 + 8,
-          y: y + 16,
+          y: y + 12,
           width: slotW - 16,
           height: Math.min(h, 50),
         });

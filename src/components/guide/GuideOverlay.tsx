@@ -36,6 +36,7 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
 
   const fade = useRef(new Animated.Value(0)).current;
   const pop = useRef(new Animated.Value(0.85)).current;
+  const pulse = useRef(new Animated.Value(1)).current;
 
   const visible = active && curStep === step && !!rect;
 
@@ -57,7 +58,26 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [visible, fade, pop]);
+    // Scale pulse halus di hole — breathe 1 ↔ 1.05, nggak jomplang.
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1.05,
+          duration: 900,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 900,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [visible, fade, pop, pulse]);
 
   if (!visible || !rect) return null;
 
@@ -117,15 +137,26 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
         ]}
       />
 
-      {/* HOLE — border tipis + tap = aksi step */}
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={onHolePress}
+      {/* HOLE — border tipis + scale pulse halus + tap = aksi step */}
+      <Animated.View
         style={[
-          styles.hole,
-          { top: ry, left: rx, width: rw, height: rh, borderRadius: R },
+          styles.holeWrap,
+          {
+            top: ry,
+            left: rx,
+            width: rw,
+            height: rh,
+            borderRadius: R,
+            transform: [{ scale: pulse }],
+          },
         ]}
-      />
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={onHolePress}
+          style={[styles.hole, { borderRadius: R }]}
+        />
+      </Animated.View>
 
       {/* Tooltip bubble */}
       <Animated.View
@@ -187,10 +218,13 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.72)",
     backgroundColor: "transparent",
   },
-  hole: {
+  holeWrap: {
     position: "absolute",
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.45)",
+  },
+  hole: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.5)",
   },
   tooltip: {
     position: "absolute",
