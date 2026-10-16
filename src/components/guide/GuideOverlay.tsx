@@ -1,6 +1,5 @@
 import { GuideStep, useGuideStore } from "@/stores/guideStore";
 import { useT } from "@/stores/languageStore";
-import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef } from "react";
 import {
@@ -77,16 +76,17 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
     useGuideStore.getState().actions[step]?.();
   };
 
-  const blurPanel = (style: object, key: string) => (
-    <View key={key} style={[styles.panelWrap, style]} pointerEvents="auto">
-      <BlurView
-        intensity={40}
-        tint="dark"
-        experimentalBlurMethod="dimezisBlurView"
-        style={StyleSheet.absoluteFill}
-      />
-      <View style={[StyleSheet.absoluteFill, styles.panelTint]} />
-    </View>
+  /*
+   * Dim pekat dipakai instead of BlurView — experimental blur Android
+   * sering gagal render / flicker, sedangkan dim solid selalu
+   * konsisten dan justru bikin target lebih kontras.
+   */
+  const dimPanel = (style: object, key: string) => (
+    <View
+      key={key}
+      style={[styles.panelWrap, styles.panelTint, style]}
+      pointerEvents="auto"
+    />
   );
 
   return (
@@ -94,11 +94,11 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
       style={[StyleSheet.absoluteFill, { opacity: fade, zIndex: 999 }]}
       pointerEvents="box-none"
     >
-      {/* BLUR panels di sekitar hole */}
-      {blurPanel({ top: 0, left: 0, right: 0, height: ry }, "top")}
-      {blurPanel({ top: ry + rh, left: 0, right: 0, bottom: 0 }, "bottom")}
-      {blurPanel({ top: ry, left: 0, width: rx, height: rh }, "left")}
-      {blurPanel({ top: ry, left: rx + rw, right: 0, height: rh }, "right")}
+      {/* DIM panels di sekitar hole */}
+      {dimPanel({ top: 0, left: 0, right: 0, height: ry }, "top")}
+      {dimPanel({ top: ry + rh, left: 0, right: 0, bottom: 0 }, "bottom")}
+      {dimPanel({ top: ry, left: 0, width: rx, height: rh }, "left")}
+      {dimPanel({ top: ry, left: rx + rw, right: 0, height: rh }, "right")}
 
       {/* HOLE — rounded cutout, tap = aksi step */}
       <TouchableOpacity
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   panelTint: {
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.82)",
   },
   hole: {
     position: "absolute",

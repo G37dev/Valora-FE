@@ -4,8 +4,8 @@ import { useProfileStore } from "@/stores/profileStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, Tabs, usePathname } from "expo-router";
-import { useEffect } from "react";
-import { Image, StyleSheet, useWindowDimensions, View } from "react-native";
+import { useCallback, useEffect, useRef } from "react";
+import { Image, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Route yang boleh diakses selama phone guide aktif.
@@ -24,8 +24,6 @@ export default function TabLayout() {
   const setGuideActive = useGuideStore((s) => s.setActive);
   const registerAction = useGuideStore((s) => s.registerAction);
   const registerRect = useGuideStore((s) => s.registerRect);
-  const { width: winW, height: winH } = useWindowDimensions();
-
   /*
    * Guide wajib verifikasi nomor — aktif selama user login tapi belum
    * punya phoneNumber. Paksa user di home lalu arahkan via overlay
@@ -36,34 +34,32 @@ export default function TabLayout() {
     if (needsGuide !== guideActive) setGuideActive(needsGuide);
     if (needsGuide) {
       registerAction("profileTab", () => router.push("/profile" as never));
-      /*
-       * Rect tab Profile dihitung dari geometri tab bar (fixed):
-       * left/right 20, 5 slot sama lebar, Profile = slot terakhir,
-       * tinggi bar 80 + insets.bottom, nempel di bawah layar.
-       */
-      const slotW = (winW - 40) / 5;
-      // Tab bar: bottom -10, tinggi 80+insets.bottom, konten
-      // icon+label kira-kira di 62px teratas dari sisi bawah layar.
-      registerRect("profileTab", {
-        x: 20 + slotW * 4,
-        y: winH - 70 - insets.bottom + 8,
-        width: slotW,
-        height: 54,
-      });
       if (!GUIDE_ALLOWED_PATHS.has(pathname)) {
         router.replace("/");
       }
     }
-  }, [
-    user,
-    pathname,
-    guideActive,
-    setGuideActive,
-    registerAction,
-    registerRect,
-    winW,
-    winH,
-  ]);
+  }, [user, pathname, guideActive, setGuideActive, registerAction]);
+
+  /*
+   * Rect tab Profile diukur langsung dari layout tab bar — 5 slot
+   * sama lebar, Profile = slot terakhir. Lebih akurat daripada
+   * menghitung manual dari insets/dimensi layar.
+   */
+  const tabBarRef = useRef<View>(null);
+  const onTabBarLayout = useCallback(() => {
+    tabBarRef.current?.measureInWindow(
+      (x: number, y: number, w: number, h: number) => {
+        if (!w || !h) return;
+        const slotW = w / 5;
+        registerRect("profileTab", {
+          x: x + slotW * 4,
+          y: y,
+          width: slotW,
+          height: h,
+        });
+      },
+    );
+  }, [registerRect]);
 
   const TAB_BAR_HEIGHT = 80;
   const bottomSpace = Math.max(insets.bottom, 0);
@@ -100,7 +96,11 @@ export default function TabLayout() {
           },
 
           tabBarBackground: () => (
-            <View style={styles.tabBarContainer}>
+            <View
+              ref={tabBarRef}
+              style={styles.tabBarContainer}
+              onLayout={onTabBarLayout}
+            >
               <LinearGradient
                 colors={["#161616", "#000"]}
                 start={{ x: 0, y: 0 }}
