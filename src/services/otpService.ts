@@ -4,7 +4,8 @@ export type WaOtpPurpose =
   | "register"
   | "login"
   | "transaction"
-  | "verify-phone";
+  | "verify-phone"
+  | "change-phone";
 
 export interface SendWaOtpResult {
   ok: boolean;

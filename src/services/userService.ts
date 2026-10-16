@@ -42,7 +42,7 @@ export const getUserProfileApi = async (
 
 export const updateUserProfileApi = async (
   coreId: string,
-  data: Partial<UserProfile>,
+  data: Partial<UserProfile> & { otpTicket?: string },
 ): Promise<UserProfile> => {
   try {
     const response = await apiClient.put<{
@@ -51,6 +51,10 @@ export const updateUserProfileApi = async (
     }>(`/users/${coreId}`, data);
     return response.data.data;
   } catch (error: any) {
-    throw error.response?.data?.message || "Gagal memperbarui profil user";
+    throw (
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      "Gagal memperbarui profil user"
+    );
   }
 };

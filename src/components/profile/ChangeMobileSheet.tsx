@@ -1,6 +1,10 @@
 import OTPInput from "@/components/app/otp/OTPInput";
 import ValoraSheet from "@/components/ValoraSheet";
+import { refreshProfile } from "@/hooks/useProfileData";
+import { sendWaOtp, verifyWaOtp } from "@/services/otpService";
+import { updateUserProfileApi } from "@/services/userService";
 import { useT } from "@/stores/languageStore";
+import { useProfileStore } from "@/stores/profileStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
@@ -49,6 +53,7 @@ export default function ChangeMobileSheet({
   hasPhone,
 }: ChangeMobileSheetProps) {
   const t = useT();
+  const coreId = useProfileStore((s) => s.user?.coreId);
   const [step, setStep] = useState<Step>("old");
   const [oldCode, setOldCode] = useState("");
   const [newCode, setNewCode] = useState("");
@@ -60,43 +65,154 @@ export default function ChangeMobileSheet({
   const [verifStatus, setVerifStatus] = useState<
     "idle" | "verifying" | "success" | "error"
   >("idle");
+  const [sending, setSending] = useState(false);
+  const [errMsg, setErrMsg] = useState("");
+  const [newOtpSent, setNewOtpSent] = useState(false);
+  const [normalizedNewPhone, setNormalizedNewPhone] = useState("");
+  const [resendIn, setResendIn] = useState(0);
+  const [oldMasked, setOldMasked] = useState(currentMasked);
+
+  const resetState = () => {
+    setStep(hasPhone ? "old" : "new");
+    setOldCode("");
+    setNewCode("");
+    setPhone("");
+    setCountryCode("ID");
+    setCallingCode("+62");
+    setCountryPickerVisible(false);
+    setVerifStatus("idle");
+    setSending(false);
+    setErrMsg("");
+    setNewOtpSent(false);
+    setNormalizedNewPhone("");
+    setResendIn(0);
+    setOldMasked(currentMasked);
+    setOtpKey((k) => k + 1);
+  };
 
   useEffect(() => {
     if (visible) {
-      setStep(hasPhone ? "old" : "new");
-      setOldCode("");
-      setNewCode("");
-      setPhone("");
-      setCountryCode("ID");
-      setCallingCode("+62");
-      setCountryPickerVisible(false);
-      setVerifStatus("idle");
-      setOtpKey((k) => k + 1);
+      resetState();
+      // Nomor lama diverifikasi dulu — kirim OTP ke nomor saat ini.
+      if (hasPhone) {
+        sendOtp("verify-phone");
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, hasPhone]);
+
+  // Countdown resend
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const timer = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendIn]);
 
   const winW = Dimensions.get("window").width;
   const gap = 8;
   const boxSize = Math.min(52, Math.floor((winW - 40 - gap * 5) / 6));
 
-  const resend = () => {
-    setVerifStatus("idle");
-    setOtpKey((k) => k + 1);
-    if (step === "old") setOldCode("");
-    if (step === "new") setNewCode("");
+  const toE164Digits = (raw: string, code: string) => {
+    const cc = code.replace(/\D/g, "");
+    const local = raw.replace(/\D/g, "").replace(/^0+/, "");
+    return local ? `${cc}${local}` : "";
   };
 
-  const verify = (next: Step) => {
-    setVerifStatus("verifying");
-    // Placeholder for real OTP API call — UI-only flow for now.
-    setTimeout(() => {
+  const sendOtp = async (
+    purpose: "verify-phone" | "change-phone",
+    newPhone?: string,
+  ) => {
+    try {
+      setSending(true);
+      setErrMsg("");
+      const res = await sendWaOtp(purpose, { phone: newPhone });
+      setResendIn(res.resendAfter || 60);
+      return true;
+    } catch (err: any) {
+      setErrMsg(
+        err?.response?.data?.error || "Failed to send verification code.",
+      );
+      return false;
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const resend = async () => {
+    if (resendIn > 0 || sending) return;
+    setVerifStatus("idle");
+    setOtpKey((k) => k + 1);
+    if (step === "old") {
+      setOldCode("");
+      await sendOtp("verify-phone");
+    } else {
+      setNewCode("");
+      await sendOtp("change-phone", normalizedNewPhone);
+    }
+  };
+
+  const verifyOld = async () => {
+    try {
+      setVerifStatus("verifying");
+      setErrMsg("");
+      await verifyWaOtp("verify-phone", oldCode);
       setVerifStatus("success");
       setTimeout(() => {
         setVerifStatus("idle");
-        setStep(next);
+        setStep("new");
         setOtpKey((k) => k + 1);
-      }, 1200);
-    }, 900);
+      }, 1000);
+    } catch (err: any) {
+      setVerifStatus("error");
+      setErrMsg(err?.response?.data?.error || "Incorrect code.");
+      setOldCode("");
+      setOtpKey((k) => k + 1);
+    }
+  };
+
+  const sendNewOtp = async () => {
+    const normalized = toE164Digits(phone, callingCode);
+    if (!normalized) return;
+    setNormalizedNewPhone(normalized);
+    const ok = await sendOtp("change-phone", normalized);
+    if (ok) {
+      setNewOtpSent(true);
+      setNewCode("");
+      setOtpKey((k) => k + 1);
+    }
+  };
+
+  const verifyNew = async () => {
+    if (!coreId) return;
+    try {
+      setVerifStatus("verifying");
+      setErrMsg("");
+      const res = await verifyWaOtp("change-phone", newCode, {
+        phone: normalizedNewPhone,
+      });
+      if (!res.otpTicket) throw new Error("missing ticket");
+      await updateUserProfileApi(coreId, {
+        phoneNumber: normalizedNewPhone,
+        otpTicket: res.otpTicket,
+      });
+      refreshProfile(true);
+      setVerifStatus("success");
+      setTimeout(() => {
+        setVerifStatus("idle");
+        setStep("done");
+      }, 1000);
+    } catch (err: any) {
+      setVerifStatus("error");
+      setErrMsg(
+        typeof err === "string"
+          ? err
+          : err?.response?.data?.error ||
+              err?.message ||
+              "Verification failed. Please try again.",
+      );
+      setNewCode("");
+      setOtpKey((k) => k + 1);
+    }
   };
 
   const handleCountrySelect = (country: Country) => {
@@ -160,20 +276,30 @@ export default function ChangeMobileSheet({
             verificationStatus={verifStatus}
             onComplete={setOldCode}
           />
+          {!!errMsg && <Text style={styles.errText}>{errMsg}</Text>}
 
           <View style={styles.btnRow}>
             <TouchableOpacity
               style={styles.ghostBtn}
               onPress={resend}
-              disabled={verifStatus !== "idle"}
+              disabled={verifStatus !== "idle" || sending || resendIn > 0}
               activeOpacity={0.8}
             >
-              <Text style={styles.ghostText}>{t("common.resendCode")}</Text>
+              <Text
+                style={[
+                  styles.ghostText,
+                  resendIn > 0 && styles.ghostTextDisabled,
+                ]}
+              >
+                {resendIn > 0
+                  ? `${t("common.resendCode")} (${resendIn}s)`
+                  : t("common.resendCode")}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.goldBtnWrap}
               disabled={oldCode.length !== 6 || verifStatus !== "idle"}
-              onPress={() => verify("new")}
+              onPress={verifyOld}
               activeOpacity={0.85}
             >
               <LinearGradient
@@ -206,6 +332,7 @@ export default function ChangeMobileSheet({
             <TouchableOpacity
               style={styles.countryBox}
               onPress={() => setCountryPickerVisible(true)}
+              disabled={newOtpSent}
               activeOpacity={0.7}
             >
               <Text style={styles.countryFlag}>
@@ -215,42 +342,62 @@ export default function ChangeMobileSheet({
               <Ionicons name="chevron-down" size={14} color="#8A8A8A" />
             </TouchableOpacity>
             <TextInput
-              style={styles.phoneInput}
+              style={[styles.phoneInput, newOtpSent && { opacity: 0.5 }]}
               placeholder="8xx xxxx xxxx"
               placeholderTextColor="#5A5A5A"
               keyboardType="phone-pad"
+              editable={!newOtpSent}
               value={phone}
               onChangeText={(t) => setPhone(t.replace(/[^0-9 ]/g, ""))}
             />
           </View>
 
-          <Text style={styles.otpLabel}>{t("mobile.codeLabel")}</Text>
-          <OTPInput
-            key={`new-${otpKey}`}
-            boxSize={boxSize}
-            gap={gap}
-            showPaste={false}
-            verificationStatus={verifStatus}
-            onComplete={setNewCode}
-          />
+          {newOtpSent && (
+            <>
+              <Text style={styles.hint}>{t("mobile.newHint")}</Text>
+              <Text style={styles.otpLabel}>{t("mobile.codeLabel")}</Text>
+              <OTPInput
+                key={`new-${otpKey}`}
+                boxSize={boxSize}
+                gap={gap}
+                showPaste={false}
+                verificationStatus={verifStatus}
+                onComplete={setNewCode}
+              />
+            </>
+          )}
+          {!!errMsg && <Text style={styles.errText}>{errMsg}</Text>}
 
           <View style={styles.btnRow}>
-            <TouchableOpacity
-              style={styles.ghostBtn}
-              onPress={resend}
-              disabled={verifStatus !== "idle"}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.ghostText}>{t("common.resendCode")}</Text>
-            </TouchableOpacity>
+            {newOtpSent && (
+              <TouchableOpacity
+                style={styles.ghostBtn}
+                onPress={resend}
+                disabled={verifStatus !== "idle" || sending || resendIn > 0}
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={[
+                    styles.ghostText,
+                    resendIn > 0 && styles.ghostTextDisabled,
+                  ]}
+                >
+                  {resendIn > 0
+                    ? `${t("common.resendCode")} (${resendIn}s)`
+                    : t("common.resendCode")}
+                </Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={styles.goldBtnWrap}
               disabled={
-                newCode.length !== 6 ||
-                phone.trim().length < 8 ||
-                verifStatus !== "idle"
+                sending ||
+                verifStatus !== "idle" ||
+                (newOtpSent
+                  ? newCode.length !== 6
+                  : phone.replace(/\D/g, "").length < 8)
               }
-              onPress={() => verify("done")}
+              onPress={newOtpSent ? verifyNew : sendNewOtp}
               activeOpacity={0.85}
             >
               <LinearGradient
@@ -259,11 +406,16 @@ export default function ChangeMobileSheet({
                 end={{ x: 0, y: 1 }}
                 style={[
                   styles.goldBtn,
-                  (newCode.length !== 6 || phone.trim().length < 8) &&
+                  (sending ||
+                    (newOtpSent
+                      ? newCode.length !== 6
+                      : phone.replace(/\D/g, "").length < 8)) &&
                     styles.goldBtnDisabled,
                 ]}
               >
-                <Text style={styles.goldText}>{t("mobile.verifyUpdate")}</Text>
+                <Text style={styles.goldText}>
+                  {newOtpSent ? t("mobile.verifyUpdate") : t("mobile.sendCode")}
+                </Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -293,7 +445,7 @@ export default function ChangeMobileSheet({
                   <Text style={styles.doneCardLabel}>
                     {t("mobile.oldLabel")}
                   </Text>
-                  <Text style={styles.doneCardValue}>{currentMasked}</Text>
+                  <Text style={styles.doneCardValue}>{oldMasked}</Text>
                 </View>
                 <View style={styles.doneCardDivider} />
               </>
@@ -479,6 +631,15 @@ const styles = StyleSheet.create({
     color: GOLD,
     fontSize: 12,
     fontFamily: "Poppins_600SemiBold",
+  },
+  ghostTextDisabled: {
+    color: "#5A5A5A",
+  },
+  errText: {
+    color: "#FF6B6B",
+    fontSize: 11,
+    fontFamily: "Poppins_400Regular",
+    marginTop: 10,
   },
   goldBtnWrap: { flex: 1 },
   goldBtn: {
