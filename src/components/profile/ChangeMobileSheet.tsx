@@ -7,7 +7,7 @@ import { useT } from "@/stores/languageStore";
 import { useProfileStore } from "@/stores/profileStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -90,14 +90,18 @@ export default function ChangeMobileSheet({
     setOtpKey((k) => k + 1);
   };
 
+  // Reset + kirim OTP nomor lama hanya saat sheet dibuka.
+  // hasPhone bisa berubah saat flow berjalan (setelah update profil),
+  // jangan kirim ulang OTP gara-gara itu.
+  const prevVisible = useRef(false);
   useEffect(() => {
-    if (visible) {
+    if (visible && !prevVisible.current) {
       resetState();
-      // Nomor lama diverifikasi dulu — kirim OTP ke nomor saat ini.
       if (hasPhone) {
         sendOtp("verify-phone");
       }
     }
+    prevVisible.current = visible;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, hasPhone]);
 
