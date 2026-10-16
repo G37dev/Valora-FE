@@ -16,13 +16,13 @@ const GOLD = "#F5D13E";
 const PAD_X: Record<GuideStep, number> = {
   profileTab: 4,
   myInfo: 12,
-  security: 12,
+  security: 8,
   mobile: 12,
 };
 const PAD_Y: Record<GuideStep, number> = {
   profileTab: 4,
   myInfo: 16,
-  security: 12,
+  security: 8,
   mobile: 12,
 };
 const DIM_BORDER = 2000;

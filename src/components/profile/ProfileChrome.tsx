@@ -289,7 +289,17 @@ export function ProfileTabs({ active }: { active: string }) {
     );
     const timer = setTimeout(() => {
       secTabRef.current?.measureInWindow((x, y, width, height) => {
-        registerRect("security", { x, y, width, height });
+        /*
+         * tabItem flex-nya lebar (~25% layar) padahal target visualnya
+         * cuma label — inset rect biar hole nge-hug konten, bukan
+         * seluruh sel.
+         */
+        registerRect("security", {
+          x: x + width * 0.14,
+          y: y + 4,
+          width: width * 0.72,
+          height: height - 8,
+        });
       });
     }, 450);
     return () => clearTimeout(timer);
