@@ -21,6 +21,7 @@ export default function TabLayout() {
   const pathname = usePathname();
   const user = useProfileStore((s) => s.user);
   const guideActive = useGuideStore((s) => s.active);
+  const guideStep = useGuideStore((s) => s.step);
   const setGuideActive = useGuideStore((s) => s.setActive);
   const registerAction = useGuideStore((s) => s.registerAction);
   const registerRect = useGuideStore((s) => s.registerRect);
@@ -57,10 +58,10 @@ export default function TabLayout() {
          * jadi hole dipotong biar nggak nutupin nav bar Android.
          */
         registerRect("profileTab", {
-          x: x + slotW * 4,
-          y: y + 10,
-          width: slotW,
-          height: Math.min(h, 62),
+          x: x + slotW * 4 + 8,
+          y: y + 16,
+          width: slotW - 16,
+          height: Math.min(h, 50),
         });
       },
     );
@@ -194,6 +195,25 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
+
+      {/*
+       * Selama guide aktif dan step bukan profileTab, tab bar harus
+       * diblok — overlay screen-level nggak menjangkau tab bar yang
+       * di-render navigator di luar scene.
+       */}
+      {guideActive && guideStep !== "profileTab" && (
+        <View
+          pointerEvents="auto"
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: TAB_BAR_HEIGHT + bottomSpace + 12,
+            zIndex: 998,
+          }}
+        />
+      )}
 
       {/* Spotlight ke tab Profile saat step pertama guide */}
       <GuideOverlay step="profileTab" />
