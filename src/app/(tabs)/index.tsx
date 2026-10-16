@@ -3,7 +3,6 @@ import ComingSoonSheet from "@/components/ComingSoonSheet";
 import FixedHeader from "@/components/FixedHeader";
 import ValoraChart from "@/components/app/valoraChart";
 import LoginHeader from "@/components/loginHeader";
-import ChangeMobileSheet from "@/components/profile/ChangeMobileSheet";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -72,9 +71,6 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const [comingSoon, setComingSoon] = useState(false);
-
-  const [mobileSheet, setMobileSheet] = useState(false);
-  const [phoneBannerDismissed, setPhoneBannerDismissed] = useState(false);
 
   const router = useRouter();
 
@@ -251,41 +247,6 @@ export default function HomeScreen() {
         )}
 
         {/* ==================================================
-            ADD PHONE GUIDE — user tanpa nomor (mis. login Google)
-            diarahkan verifikasi nomor via WhatsApp OTP
-        ================================================== */}
-
-        {isLoggedIn && !userData?.phoneNumber && !phoneBannerDismissed && (
-          <View style={styles.phoneGuideCard}>
-            <View style={styles.phoneGuideIcon}>
-              <Ionicons name="logo-whatsapp" size={22} color="#25D366" />
-            </View>
-            <View style={styles.phoneGuideBody}>
-              <Text style={styles.phoneGuideTitle}>
-                {t("home.addPhone.title")}
-              </Text>
-              <Text style={styles.phoneGuideSub}>{t("home.addPhone.sub")}</Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setMobileSheet(true)}
-                style={styles.phoneGuideBtn}
-              >
-                <Text style={styles.phoneGuideBtnText}>
-                  {t("home.addPhone.cta")}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity
-              style={styles.phoneGuideClose}
-              onPress={() => setPhoneBannerDismissed(true)}
-              hitSlop={8}
-            >
-              <Ionicons name="close" size={14} color="#666" />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* ==================================================
             DAILY NEWS
         ================================================== */}
 
@@ -344,13 +305,6 @@ export default function HomeScreen() {
       <ComingSoonSheet
         visible={comingSoon}
         onClose={() => setComingSoon(false)}
-      />
-
-      <ChangeMobileSheet
-        visible={mobileSheet}
-        onClose={() => setMobileSheet(false)}
-        currentMasked=""
-        hasPhone={false}
       />
     </SafeAreaView>
   );
@@ -588,69 +542,6 @@ const styles = StyleSheet.create({
     color: "#888",
     fontSize: 12,
     fontFamily: "Poppins_400Regular",
-  },
-
-  // ======================================================
-  // PHONE GUIDE
-  // ======================================================
-
-  phoneGuideCard: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#141414",
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#25D36633",
-    padding: 14,
-    marginBottom: 20,
-  },
-
-  phoneGuideIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#25D3661a",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-
-  phoneGuideBody: {
-    flex: 1,
-  },
-
-  phoneGuideTitle: {
-    color: "#FFF",
-    fontSize: 13,
-    fontFamily: "Poppins_600SemiBold",
-  },
-
-  phoneGuideSub: {
-    color: "#888",
-    fontSize: 11,
-    lineHeight: 16,
-    fontFamily: "Poppins_400Regular",
-    marginTop: 3,
-  },
-
-  phoneGuideBtn: {
-    alignSelf: "flex-start",
-    backgroundColor: "#FBE678",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    marginTop: 10,
-  },
-
-  phoneGuideBtnText: {
-    color: "#141414",
-    fontSize: 11,
-    fontFamily: "Poppins_600SemiBold",
-  },
-
-  phoneGuideClose: {
-    padding: 4,
-    marginLeft: 6,
   },
 
   // ======================================================
