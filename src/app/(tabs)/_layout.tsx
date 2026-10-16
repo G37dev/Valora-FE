@@ -51,11 +51,16 @@ export default function TabLayout() {
       (x: number, y: number, w: number, h: number) => {
         if (!w || !h) return;
         const slotW = w / 5;
+        /*
+         * Bar-nya tinggi (80 + bottom inset, jorok 10px ke bawah
+         * layar) — icon+label cuma nempati ~56px bagian atas,
+         * jadi hole dipotong biar nggak nutupin nav bar Android.
+         */
         registerRect("profileTab", {
           x: x + slotW * 4,
-          y: y,
+          y: y + 2,
           width: slotW,
-          height: h,
+          height: Math.min(h, 56),
         });
       },
     );
