@@ -211,6 +211,8 @@ export default function TabLayout() {
             bottom: 0,
             height: TAB_BAR_HEIGHT + bottomSpace + 12,
             zIndex: 998,
+            elevation: 998,
+            backgroundColor: "rgba(0,0,0,0.001)",
           }}
         />
       )}
