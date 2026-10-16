@@ -92,10 +92,12 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
 
   if (!visible || !rect) return null;
 
+  // Clamp hole ke dalam layar — target di tepi (tab bar) tidak boleh
+  // bikin ring terpotong/melebihi layar.
   const rx = Math.max(rect.x - PAD, 0);
   const ry = Math.max(rect.y - PAD, 0);
-  const rw = Math.min(rect.width + PAD * 2, W);
-  const rh = rect.height + PAD * 2;
+  const rw = Math.min(rect.width + PAD * 2, W - rx);
+  const rh = Math.min(rect.height + PAD * 2, H - ry);
 
   // Tooltip di bawah hole kalau ada ruang, kalau tidak di atas.
   const tooltipBelow = ry + rh + 170 < H;
@@ -152,7 +154,10 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
         onPress={onHolePress}
         style={[styles.hole, { top: ry, left: rx, width: rw, height: rh }]}
       >
-        <Animated.View style={[styles.ring, { opacity: ringOpacity }]} />
+        {/* ring statis + ring berdenyut — murni opacity, tanpa
+            transform/shadow supaya tidak overflow & tidak flicker */}
+        <View style={styles.ringStatic} />
+        <Animated.View style={[styles.ringPulse, { opacity: ringOpacity }]} />
       </TouchableOpacity>
 
       {/* Arrow */}
@@ -213,7 +218,17 @@ const styles = StyleSheet.create({
     position: "absolute",
     borderRadius: 16,
   },
-  ring: {
+  ringStatic: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "rgba(245,209,62,0.5)",
+  },
+  ringPulse: {
     position: "absolute",
     top: 0,
     left: 0,
@@ -222,11 +237,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 2.5,
     borderColor: GOLD,
-    shadowColor: GOLD,
-    shadowOpacity: 0.9,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 8,
   },
   arrow: {
     position: "absolute",

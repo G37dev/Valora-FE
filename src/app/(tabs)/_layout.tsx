@@ -4,8 +4,8 @@ import { useProfileStore } from "@/stores/profileStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, Tabs, usePathname } from "expo-router";
-import { useEffect, useRef } from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useEffect } from "react";
+import { Image, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Route yang boleh diakses selama phone guide aktif.
@@ -16,45 +16,6 @@ const GUIDE_ALLOWED_PATHS = new Set([
   "/profile/security",
 ]);
 
-function ProfileTabButton(props: any) {
-  const ref = useRef<View>(null);
-  const active = useGuideStore((s) => s.active);
-  const registerRect = useGuideStore((s) => s.registerRect);
-
-  const measure = () => {
-    setTimeout(() => {
-      ref.current?.measureInWindow((x, y, width, height) => {
-        registerRect("profileTab", { x, y, width, height });
-      });
-    }, 250);
-  };
-
-  useEffect(() => {
-    if (active) measure();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
-
-  return (
-    <View
-      ref={ref}
-      collapsable={false}
-      style={{ flex: 1 }}
-      onLayout={active ? measure : undefined}
-    >
-      <TouchableOpacity
-        activeOpacity={0.7}
-        style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        onPress={props.onPress}
-        onLongPress={props.onLongPress}
-        accessibilityState={props.accessibilityState}
-        accessibilityLabel={props.accessibilityLabel}
-      >
-        {props.children}
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
@@ -62,6 +23,8 @@ export default function TabLayout() {
   const guideActive = useGuideStore((s) => s.active);
   const setGuideActive = useGuideStore((s) => s.setActive);
   const registerAction = useGuideStore((s) => s.registerAction);
+  const registerRect = useGuideStore((s) => s.registerRect);
+  const { width: winW, height: winH } = useWindowDimensions();
 
   /*
    * Guide wajib verifikasi nomor — aktif selama user login tapi belum
@@ -73,11 +36,32 @@ export default function TabLayout() {
     if (needsGuide !== guideActive) setGuideActive(needsGuide);
     if (needsGuide) {
       registerAction("profileTab", () => router.push("/profile" as never));
+      /*
+       * Rect tab Profile dihitung dari geometri tab bar (fixed):
+       * left/right 20, 5 slot sama lebar, Profile = slot terakhir,
+       * tinggi bar 80 + insets.bottom, nempel di bawah layar.
+       */
+      const slotW = (winW - 40) / 5;
+      registerRect("profileTab", {
+        x: 20 + slotW * 4,
+        y: winH - 90,
+        width: slotW,
+        height: 90,
+      });
       if (!GUIDE_ALLOWED_PATHS.has(pathname)) {
         router.replace("/");
       }
     }
-  }, [user, pathname, guideActive, setGuideActive, registerAction]);
+  }, [
+    user,
+    pathname,
+    guideActive,
+    setGuideActive,
+    registerAction,
+    registerRect,
+    winW,
+    winH,
+  ]);
 
   const TAB_BAR_HEIGHT = 80;
   const bottomSpace = Math.max(insets.bottom, 0);
@@ -200,7 +184,6 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => (
               <Ionicons name="person" size={20} color={color} />
             ),
-            tabBarButton: (props) => <ProfileTabButton {...props} />,
           }}
         />
       </Tabs>
