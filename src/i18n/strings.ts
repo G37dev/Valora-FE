@@ -189,6 +189,10 @@ export const STRINGS = {
     "mobile.verifyUpdate": "Verify & Update",
     "mobile.sendCode": "Send OTP Code",
     "mobile.newHint": "We sent a 6-digit code to your new number",
+    "home.addPhone.title": "Verify your WhatsApp number",
+    "home.addPhone.sub":
+      "Add your number to enable WhatsApp login codes and extra account security.",
+    "home.addPhone.cta": "Verify Now",
     "mobile.updated.sub": "Your mobile number has been updated succesfully",
     "mobile.added.sub": "Your mobile number has been added succesfully",
     "mobile.newLabel": "New Number",
@@ -403,6 +407,10 @@ export const STRINGS = {
     "mobile.verifyUpdate": "Verifikasi & Perbarui",
     "mobile.sendCode": "Kirim Kode OTP",
     "mobile.newHint": "Kami mengirim kode 6 digit ke nomor barumu",
+    "home.addPhone.title": "Verifikasi nomor WhatsApp kamu",
+    "home.addPhone.sub":
+      "Tambahkan nomor untuk aktifkan kode login via WhatsApp dan keamanan ekstra.",
+    "home.addPhone.cta": "Verifikasi Sekarang",
     "mobile.updated.sub": "Nomor ponselmu berhasil diperbarui",
     "mobile.added.sub": "Nomor ponselmu berhasil ditambahkan",
     "mobile.newLabel": "Nomor Baru",
