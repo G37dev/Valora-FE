@@ -1,6 +1,7 @@
 import OTPInput from "@/components/app/otp/OTPInput";
 import ValoraSheet from "@/components/ValoraSheet";
 import { refreshProfile } from "@/hooks/useProfileData";
+import { notifyApp } from "@/services/notificationService";
 import { sendWaOtp, verifyWaOtp } from "@/services/otpService";
 import { updateUserProfileApi } from "@/services/userService";
 import { useT } from "@/stores/languageStore";
@@ -160,6 +161,10 @@ export default function ChangeMobileSheet({
       setVerifStatus("verifying");
       setErrMsg("");
       await verifyWaOtp("verify-phone", oldCode);
+      notifyApp({
+        title: t("notif.otpOk.title"),
+        body: t("notif.otpOk.body"),
+      });
       setVerifStatus("success");
       setTimeout(() => {
         setVerifStatus("idle");
@@ -168,7 +173,12 @@ export default function ChangeMobileSheet({
       }, 1000);
     } catch (err: any) {
       setVerifStatus("error");
-      setErrMsg(err?.response?.data?.error || "Incorrect code.");
+      const msg = err?.response?.data?.error || "Incorrect code.";
+      setErrMsg(msg);
+      notifyApp({
+        title: t("notif.otpFail.title"),
+        body: t("notif.otpFail.body"),
+      });
       setOldCode("");
       setOtpKey((k) => k + 1);
     }
@@ -200,6 +210,14 @@ export default function ChangeMobileSheet({
         otpTicket: res.otpTicket,
       });
       refreshProfile(true);
+      notifyApp({
+        title: hasPhone
+          ? t("notif.phoneUpdated.title")
+          : t("notif.phoneAdded.title"),
+        body: hasPhone
+          ? t("notif.phoneUpdated.body")
+          : t("notif.phoneAdded.body"),
+      });
       setVerifStatus("success");
       setTimeout(() => {
         setVerifStatus("idle");
@@ -214,6 +232,10 @@ export default function ChangeMobileSheet({
               err?.message ||
               "Verification failed. Please try again.",
       );
+      notifyApp({
+        title: t("notif.phoneFail.title"),
+        body: t("notif.phoneFail.body"),
+      });
       setNewCode("");
       setOtpKey((k) => k + 1);
     }
