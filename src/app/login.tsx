@@ -29,6 +29,7 @@ import {
 } from "../services/authService";
 import { setAuthToken } from "../services/authStorage";
 import { notifyApp, registerPushToken } from "../services/notificationService";
+import { sendWaOtp, verifyWaOtp } from "../services/otpService";
 import {
   authenticateWithPasskey,
   isPasskeySupported,
@@ -306,6 +307,44 @@ export default function LoginScreen() {
       setPasswordLoading(false);
     }
   };
+
+  const handleSendWaOtp = async (): Promise<string | null> => {
+    try {
+      const res = await sendWaOtp("login", { token: preAuthToken });
+      return res.phone;
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to send WhatsApp code.";
+      showAlert("OTP Failed", message);
+      return null;
+    }
+  };
+
+  const handleVerifyWaOtp = async (code: string): Promise<boolean> => {
+    try {
+      setPasswordLoading(true);
+      const res = await verifyWaOtp("login", code, { token: preAuthToken });
+      if (!res.token) return false;
+      await setAuthToken(res.token);
+      if (res.user?.coreId) {
+        await AsyncStorage.setItem("coreId", res.user.coreId);
+      }
+      if (res.user) {
+        await AsyncStorage.setItem("userData", JSON.stringify(res.user));
+        useProfileStore.getState().setUser(res.user);
+      }
+      return Boolean(res.token);
+    } catch (error: any) {
+      console.log("WA OTP VERIFY ERROR:", error);
+      const message = error?.response?.data?.error;
+      if (message) showAlert("Verification Failed", message);
+      return false;
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -576,6 +615,8 @@ export default function LoginScreen() {
         onClose={() => setShowTwoFactorVerif(false)}
         onVerifyTotp={handleVerifyTotpCode}
         onVerifyPasskey={handleVerifyPasskey}
+        onSendWaOtp={handleSendWaOtp}
+        onVerifyWaOtp={handleVerifyWaOtp}
         passkeyAvailable={
           Boolean(availableMethods?.passkey) && isPasskeySupported()
         }

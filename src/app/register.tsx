@@ -1,7 +1,7 @@
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -24,8 +24,10 @@ import PasswordRequirements, {
   isPasswordValid,
 } from "../components/PasswordRequirments";
 
+import WhatsappOtpSheet from "../components/app/otp/WhatsappOtpSheet";
 import { registerApi } from "../services/authService";
 import { notifyApp } from "../services/notificationService";
+import { sendWaOtp, verifyWaOtp } from "../services/otpService";
 
 export default function RegisterScreen() {
   // =========================================================
@@ -58,6 +60,16 @@ export default function RegisterScreen() {
   const [showReferral, setShowReferral] = useState(false);
 
   const [agreeTerms, setAgreeTerms] = useState(false);
+
+  // =========================================================
+  // WA OTP VERIFICATION
+  // =========================================================
+
+  const [waOtpVisible, setWaOtpVisible] = useState(false);
+  const [waOtpPhone, setWaOtpPhone] = useState("");
+  const [waResendAfter, setWaResendAfter] = useState(60);
+  const pendingRegRef = useRef<Record<string, string> | null>(null);
+  const waTicketRef = useRef<string | null>(null);
 
   // =========================================================
   // HELPERS
@@ -245,18 +257,82 @@ export default function RegisterScreen() {
     const formattedPhone = `${callingCode}${cleanPhoneNumber}`;
 
     // =====================================================
-    // API
+    // WA OTP — verifikasi nomor sebelum akun dibuat
     // =====================================================
+
+    pendingRegRef.current = {
+      firstName,
+      lastName,
+      email: email.trim().toLowerCase(),
+      password,
+      phoneNumber: formattedPhone,
+    };
+    waTicketRef.current = null;
+
+    try {
+      setLoading(true);
+
+      const otp = await sendWaOtp("register", { phone: formattedPhone });
+      setWaOtpPhone(otp.phone);
+      setWaResendAfter(otp.resendAfter || 60);
+      setWaOtpVisible(true);
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to send verification code.";
+      showAlert("OTP Failed", message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =========================================================
+  // WA OTP HANDLERS
+  // =========================================================
+
+  const handleVerifyWaCode = async (code: string): Promise<boolean> => {
+    try {
+      const res = await verifyWaOtp("register", code, {
+        phone: waOtpPhone,
+      });
+      waTicketRef.current = res.otpTicket || null;
+      return Boolean(res.ok);
+    } catch (error: any) {
+      const message = error?.response?.data?.error;
+      if (message) showAlert("Verification Failed", message);
+      return false;
+    }
+  };
+
+  const handleResendWaOtp = async () => {
+    try {
+      const otp = await sendWaOtp("register", { phone: waOtpPhone });
+      setWaResendAfter(otp.resendAfter || 60);
+    } catch (error: any) {
+      const message = error?.response?.data?.error;
+      if (message) showAlert("OTP Failed", message);
+    }
+  };
+
+  // =========================================================
+  // REGISTER (setelah OTP terverifikasi)
+  // =========================================================
+
+  const completeRegistration = async () => {
+    const pending = pendingRegRef.current;
+    if (!pending) return;
 
     try {
       setLoading(true);
 
       const response = await registerApi({
-        firstName,
-        lastName,
-        email: email.trim().toLowerCase(),
-        password,
-        phoneNumber: formattedPhone,
+        firstName: pending.firstName,
+        lastName: pending.lastName,
+        email: pending.email,
+        password: pending.password,
+        phoneNumber: pending.phoneNumber,
+        otpTicket: waTicketRef.current || undefined,
       });
 
       showAlert("Success", response.message || "Account created successfully!");
@@ -716,6 +792,22 @@ HEADER
         }}
         onSelect={handleCountrySelect}
         onClose={() => setCountryPickerVisible(false)}
+      />
+
+      {/* =================================================
+      WA OTP VERIFICATION
+  ================================================= */}
+      <WhatsappOtpSheet
+        visible={waOtpVisible}
+        phone={waOtpPhone}
+        resendAfter={waResendAfter}
+        onVerify={handleVerifyWaCode}
+        onResend={handleResendWaOtp}
+        onClose={() => setWaOtpVisible(false)}
+        onSuccess={() => {
+          setWaOtpVisible(false);
+          completeRegistration();
+        }}
       />
     </SafeAreaView>
   );

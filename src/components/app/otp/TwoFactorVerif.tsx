@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 
+import { maskPhone } from "../../../services/otpService";
 import Text from "../../CustomText";
 import ValoraSheet from "../../ValoraSheet";
 import OTPVerificationScreen from "./OTPVerificationScreen";
@@ -19,6 +20,8 @@ interface TwoFactorVerifProps {
   onVerifyTotp: (code: string) => Promise<boolean>;
   onVerifyPasskey?: () => Promise<boolean>;
   passkeyAvailable?: boolean;
+  onSendWaOtp?: () => Promise<string | null>;
+  onVerifyWaOtp?: (code: string) => Promise<boolean>;
   onSuccess: () => void;
 }
 
@@ -29,10 +32,17 @@ export default function TwoFactorVerif({
   onVerifyTotp,
   onVerifyPasskey,
   passkeyAvailable = false,
+  onSendWaOtp,
+  onVerifyWaOtp,
   onSuccess,
 }: TwoFactorVerifProps) {
   const [totpCode, setTotpCode] = useState("");
   const [showTotpFallback, setShowTotpFallback] = useState(false);
+  const [waMode, setWaMode] = useState(false);
+  const [waPhone, setWaPhone] = useState("");
+  const [waCooldown, setWaCooldown] = useState(0);
+  const [waResending, setWaResending] = useState(false);
+  const cooldownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [verificationStatus, setVerificationStatus] = useState<
     "idle" | "verifying" | "success" | "error"
@@ -43,6 +53,9 @@ export default function TwoFactorVerif({
       setTotpCode("");
       setVerificationStatus("idle");
       setShowTotpFallback(false);
+      setWaMode(false);
+      setWaPhone("");
+      if (cooldownTimer.current) clearInterval(cooldownTimer.current);
       return;
     }
 
@@ -85,7 +98,9 @@ export default function TwoFactorVerif({
     setVerificationStatus("verifying");
 
     try {
-      const success = await onVerifyTotp(totpCode);
+      const success = waMode
+        ? await onVerifyWaOtp!(totpCode)
+        : await onVerifyTotp(totpCode);
 
       if (!success) {
         setVerificationStatus("error");
@@ -112,6 +127,41 @@ export default function TwoFactorVerif({
         setVerificationStatus("idle");
         setTotpCode("");
       }, 700);
+    }
+  };
+
+  const startWaCooldown = () => {
+    if (cooldownTimer.current) clearInterval(cooldownTimer.current);
+    setWaCooldown(60);
+    cooldownTimer.current = setInterval(
+      () => setWaCooldown((c) => (c > 0 ? c - 1 : 0)),
+      1000,
+    );
+  };
+
+  const enterWaMode = async () => {
+    if (!onSendWaOtp) return;
+    setWaMode(true);
+    startWaCooldown();
+    const phone = await onSendWaOtp();
+    if (phone) {
+      setWaPhone(phone);
+    } else {
+      setWaMode(false);
+    }
+  };
+
+  const handleResendWa = async () => {
+    if (!onSendWaOtp || waCooldown > 0 || waResending) return;
+    setWaResending(true);
+    try {
+      const phone = await onSendWaOtp();
+      if (phone) {
+        setWaPhone(phone);
+        startWaCooldown();
+      }
+    } finally {
+      setWaResending(false);
     }
   };
 
@@ -182,9 +232,11 @@ export default function TwoFactorVerif({
         <View style={styles.iconContainer}>
           <Ionicons
             name={
-              passkeyAvailable && !showTotpFallback
-                ? "finger-print-outline"
-                : "shield-checkmark-outline"
+              waMode
+                ? "logo-whatsapp"
+                : passkeyAvailable && !showTotpFallback
+                  ? "finger-print-outline"
+                  : "shield-checkmark-outline"
             }
             size={28}
             color="#FBE87C"
@@ -194,12 +246,87 @@ export default function TwoFactorVerif({
         <Text style={styles.modalTitle}>Two-Factor Authentication</Text>
 
         <Text style={styles.modalSubtitle}>
-          {passkeyAvailable && !showTotpFallback
-            ? "Verify your identity with your passkey."
-            : "Enter the 6-digit code from your authenticator app."}
+          {waMode
+            ? `Enter the 6-digit code sent to WhatsApp ${maskPhone(waPhone) || "your number"}.`
+            : passkeyAvailable && !showTotpFallback
+              ? "Verify your identity with your passkey."
+              : "Enter the 6-digit code from your authenticator app."}
         </Text>
 
-        {passkeyAvailable && onVerifyPasskey && !showTotpFallback ? (
+        {waMode && onVerifyWaOtp ? (
+          <View style={styles.login2FAContainer}>
+            <View style={styles.verificationContainer}>
+              <OTPVerificationScreen
+                onVerifyOTP={handleOTPComplete}
+                verificationStatus={verificationStatus}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.submitModalBtn,
+                (loading ||
+                  verificationStatus === "verifying" ||
+                  verificationStatus === "success") &&
+                  styles.disabledButton,
+              ]}
+              onPress={handleVerify}
+              disabled={
+                loading ||
+                verificationStatus === "verifying" ||
+                verificationStatus === "success" ||
+                totpCode.length !== 6
+              }
+              activeOpacity={0.8}
+            >
+              {loading || verificationStatus === "verifying" ? (
+                <ActivityIndicator color="#000" />
+              ) : verificationStatus === "success" ? (
+                <Ionicons name="checkmark" size={22} color="#000" />
+              ) : (
+                <Text style={styles.submitModalBtnText}>Verify Login</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.fallbackLink}
+              onPress={handleResendWa}
+              disabled={waCooldown > 0 || waResending || loading}
+            >
+              <Text
+                style={[
+                  styles.fallbackLinkText,
+                  (waCooldown > 0 || waResending) &&
+                    styles.fallbackLinkDisabled,
+                ]}
+              >
+                {waResending
+                  ? "Sending..."
+                  : waCooldown > 0
+                    ? `Resend code in ${waCooldown}s`
+                    : "Resend code"}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.fallbackLink}
+              onPress={() => {
+                setWaMode(false);
+                setShowTotpFallback(true);
+                setTotpCode("");
+              }}
+              disabled={
+                loading ||
+                verificationStatus === "verifying" ||
+                verificationStatus === "success"
+              }
+            >
+              <Text style={styles.fallbackLinkText}>
+                Use authenticator code instead
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : passkeyAvailable && onVerifyPasskey && !showTotpFallback ? (
           /*
            * Passkey jadi metode utama — ceremony otomatis
            * ke-trigger pas modal kebuka; TOTP jadi fallback.
@@ -252,6 +379,22 @@ export default function TwoFactorVerif({
                 Use authenticator code instead
               </Text>
             </TouchableOpacity>
+
+            {onSendWaOtp && onVerifyWaOtp && (
+              <TouchableOpacity
+                style={styles.fallbackLink}
+                onPress={enterWaMode}
+                disabled={
+                  loading ||
+                  verificationStatus === "verifying" ||
+                  verificationStatus === "success"
+                }
+              >
+                <Text style={styles.fallbackLinkText}>
+                  Send code via WhatsApp instead
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           <View style={styles.login2FAContainer}>
@@ -299,6 +442,22 @@ export default function TwoFactorVerif({
                 }
               >
                 <Text style={styles.fallbackLinkText}>Use passkey instead</Text>
+              </TouchableOpacity>
+            )}
+
+            {onSendWaOtp && onVerifyWaOtp && (
+              <TouchableOpacity
+                style={styles.fallbackLink}
+                onPress={enterWaMode}
+                disabled={
+                  loading ||
+                  verificationStatus === "verifying" ||
+                  verificationStatus === "success"
+                }
+              >
+                <Text style={styles.fallbackLinkText}>
+                  Send code via WhatsApp instead
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -449,6 +608,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Poppins_500Medium",
     textAlign: "center",
+  },
+
+  fallbackLinkDisabled: {
+    color: "#555555",
   },
 
   cancelButton: {
