@@ -13,7 +13,12 @@ import {
 import Text from "../CustomText";
 
 const GOLD = "#F5D13E";
-const PAD = 4;
+const PAD: Record<GuideStep, number> = {
+  profileTab: 4,
+  myInfo: 12,
+  security: 12,
+  mobile: 12,
+};
 const DIM_BORDER = 2000;
 const STEP_INDEX: Record<GuideStep, number> = {
   profileTab: 1,
@@ -58,11 +63,11 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
         useNativeDriver: true,
       }),
     ]).start();
-    // Scale pulse halus di hole — breathe 1 ↔ 1.05, nggak jomplang.
+    // Scale pulse ke dalem — 1 ↔ 0.96, nggak pernah keluar bounds.
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, {
-          toValue: 1.05,
+          toValue: 0.96,
           duration: 900,
           easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
@@ -82,10 +87,11 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
   if (!visible || !rect) return null;
 
   // Clamp hole ke dalam layar.
-  const rx = Math.max(rect.x - PAD, 0);
-  const ry = Math.max(rect.y - PAD, 0);
-  const rw = Math.min(rect.width + PAD * 2, W - rx);
-  const rh = Math.min(rect.height + PAD * 2, H - ry);
+  const pad = PAD[step];
+  const rx = Math.max(rect.x - pad, 0);
+  const ry = Math.max(rect.y - pad, 0);
+  const rw = Math.min(rect.width + pad * 2, W - rx);
+  const rh = Math.min(rect.height + pad * 2, H - ry);
 
   const R = 16;
 
@@ -224,7 +230,7 @@ const styles = StyleSheet.create({
   hole: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.5)",
+    borderColor: "rgba(255,255,255,0.2)",
   },
   tooltip: {
     position: "absolute",
