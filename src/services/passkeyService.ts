@@ -63,10 +63,7 @@ export async function authenticateWithPasskey(preAuthToken: string) {
 }
 
 export async function listPasskeys(token: string): Promise<PasskeyInfo[]> {
-  const { data } = await apiClient.get(
-    "/auth/passkey/list",
-    authHeader(token),
-  );
+  const { data } = await apiClient.get("/auth/passkey/list", authHeader(token));
   return data.passkeys || [];
 }
 
