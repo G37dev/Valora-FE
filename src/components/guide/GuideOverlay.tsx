@@ -14,6 +14,7 @@ import Text from "../CustomText";
 
 const GOLD = "#F5D13E";
 const PAD = 4;
+const DIM_BORDER = 2000;
 const STEP_INDEX: Record<GuideStep, number> = {
   profileTab: 1,
   myInfo: 2,
@@ -102,6 +103,25 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
       {dimPanel({ top: ry, left: 0, width: rx, height: rh }, "left")}
       {dimPanel({ top: ry, left: rx + rw, right: 0, height: rh }, "right")}
 
+      {/*
+       * Frame dim dengan border tebal — inner edge borderRadius
+       * ngikut otomatis, jadi sudut hole beneran rounded tanpa
+       * patch terpisah.
+       */}
+      <View
+        pointerEvents="none"
+        style={[
+          styles.frame,
+          {
+            top: ry - DIM_BORDER,
+            left: rx - DIM_BORDER,
+            width: rw + DIM_BORDER * 2,
+            height: rh + DIM_BORDER * 2,
+            borderRadius: R + DIM_BORDER,
+          },
+        ]}
+      />
+
       {/* HOLE — border tipis + tap = aksi step */}
       <TouchableOpacity
         activeOpacity={1}
@@ -165,6 +185,12 @@ const styles = StyleSheet.create({
   },
   panelTint: {
     backgroundColor: "rgba(0,0,0,0.82)",
+  },
+  frame: {
+    position: "absolute",
+    borderWidth: DIM_BORDER,
+    borderColor: "rgba(0,0,0,0.82)",
+    backgroundColor: "transparent",
   },
   hole: {
     position: "absolute",
