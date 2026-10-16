@@ -1,7 +1,7 @@
 import { GuideStep, useGuideStore } from "@/stores/guideStore";
 import { useT } from "@/stores/languageStore";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -107,11 +107,29 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
 
   const R = 16;
 
-  // Tooltip di bawah hole kalau ada ruang, kalau tidak di atas.
-  const tooltipBelow = ry + rh + 170 < H;
+  /*
+   * Tooltip — tinggi diukur asli (onLayout) jadi i18n/font-scale
+   * nggak bikin salah posisi. Flip ke atas kalau bawah nggak muat,
+   * clamp supaya nggak pernah keluar layar. Max-width 460 biar
+   * tetep proporsional di tablet.
+   */
+  const [tipH, setTipH] = useState(150);
   const tailSize = 10;
-  // Posisi horizontal pointer — segaris dengan tengah hole.
+  const gap = tailSize + 8;
+  const tipW = Math.min(W - 40, 460);
+  const tipLeft = (W - tipW) / 2;
   const holeCenter = rx + rw / 2;
+
+  const fitsBelow = ry + rh + gap + tipH + 8 <= H;
+  const fitsAbove = ry - gap - tipH - 8 >= 0;
+  const tooltipBelow = fitsBelow || !fitsAbove;
+
+  const tipTop = tooltipBelow
+    ? Math.min(ry + rh + gap, H - tipH - 8)
+    : undefined;
+  const tipBottom = tooltipBelow
+    ? undefined
+    : Math.min(H - ry + gap, H - tipH - 8);
 
   const onHolePress = () => {
     useGuideStore.getState().actions[step]?.();
@@ -179,13 +197,14 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
       {/* Tooltip bubble */}
       <Animated.View
         pointerEvents="none"
+        onLayout={(e) => setTipH(e.nativeEvent.layout.height)}
         style={[
           styles.tooltip,
           {
-            left: 20,
-            right: 20,
-            top: tooltipBelow ? ry + rh + tailSize + 8 : undefined,
-            bottom: tooltipBelow ? undefined : H - ry + tailSize + 8,
+            left: tipLeft,
+            width: tipW,
+            top: tipTop,
+            bottom: tipBottom,
             transform: [{ scale: pop }],
           },
         ]}
@@ -196,8 +215,8 @@ export default function GuideOverlay({ step }: { step: GuideStep }) {
             styles.tail,
             {
               left: Math.min(
-                Math.max(holeCenter - 20 - tailSize / 2, 16),
-                W - 40 - 16 - tailSize,
+                Math.max(holeCenter - tipLeft - tailSize / 2, 16),
+                tipW - 16 - tailSize,
               ),
               ...(tooltipBelow
                 ? { top: -tailSize / 2 }

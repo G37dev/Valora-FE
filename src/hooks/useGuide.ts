@@ -1,7 +1,7 @@
 import { GuideStep, useGuideStore } from "@/stores/guideStore";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef } from "react";
-import { View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 
 /**
  * Dipanggil screen yang fokus — mengklaim step guide miliknya.
@@ -29,16 +29,22 @@ export function useGuideMeasure<T extends View>(step: GuideStep) {
   const active = useGuideStore((s) => s.active);
   const curStep = useGuideStore((s) => s.step);
   const registerRect = useGuideStore((s) => s.registerRect);
+  const { width, height } = useWindowDimensions();
 
   useEffect(() => {
     if (!active || curStep !== step) return;
     const timer = setTimeout(() => {
-      ref.current?.measureInWindow((x, y, width, height) => {
-        registerRect(step, { x, y, width, height });
+      ref.current?.measureInWindow((x, y, w, h) => {
+        registerRect(step, { x, y, width: w, height: h });
       });
     }, 450);
     return () => clearTimeout(timer);
-  }, [active, curStep, step, registerRect]);
+    /*
+     * width/height di deps — rotasi, split-screen, foldable, atau
+     * perubahan font-scale yang mengubah layout memicu re-measure,
+     * jadi rect guide nggak stale.
+     */
+  }, [active, curStep, step, registerRect, width, height]);
 
   return ref;
 }

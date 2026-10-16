@@ -47,21 +47,26 @@ export default function TabLayout() {
    * menghitung manual dari insets/dimensi layar.
    */
   const tabBarRef = useRef<View>(null);
+  const insetsBottomRef = useRef(0);
+  insetsBottomRef.current = Math.max(insets.bottom, 0);
   const onTabBarLayout = useCallback(() => {
     tabBarRef.current?.measureInWindow(
       (x: number, y: number, w: number, h: number) => {
         if (!w || !h) return;
         const slotW = w / 5;
         /*
-         * Bar-nya tinggi (80 + bottom inset, jorok 10px ke bawah
-         * layar) — icon+label cuma nempati ~56px bagian atas,
-         * jadi hole dipotong biar nggak nutupin nav bar Android.
+         * Zona konten icon+label: paddingTop 10 di atas, paddingBottom
+         * (insets) + 10px jorok layar di bawah. Dihitung proporsional
+         * dari ukuran bar terukur — responsive ke device/inset apapun.
          */
+        const contentTop = 10;
+        const contentBottom = h - insetsBottomRef.current - 10;
+        const contentH = Math.max(contentBottom - contentTop, 34);
         registerRect("profileTab", {
-          x: x + slotW * 4 + 8,
-          y: y + 12,
-          width: slotW - 16,
-          height: Math.min(h, 50),
+          x: x + slotW * 4 + slotW * 0.1,
+          y: y + contentTop + 4,
+          width: slotW * 0.8,
+          height: contentH - 8,
         });
       },
     );
