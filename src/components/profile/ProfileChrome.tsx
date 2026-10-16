@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import type { StringKey } from "../../i18n/strings";
 import type { UserProfile } from "../../services/userService";
+import { useGuideStore } from "../../stores/guideStore";
 import { useT } from "../../stores/languageStore";
 import ValoraSheet from "../ValoraSheet";
 
@@ -274,11 +275,28 @@ export function SubPageShell({
 export function ProfileTabs({ active }: { active: string }) {
   const router = useRouter();
   const t = useT();
+  const guideActive = useGuideStore((s) => s.active);
+  const registerRect = useGuideStore((s) => s.registerRect);
+  const secTabRef = useRef<View>(null);
+
+  // Ukuran tab "Security" dipakai spotlight guide — posisi sama di
+  // semua screen, jadi aman diukur dari screen manapun.
+  useEffect(() => {
+    if (!guideActive) return;
+    const timer = setTimeout(() => {
+      secTabRef.current?.measureInWindow((x, y, width, height) => {
+        registerRect("security", { x, y, width, height });
+      });
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [guideActive, registerRect]);
+
   return (
     <View style={styles.tabsRow}>
       {TABS.map((tab) => (
         <TouchableOpacity
           key={tab.key}
+          ref={tab.key === "security" ? (secTabRef as any) : undefined}
           style={styles.tabItem}
           onPress={() => {
             if (tab.key !== active)

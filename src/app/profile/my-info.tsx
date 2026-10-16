@@ -1,4 +1,5 @@
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import GuideOverlay from "@/components/guide/GuideOverlay";
 import {
   NicknameSheet,
   VivaloraIdSheet,
@@ -17,6 +18,7 @@ import {
   SettingRow,
   SubPageShell,
 } from "@/components/profile/ProfileChrome";
+import { useGuideStep } from "@/hooks/useGuide";
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import { updateUserProfileApi } from "@/services/userService";
 import { useT } from "@/stores/languageStore";
@@ -39,6 +41,7 @@ export default function MyInfoScreen() {
   const insets = useSafeAreaInsets();
   const data = useProfileData();
   const sec = useSecurityLevel(data);
+  useGuideStep("security");
   const [comingSoon, setComingSoon] = useState(false);
   const [avatarPicker, setAvatarPicker] = useState(false);
   const [memberSheet, setMemberSheet] = useState(false);
@@ -241,6 +244,8 @@ export default function MyInfoScreen() {
           setAvatarPicker(false);
         }}
       />
+
+      <GuideOverlay step="security" />
     </View>
   );
 }

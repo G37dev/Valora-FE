@@ -204,6 +204,18 @@ export const STRINGS = {
     "notif.phoneAdded.body": "Your mobile number has been added successfully.",
     "notif.phoneFail.title": "Verification Failed",
     "notif.phoneFail.body": "We couldn't verify your number. Please try again.",
+    "guide.tag": "Step",
+    "guide.profileTab.title": "Go to your Profile",
+    "guide.profileTab.body":
+      "Tap the Profile tab to start securing your account.",
+    "guide.myInfo.title": "Open My Info",
+    "guide.myInfo.body": "Tap your profile card to open My Info.",
+    "guide.security.title": "Open Security",
+    "guide.security.body":
+      "Tap the Security tab to manage your account protection.",
+    "guide.mobile.title": "Add your WhatsApp number",
+    "guide.mobile.body":
+      "Tap Mobile Number and verify via WhatsApp OTP to finish.",
     "mobile.updated.sub": "Your mobile number has been updated succesfully",
     "mobile.added.sub": "Your mobile number has been added succesfully",
     "mobile.newLabel": "New Number",
@@ -433,6 +445,17 @@ export const STRINGS = {
     "notif.phoneFail.title": "Verifikasi Gagal",
     "notif.phoneFail.body":
       "Nomor kamu tidak bisa diverifikasi. Silakan coba lagi.",
+    "guide.tag": "Langkah",
+    "guide.profileTab.title": "Buka Profil kamu",
+    "guide.profileTab.body": "Tap tab Profile untuk mulai mengamankan akunmu.",
+    "guide.myInfo.title": "Buka My Info",
+    "guide.myInfo.body": "Tap kartu profil kamu untuk membuka My Info.",
+    "guide.security.title": "Buka Security",
+    "guide.security.body":
+      "Tap tab Security untuk mengatur perlindungan akunmu.",
+    "guide.mobile.title": "Tambah nomor WhatsApp kamu",
+    "guide.mobile.body":
+      "Tap Mobile Number lalu verifikasi via WhatsApp OTP untuk selesai.",
     "mobile.updated.sub": "Nomor ponselmu berhasil diperbarui",
     "mobile.added.sub": "Nomor ponselmu berhasil ditambahkan",
     "mobile.newLabel": "Nomor Baru",

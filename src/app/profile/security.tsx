@@ -2,6 +2,7 @@ import TwoFactorSetup from "@/components/app/otp/TwoFactorSetup";
 import TwoFactorVerif from "@/components/app/otp/TwoFactorVerif";
 import { showAlert } from "@/components/AppAlert";
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import GuideOverlay from "@/components/guide/GuideOverlay";
 import AccountManagementSheet from "@/components/profile/AccountManagementSheet";
 import ChangeMobileSheet from "@/components/profile/ChangeMobileSheet";
 import ChangePasswordSheet from "@/components/profile/ChangePasswordSheet";
@@ -15,6 +16,7 @@ import {
   SubPageShell,
 } from "@/components/profile/ProfileChrome";
 import TrustedDevicesSheet from "@/components/profile/TrustedDevicesSheet";
+import { useGuideMeasure, useGuideStep } from "@/hooks/useGuide";
 import { useProfileData, useSecurityLevel } from "@/hooks/useProfileData";
 import {
   disableAuthenticatorApi,
@@ -73,6 +75,8 @@ export default function SecurityScreen() {
   const sec = useSecurityLevel(data);
   const t = useT();
   const { user, twoFAEnabled, passkeys, reload } = data;
+  useGuideStep("mobile");
+  const mobileRowRef = useGuideMeasure<View>("mobile");
 
   const [comingSoon, setComingSoon] = useState(false);
   const [mobileSheet, setMobileSheet] = useState(false);
@@ -280,18 +284,20 @@ export default function SecurityScreen() {
               }
               onPress={() => setComingSoon(true)}
             />
-            <SettingRow
-              icon="call-outline"
-              label={t("row.mobile")}
-              right={
-                <Text style={styles.rowValue}>
-                  {user?.phoneNumber
-                    ? maskPhone(user.phoneNumber)
-                    : t("common.notSet")}
-                </Text>
-              }
-              onPress={() => setMobileSheet(true)}
-            />
+            <View ref={mobileRowRef} collapsable={false}>
+              <SettingRow
+                icon="call-outline"
+                label={t("row.mobile")}
+                right={
+                  <Text style={styles.rowValue}>
+                    {user?.phoneNumber
+                      ? maskPhone(user.phoneNumber)
+                      : t("common.notSet")}
+                  </Text>
+                }
+                onPress={() => setMobileSheet(true)}
+              />
+            </View>
             <SettingRow
               icon="shield-checkmark-outline"
               label={t("row.2fa")}
@@ -411,6 +417,8 @@ export default function SecurityScreen() {
         currentMasked={maskPhone(user?.phoneNumber)}
         hasPhone={!!user?.phoneNumber}
       />
+
+      <GuideOverlay step="mobile" />
 
       <ChangePasswordSheet
         visible={passwordSheet}

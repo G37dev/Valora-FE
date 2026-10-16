@@ -21,6 +21,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import Text from "../../components/CustomText";
+import { useGuideStep } from "../../hooks/useGuide";
 import { refreshProfile } from "../../hooks/useProfileData";
 import { useT } from "../../stores/languageStore";
 import { useProfileStore } from "../../stores/profileStore";
@@ -62,6 +63,7 @@ const DAILY_NEWS = [
 
 export default function HomeScreen() {
   const t = useT();
+  useGuideStep("profileTab");
   const userData = useProfileStore((s) => s.user);
   const setUserData = useProfileStore((s) => s.setUser);
 

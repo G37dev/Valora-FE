@@ -1,4 +1,5 @@
 import ComingSoonSheet from "@/components/ComingSoonSheet";
+import GuideOverlay from "@/components/guide/GuideOverlay";
 import MembershipSheet, {
   memberLevelName,
 } from "@/components/profile/MembershipSheet";
@@ -10,6 +11,7 @@ import {
   securityLevel,
   securityTier,
 } from "@/components/profile/ProfileChrome";
+import { useGuideMeasure, useGuideStep } from "@/hooks/useGuide";
 import { useProfileData } from "@/hooks/useProfileData";
 import { useT } from "@/stores/languageStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -88,6 +90,8 @@ export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user, kycStatus, twoFAEnabled, passkeys } = useProfileData();
+  useGuideStep("myInfo");
+  const myInfoRef = useGuideMeasure<View>("myInfo");
   const [comingSoon, setComingSoon] = useState(false);
   const [memberSheet, setMemberSheet] = useState(false);
   const [cardSize, setCardSize] = useState({ w: 0, h: 0 });
@@ -151,6 +155,7 @@ export default function ProfileScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <TouchableOpacity
+          ref={myInfoRef}
           style={styles.userRow}
           onPress={() => router.push("/profile/my-info")}
           activeOpacity={0.8}
@@ -347,6 +352,8 @@ export default function ProfileScreen() {
         tier={tier}
         onClose={() => setMemberSheet(false)}
       />
+
+      <GuideOverlay step="myInfo" />
     </View>
   );
 }
