@@ -10,6 +10,7 @@ import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { Text, TextInput } from "react-native";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
@@ -25,6 +26,20 @@ import {
 } from "../services/notificationService";
 
 SplashScreen.preventAutoHideAsync();
+
+/*
+ * Kunci font-size app — abaikan font scale sistem HP user (setting
+ * display "font size" kecil/besar). Tanpa ini layout bisa pecah di
+ * user yang sistem font-nya diubah.
+ */
+(Text as any).defaultProps = {
+  ...(Text as any).defaultProps,
+  allowFontScaling: false,
+};
+(TextInput as any).defaultProps = {
+  ...(TextInput as any).defaultProps,
+  allowFontScaling: false,
+};
 
 export default function RootLayout() {
   const router = useRouter();
