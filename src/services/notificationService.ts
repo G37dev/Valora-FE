@@ -170,7 +170,7 @@ export async function notifyApp({ title, body, data }: NotifyOptions) {
         body,
         data: data ?? {},
         sound: Platform.OS === "ios" ? "notif.mp3" : "default",
-        color: "#1A1A1A",
+        color: "#FBE678",
         priority: Notifications.AndroidNotificationPriority.MAX,
         interruptionLevel: "timeSensitive",
       },

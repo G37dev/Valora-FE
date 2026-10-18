@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import ComingSoonSheet from "./ComingSoonSheet";
 import Text from "./CustomText";
-import { avatarSource } from "./profile/ProfileChrome";
+import { LevelAvatar } from "./profile/ProfileChrome";
 
 interface FixedHeaderProps {
   userData: {
@@ -17,21 +18,9 @@ interface FixedHeaderProps {
   } | null;
 }
 
-const shortenAddress = (address?: string | null) => {
-  if (!address) return null;
-
-  const value = address.trim();
-
-  if (!value) return null;
-
-  if (value.length <= 12) {
-    return value;
-  }
-
-  return `${value.slice(0, 8)}...${value.slice(-6)}`;
-};
-
 export default function FixedHeader({ userData }: FixedHeaderProps) {
+  const router = useRouter();
+
   // ==========================================
   // USER NAME
   // ==========================================
@@ -43,19 +32,10 @@ export default function FixedHeader({ userData }: FixedHeaderProps) {
     `${firstName} ${lastName}`.trim() || userData?.name || "User Vvalora";
 
   // ==========================================
-  // WALLET ADDRESS
-  // ==========================================
-
-  const walletAddress = userData?.walletAddress || userData?.address || null;
-
-  const shortenedAddress = shortenAddress(walletAddress);
-
-  // ==========================================
-  // AVATAR
+  // AVATAR — border lvl 1 default, klik → profile
   // ==========================================
 
   const avatarUrl = userData?.avatarUrl || null;
-  const avatarImg = avatarSource(avatarUrl, userData?.coreId);
 
   const [comingSoon, setComingSoon] = useState(false);
 
@@ -63,17 +43,19 @@ export default function FixedHeader({ userData }: FixedHeaderProps) {
     <View>
       <View style={styles.fixedHeader}>
         <View style={styles.userInfo}>
-          {avatarImg ? (
-            <Image source={avatarImg} style={styles.avatarImage} />
-          ) : (
-            <Ionicons name="person-circle" size={40} color="#EBB42C" />
-          )}
+          <TouchableOpacity
+            onPress={() => router.push("/profile" as never)}
+            hitSlop={8}
+            activeOpacity={0.7}
+          >
+            <LevelAvatar uri={avatarUrl} coreId={userData?.coreId} size={48} />
+          </TouchableOpacity>
 
           <View style={styles.userTextContainer}>
             <Text style={styles.userName}>{fullName}</Text>
 
             <Text style={styles.walletAddressText}>
-              {shortenedAddress || "Not Connected"}
+              {userData?.coreId || "Not Connected"}
             </Text>
           </View>
         </View>
@@ -112,13 +94,6 @@ const styles = StyleSheet.create({
 
   userTextContainer: {
     marginLeft: 10,
-  },
-
-  avatarImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#333",
   },
 
   userName: {
