@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { showAlert } from "../components/AppAlert";
+import { refreshProfile } from "../hooks/useProfileData";
 import {
   getKycApi,
   refreshSumsubTokenApi,
@@ -86,8 +87,7 @@ export default function KycScreen() {
       const res = await startSumsubSessionApi();
 
       if (res.success && res.data?.accessToken) {
-        const SNSMobileSDK =
-          require("@sumsub/react-native-mobilesdk-module").default;
+        const SNSMobileSDK = require("@sumsub/react-native-mobilesdk-module");
 
         // Token expiration handler — SDK manggil ini kalau token di
         // tengah flow expired; backend ngeluarin token baru.
@@ -122,6 +122,9 @@ export default function KycScreen() {
         // Flow selesai/ditutup → refresh status (webhook/poll yang mutusin)
         await new Promise((r) => setTimeout(r, 1500));
         const s = await loadStatus();
+        // Paksa refresh profile store → banner KYC di home langsung
+        // update (nggak ke-skip 20s staleness window).
+        refreshProfile(true).catch(() => {});
         setStep(s === "VERIFIED" ? "done" : "review");
       } else {
         showAlert(
