@@ -75,9 +75,12 @@ const formatAmount = (amount: any) => {
   return n.toLocaleString("id-ID", { maximumFractionDigits: 8 });
 };
 
+const PAGE_SIZE = 10;
+
 export default function HistoryScreen() {
   const { allTxs, fetchGlobalTransactions } = useContext(TransactionContext);
   const [refreshing, setRefreshing] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const txs = useMemo(() => {
     const list = Array.isArray(allTxs) ? [...allTxs] : [];
@@ -87,6 +90,19 @@ export default function HistoryScreen() {
         new Date(a.createdAt || 0).getTime(),
     );
   }, [allTxs]);
+
+  const visibleTxs = useMemo(
+    () => txs.slice(0, visibleCount),
+    [txs, visibleCount],
+  );
+
+  const hasMore = visibleCount < txs.length;
+
+  const loadMore = () => {
+    if (hasMore) {
+      setVisibleCount((c) => c + PAGE_SIZE);
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -141,15 +157,26 @@ export default function HistoryScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <Text style={styles.headerTitle}>History</Text>
+      <Text style={styles.headerTitle}>Activity</Text>
 
       <FlatList
-        data={txs}
+        data={visibleTxs}
         keyExtractor={(item, index) =>
           item.tx_hash || item.id || `${item.type}-${index}`
         }
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
+        initialNumToRender={PAGE_SIZE}
+        maxToRenderPerBatch={PAGE_SIZE}
+        windowSize={7}
+        removeClippedSubviews
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          hasMore ? (
+            <Text style={styles.moreText}>Scroll to load more</Text>
+          ) : null
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -229,6 +256,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Poppins_500Medium",
     marginTop: 3,
+  },
+  moreText: {
+    color: "#666",
+    fontSize: 11,
+    fontFamily: "Poppins_400Regular",
+    textAlign: "center",
+    paddingVertical: 16,
   },
   emptyWrap: {
     alignItems: "center",

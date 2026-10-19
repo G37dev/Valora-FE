@@ -33,7 +33,7 @@ const SERVICE_SECTIONS = [
         route: null,
       },
       {
-        name: "Redemption",
+        name: "Redeem",
         image: require("../../../assets/images/service/10.png"),
         route: null,
       },
@@ -60,7 +60,7 @@ const SERVICE_SECTIONS = [
       {
         name: "Convert",
         image: require("../../../assets/images/service/8.png"),
-        route: "/active-deposit",
+        route: null,
       },
       {
         name: "Tx History",

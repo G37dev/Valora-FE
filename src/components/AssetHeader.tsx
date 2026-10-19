@@ -162,7 +162,7 @@ export default function AssetHeader({
       name: "Swap",
       icon: require("../../assets/images/icon/portofolio.png"),
     },
-    // Wallet page: "More" diganti "Convert" -> swap screen
+    // Wallet page: "More" diganti "Convert" (coming soon)
     isWalletPage
       ? {
           name: "Convert",
@@ -229,8 +229,6 @@ export default function AssetHeader({
       setDepositVisible(true);
     } else if (menuName === "More") {
       router.push("/services");
-    } else if (menuName === "Convert") {
-      router.push("/swap/swap-screen");
     } else if (menuName === "Swap") {
       router.push("/swap/swap-screen");
     } else if (menuName === "Earning") {
