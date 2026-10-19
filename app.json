@@ -49,13 +49,14 @@
         "expo-build-properties",
         {
           "android": {
-            "minSdkVersion": 26
+            "minSdkVersion": 26,
+            "extraMavenRepos": [
+              "https://maven.sumsub.com/repository/maven-public/"
+            ]
           }
         }
       ],
-      "@didit-protocol/sdk-react-native",
       "./plugins/withManifestFixes",
-      "./plugins/withDiditPackage",
       "@react-native-google-signin/google-signin",
       "expo-secure-store",
       [

@@ -13,7 +13,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { showAlert } from "../components/AppAlert";
-import { getKycApi, startDiditSessionApi } from "../services/kycService";
+import {
+  getKycApi,
+  refreshSumsubTokenApi,
+  startSumsubSessionApi,
+} from "../services/kycService";
 import { notifyApp } from "../services/notificationService";
 
 type Step = "start" | "review" | "done";
@@ -76,60 +80,49 @@ export default function KycScreen() {
     return () => clearInterval(t);
   }, [step, loadStatus]);
 
-  const handleStartDidit = async () => {
+  const handleStartSumsub = async () => {
     try {
       setLoading(true);
-      const res = await startDiditSessionApi();
+      const res = await startSumsubSessionApi();
 
-      if (res.success && res.data?.sessionToken) {
-        let completed = false;
-        let nativeWorked = false;
+      if (res.success && res.data?.accessToken) {
+        const SNSMobileSDK =
+          require("@sumsub/react-native-mobilesdk-module").default;
 
-        // Cek ketersediaan dulu — get() tidak throw (beda dengan getEnforcing
-        // yang dieksekusi saat modul JS-nya di-require).
-        const { TurboModuleRegistry } = require("react-native");
-        const hasNative = !!TurboModuleRegistry.get("SdkReactNative");
+        // Token expiration handler — SDK manggil ini kalau token di
+        // tengah flow expired; backend ngeluarin token baru.
+        const snsMobileSDK = SNSMobileSDK.init(res.data.accessToken, () =>
+          refreshSumsubTokenApi(),
+        )
+          .withHandlers({
+            onStatusChanged: (event: any) => {
+              console.log(
+                `[Sumsub] status: ${event?.prevStatus} → ${event?.newStatus}`,
+              );
+            },
+            onLog: (event: any) => {
+              console.log(`[Sumsub] ${event?.message}`);
+            },
+          })
+          .withLocale("en")
+          .build();
 
-        if (hasNative) {
-          const didit = require("@didit-protocol/sdk-react-native");
-          // Native Didit UI — capture dokumen + liveness di dalam app
-          const result = await didit.startVerification(res.data.sessionToken, {
-            languageCode: "en",
-          });
-          nativeWorked = true;
+        const result = await snsMobileSDK.launch();
+        console.log("[Sumsub] result:", JSON.stringify(result));
 
-          if (result.type === "failed") {
-            showAlert(
-              "Failed",
-              result.error?.message || "Verification could not be completed.",
-            );
-            router.back();
-            return;
-          }
-          completed = result.type === "completed";
-          // User cancel di Didit → langsung keluar dari KYC screen
-          if (!completed) {
-            router.back();
-            return;
-          }
+        if (result?.status === "Failed" || result?.success === false) {
+          showAlert(
+            "Failed",
+            result?.errorMsg || "Verification could not be completed.",
+          );
+          router.back();
+          return;
         }
 
-        if (!hasNative) {
-          console.warn("[Didit] Native SDK tidak tersedia, fallback ke hosted");
-        }
-
-        // Fallback: hosted verification page di browser
-        if (!nativeWorked && res.data?.url) {
-          const WebBrowser = require("expo-web-browser");
-          await WebBrowser.openBrowserAsync(res.data.url);
-          completed = true; // anggap selesai, status final dari webhook/poll
-        }
-
-        if (completed) {
-          await new Promise((r) => setTimeout(r, 1500));
-          await loadStatus();
-          setStep("review");
-        }
+        // Flow selesai/ditutup → refresh status (webhook/poll yang mutusin)
+        await new Promise((r) => setTimeout(r, 1500));
+        const s = await loadStatus();
+        setStep(s === "VERIFIED" ? "done" : "review");
       } else {
         showAlert(
           "Failed",
@@ -137,7 +130,7 @@ export default function KycScreen() {
         );
       }
     } catch (error: any) {
-      console.error("Error start Didit:", error);
+      console.error("Error start Sumsub:", error);
       showAlert("Error", error.message || "A connection error occurred.");
     } finally {
       setLoading(false);
@@ -190,7 +183,7 @@ export default function KycScreen() {
           <TouchableOpacity
             style={[styles.goldButton, loading && { opacity: 0.6 }]}
             onPress={
-              status === "PENDING" ? () => setStep("review") : handleStartDidit
+              status === "PENDING" ? () => setStep("review") : handleStartSumsub
             }
             disabled={loading}
             activeOpacity={0.85}

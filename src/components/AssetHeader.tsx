@@ -39,7 +39,7 @@ interface AssetHeaderProps {
 // ======================================================
 
 function KycUnlockBanner({ onPress }: { onPress: () => void }) {
-  const [bannerHeight, setBannerHeight] = useState(46);
+  const [bannerHeight, setBannerHeight] = useState(40);
 
   const progress = useSharedValue(-1);
 
@@ -520,8 +520,9 @@ const styles = StyleSheet.create({
 
   bannerClip: {
     overflow: "hidden",
-    marginBottom: 30,
+    marginBottom: 20,
     marginHorizontal: -20,
+    marginTop: -30,
   },
 
   headcard: {

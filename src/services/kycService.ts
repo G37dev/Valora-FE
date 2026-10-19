@@ -54,14 +54,26 @@ export const startVeriffSessionApi = async (payload?: VeriffSessionPayload) => {
   }
 };
 
-// Buat sesi verifikasi Didit → return { url, sessionId, sessionToken }
-// sessionToken dipakai untuk launch Didit native SDK di device
-export const startDiditSessionApi = async () => {
+// Buat sesi verifikasi Sumsub → return { accessToken, applicantId }
+// accessToken dipakai untuk launch Sumsub native SDK di device
+export const startSumsubSessionApi = async () => {
   try {
-    const response = await apiClient.post("/kyc/didit/session");
+    const response = await apiClient.post("/kyc/sumsub/session");
     return response.data;
   } catch (error: any) {
-    console.error("Gagal membuat sesi Didit:", error);
+    console.error("Gagal membuat sesi Sumsub:", error);
     throw error.response?.data || { message: "Gagal membuat sesi verifikasi" };
+  }
+};
+
+// Refresh Sumsub accessToken — dipanggil dari tokenExpirationHandler SDK
+// Return string token mentah (bukan envelope) sesuai ekspektasi handler
+export const refreshSumsubTokenApi = async () => {
+  try {
+    const response = await apiClient.post("/kyc/sumsub/token/refresh");
+    return response.data?.data?.accessToken as string;
+  } catch (error: any) {
+    console.error("Gagal refresh token Sumsub:", error);
+    throw error.response?.data || { message: "Gagal refresh token verifikasi" };
   }
 };
