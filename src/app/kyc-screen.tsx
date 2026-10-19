@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import "../../www/assets";
 import { showAlert } from "../components/AppAlert";
 import { refreshProfile } from "../hooks/useProfileData";
 import {
@@ -29,6 +30,20 @@ const GOLD = "#DEC236";
 // Single value dipakai untuk light+dark (app dark-only).
 const SUMSUB_THEME = {
   universal: {
+    fonts: {
+      assets: [
+        { name: "Poppins Regular", file: "www/fonts/Poppins_400Regular.ttf" },
+        { name: "Poppins Medium", file: "www/fonts/Poppins_500Medium.ttf" },
+        { name: "Poppins SemiBold", file: "www/fonts/Poppins_600SemiBold.ttf" },
+        { name: "Poppins Bold", file: "www/fonts/Poppins_700Bold.ttf" },
+      ],
+      headline1: { name: "Poppins SemiBold" },
+      headline2: { name: "Poppins SemiBold" },
+      subtitle1: { name: "Poppins Medium" },
+      subtitle2: { name: "Poppins Regular" },
+      body: { name: "Poppins Regular" },
+      caption: { name: "Poppins Regular" },
+    },
     colors: {
       primaryButtonBackground: "#DEC236",
       primaryButtonContent: "#000000",
