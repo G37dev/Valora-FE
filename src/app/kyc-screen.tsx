@@ -30,9 +30,13 @@ const GOLD = "#DEC236";
 const SUMSUB_THEME = {
   universal: {
     colors: {
-      primaryButtonBackground: "#DEC236",
+      primaryButtonBackground: "#FFFFFF",
       primaryButtonContent: "#000000",
-      primaryButtonBackgroundHighlighted: "#C4A92E",
+      primaryButtonBackgroundHighlighted: "#D9D9D9",
+      primaryButtonBackgroundDisabled: "#3A3A3A",
+      secondaryButtonBackground: "#2A2A2A",
+      secondaryButtonContent: "#FFFFFF",
+      secondaryButtonBackgroundHighlighted: "#3A3A3A",
       backgroundCommon: "#0A0A0A",
       backgroundNeutral: "#1A1A1A",
       contentStrong: "#FFFFFF",
