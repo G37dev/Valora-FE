@@ -25,6 +25,26 @@ type Step = "start" | "review" | "done";
 
 const GOLD = "#DEC236";
 
+// Brand theme untuk Sumsub SDK — dark + gold VIVALORA.
+// Single value dipakai untuk light+dark (app dark-only).
+const SUMSUB_THEME = {
+  universal: {
+    colors: {
+      primaryButtonBackground: "#DEC236",
+      primaryButtonContent: "#000000",
+      primaryButtonBackgroundHighlighted: "#C4A92E",
+      backgroundCommon: "#0A0A0A",
+      backgroundNeutral: "#1A1A1A",
+      contentStrong: "#FFFFFF",
+      contentNeutral: "#C8C8C8",
+      contentWeak: "#8A8A8A",
+      contentLink: "#FBE678",
+      alertTint: "#DEC236",
+      navigationBarItem: "#FFFFFF",
+    },
+  },
+};
+
 export default function KycScreen() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("start");
@@ -105,6 +125,7 @@ export default function KycScreen() {
             },
           })
           .withLocale("en")
+          .withTheme(SUMSUB_THEME)
           .build();
 
         const result = await snsMobileSDK.launch();
