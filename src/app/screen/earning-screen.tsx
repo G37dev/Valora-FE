@@ -35,7 +35,10 @@ import { showAlert } from "../../components/AppAlert";
 import BackHeader from "../../components/BackHeader";
 import GoldButton from "../../components/GoldButton";
 import { TransactionContext } from "../../context/TransactionContext";
-import { getUserEarnPositionsApi } from "../../services/earnService";
+import {
+  getEarnConfigApi,
+  getUserEarnPositionsApi,
+} from "../../services/earnService";
 
 const { width } = Dimensions.get("window");
 
@@ -66,9 +69,9 @@ const ASSETS_DATA: Asset[] = [
     color: "#26A17B",
     image: require("../../../assets/images/usdte.png"),
     aprs: {
-      90: "3.0%",
-      180: "5.0%",
-      1: "6.5%",
+      90: "3.5%",
+      180: "4.25%",
+      1: "36%",
     },
   },
   {
@@ -78,9 +81,9 @@ const ASSETS_DATA: Asset[] = [
     color: "#2775CA",
     image: require("../../../assets/images/usdce.png"),
     aprs: {
-      90: "3.2%",
-      180: "5.10%",
-      1: "6.6%",
+      90: "3.5%",
+      180: "4.25%",
+      1: "36%",
     },
   },
   {
@@ -90,9 +93,9 @@ const ASSETS_DATA: Asset[] = [
     color: "#FBE87C",
     image: require("../../../assets/images/golde.png"),
     aprs: {
-      90: "3.4%",
-      180: "5.20%",
-      1: "6.7%",
+      90: "3.5%",
+      180: "4.25%",
+      1: "36%",
     },
   },
   {
@@ -103,8 +106,8 @@ const ASSETS_DATA: Asset[] = [
     image: require("../../../assets/images/xaute.png"),
     aprs: {
       90: "3.5%",
-      180: "5.25%",
-      1: "6.75%",
+      180: "3.75%",
+      1: "36%",
     },
   },
 ];
@@ -163,6 +166,14 @@ export default function EarningScreen() {
    */
   const [positionsLoading, setPositionsLoading] = useState<boolean>(false);
 
+  /*
+   * APR live dari contract (backend /earn/config).
+   * { [asset]: { [term]: "3.5" } } — bps/100
+   */
+  const [liveAprs, setLiveAprs] = useState<
+    Record<string, Record<number, string>>
+  >({});
+
   const currentAsset = ASSETS_DATA[currentIndex];
 
   /* =========================================================
@@ -189,6 +200,23 @@ export default function EarningScreen() {
       } else {
         setEarnPositions([]);
       }
+
+      // APR live dari contract — fallback ke hardcode kalau gagal
+      try {
+        const cfg = await getEarnConfigApi();
+        if (cfg?.success && cfg?.data) {
+          const map: Record<string, Record<number, string>> = {};
+          for (const [asset, info] of Object.entries<any>(cfg.data)) {
+            map[asset] = {};
+            for (const [term, bps] of Object.entries<number>(
+              info.terms || {},
+            )) {
+              if (bps > 0) map[asset][Number(term)] = `${bps / 100}%`;
+            }
+          }
+          setLiveAprs(map);
+        }
+      } catch {}
     } catch (error: any) {
       console.error("[Earn] Gagal mengambil posisi:", error?.message || error);
 
@@ -351,7 +379,9 @@ export default function EarningScreen() {
      APR
   ========================================================= */
 
-  const currentApr = currentAsset.aprs[selectedLockTime];
+  const aprsForAsset = { ...currentAsset.aprs, ...liveAprs[currentAsset.name] };
+
+  const currentApr = aprsForAsset[selectedLockTime];
 
   /* =========================================================
      CALCULATE EARNINGS
@@ -362,7 +392,7 @@ export default function EarningScreen() {
 
     const aprNum = parseFloat(currentApr) / 100;
 
-    const earnings = principal * aprNum * (selectedLockTime / 365);
+    const earnings = principal * aprNum * (selectedLockTime / 360);
 
     return earnings.toFixed(2);
   };
@@ -416,7 +446,7 @@ export default function EarningScreen() {
         return;
       }
 
-      const apr = currentAsset.aprs[selectedLockTime];
+      const apr = aprsForAsset[selectedLockTime];
 
       if (!apr) {
         showAlert("APR for this term is not available yet.");
@@ -714,7 +744,7 @@ export default function EarningScreen() {
           <Text style={styles.labelTitle}>Choose Lock Time</Text>
 
           <View style={styles.lockTimeRow}>
-            {[90, 180, 1].map((days) => {
+            {[90, 180, 360, 1].map((days) => {
               const isSelected = selectedLockTime === days;
 
               return (
@@ -734,7 +764,7 @@ export default function EarningScreen() {
                       </Text>
 
                       <Text style={styles.lockAprTextSelected}>
-                        APR {currentAsset.aprs[days]}
+                        APR {aprsForAsset[days] ?? "—"}
                       </Text>
                     </ExpoLinearGradient>
                   ) : (
@@ -742,7 +772,7 @@ export default function EarningScreen() {
                       <Text style={styles.lockDaysText}>{days} Days</Text>
 
                       <Text style={styles.lockAprText}>
-                        APR {currentAsset.aprs[days]}
+                        APR {aprsForAsset[days] ?? "—"}
                       </Text>
                     </View>
                   )}

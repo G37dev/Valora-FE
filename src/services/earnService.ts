@@ -55,3 +55,11 @@ export const claimEarnPositionApi = async (
 
   return response.data;
 };
+
+/**
+ * GET EARN CONFIG — APR live per asset/term dari chain (via backend)
+ */
+export const getEarnConfigApi = async () => {
+  const response = await apiClient.get(`/earn/config`);
+  return response.data;
+};
